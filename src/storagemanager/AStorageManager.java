@@ -51,6 +51,7 @@ public abstract class AStorageManager {
     /**
      * Inserts the record in the given table. If the record already exists it throws an exception. It finds the page
      * where it belongs, adds it in its proper location. If the page becomes overfull it will make a new page.
+     * Check if table is in BufferManager
      * @param table the number of the table
      * @param record the record to insert; an 1d array of objects representing the data in the record
      * @throws StorageManagerException if the table does not exist, if the record already exists
@@ -92,6 +93,9 @@ public abstract class AStorageManager {
 
     /**
      * Adds an empty table with the provided name
+     * create a empty folder with the table id
+     * create a table object calculate the record size and then create a table object
+     * then serialize out the file in that directory.
      * @param table number of the table
      * @param dataTypes ArrayList of Strings representing the data types stored in the table
      *                  The order of the types must match the order of the records
