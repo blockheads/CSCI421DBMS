@@ -1,8 +1,12 @@
 package buffermanager;
 
+import datamanager.DataManager;
+import util.ObjectSaver;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -17,12 +21,11 @@ public class BufferManager {
      **/
     private Map<Integer, TreeSet<Page>> loadedPageMap;
     private Map<Integer, Table> tableMap;
-    // this is a unloaded page map, hence it stores all the data for all the pages unloaded and loaded into memory.
-    private Map<Integer, Integer[]> pageMap;
+    private DataManager dataManager;
 
     public BufferManager(){
-        loadedPageMap = new HashMap<>();
         tableMap = new HashMap<>();
+        dataManager = new DataManager();
     }
 
     /**
@@ -63,45 +66,48 @@ public class BufferManager {
      * and loaded pageMap for now TODO: should this be stored in loaded page map
      *
      */
-    public void createPage(final String filename, int table) throws IOException {
+    public void createPage(int table) throws IOException {
 
-        Page page = new Page(filename);
-        boolean newFile = page.createNewFile();
+        Page page = new Page();
 
-        if (newFile) {
-            System.out.println("New file created successfully");
-
-            RandomAccessFile raf = new RandomAccessFile(page, "rw");
-            // limited to 4k file size
-            raf.setLength(4096);
-            raf.close();
-
-            System.out.println("File bytes set.");
-
-            // then load the page into memory
-            loadPage(table);
+        // we have to load in our table if it isn't loaded here.
+        // todo: check if this is needed
+        if(!tableMap.containsKey(table)){
+            loadTable(table);
         }
-        else{
-            System.out.println("New file created un-successfully");
-            //...?
+
+        // right now were just going to add pages like this
+        ArrayList<String> pages = DataManager.getPages(table);
+        int newPageName = 0;
+
+        if(!pages.isEmpty()) {
+            pages.sort(String::compareToIgnoreCase);
+            newPageName = Integer.parseInt(pages.get(pages.size() -1 )) + 1;
         }
+
+
+
+        DataManager.savePage(page,table,newPageName);
+        // then load the page into memory
+        loadPage(table);
 
     }
 
     /**
      * Helper function to load a page into memory
      */
-    public void loadPage(int table){
+    public void loadPage(int tableId){
 
-        // first check if our table is loaded into memory
+        Table table = tableMap.get(tableId);
 
     }
 
     /**
-     * Helper function to load all the pages a table has into memory.
+     * tihs function loads a table into memory
      */
-    public void loadTablePages(int table){
-
+    public void loadTable(int id){
+        Table table = DataManager.getTable(id);
+        tableMap.put(id,table);
     }
 
     /**
