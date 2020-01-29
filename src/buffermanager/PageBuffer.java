@@ -11,11 +11,8 @@ import java.util.*;
 public class PageBuffer {
 
     private HashMap<Integer, Dictionary<PageTypes, Page>> pages;
+    private HashMap<Integer, Table> loadedTables;
     private Set<AgeTracker> ageTrackers;
-
-    public PageBuffer(){
-        super();
-    }
 
     /**
      * loads a page into memory
