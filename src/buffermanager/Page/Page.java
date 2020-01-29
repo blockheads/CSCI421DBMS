@@ -1,8 +1,7 @@
-package buffermanager;
+package buffermanager.Page;
 
-import util.ObjectSaver;
+import buffermanager.Table;
 
-import java.io.File;
 import java.io.Serializable;
 
 public class Page implements Serializable,Comparable<Page> {

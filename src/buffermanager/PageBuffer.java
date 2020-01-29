@@ -1,11 +1,17 @@
 package buffermanager;
 
+import buffermanager.Datatype.ValidDataTypes;
+import buffermanager.Page.AgeTracker;
+import buffermanager.Page.Page;
+import buffermanager.Page.PageTypes;
 import datamanager.DataManager;
 
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.*;
 
-public class PageBuffer extends HashMap<Integer, TreeSet<Page>> {
+public class PageBuffer {
+
+    private HashMap<Integer, Dictionary<PageTypes, Page>> pages;
+    private Set<AgeTracker> ageTrackers;
 
     public PageBuffer(){
         super();
@@ -17,7 +23,7 @@ public class PageBuffer extends HashMap<Integer, TreeSet<Page>> {
     private Page loadPage(int tableId, String pageId){
         Page page = DataManager.getPage(tableId,pageId);
         // already loaded pages from this table
-        if(this.containsKey(tableId)){
+        if(pages.containsKey(tableId)){
             this.get(tableId).add(page);
         }
         // have not loaded pages from this table

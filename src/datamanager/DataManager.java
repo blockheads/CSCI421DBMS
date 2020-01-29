@@ -1,14 +1,11 @@
 package datamanager;
 
-import buffermanager.Page;
+import buffermanager.Page.Page;
 import buffermanager.Table;
 import util.ObjectSaver;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 public class DataManager {
     /**
