@@ -24,6 +24,9 @@ public enum ValidDataTypes {
 
     public static Datatype resolveType(String string) throws StorageManagerException {
         String[] attribute = string.split("([()])");
+        if (attribute.length == 3 && !attribute[2].equals("")) {
+            throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
+        }
         switch (attribute[0].toUpperCase()) {
             case "INTEGER":
                 return new IntegerData();
@@ -32,11 +35,19 @@ public enum ValidDataTypes {
             case "BOOLEAN":
                 return new BooleanData();
             case "VARCHAR":
-                return new VarcharData(Integer.parseInt(attribute[1]));
+                try {
+                    return new VarcharData(Integer.parseInt(attribute[1]));
+                } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                }
             case "CHAR":
-                return new CharData(Integer.parseInt(attribute[1]));
+                try {
+                    return new CharData(Integer.parseInt(attribute[1]));
+                } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                }
         }
-        throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, attribute[0].toLowerCase()));
+        throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
     }
 
 }
