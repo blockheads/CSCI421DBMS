@@ -1,6 +1,5 @@
 package buffermanager;
 
-import buffermanager.Datatype.ValidDataTypes;
 import buffermanager.Page.AgeTracker;
 import buffermanager.Page.Page;
 import buffermanager.Page.PageTypes;
@@ -59,7 +58,7 @@ public class PageBuffer {
      */
     public void insetRecord(Page page, Object[] record){
         // right now it just inserts at first available spot
-        page.insertRecord(page.getEntries(),record);
+        page.insertRecord(page.getEntriesCount(),record);
     }
 
     // empties all the loaded pages out into respective tables

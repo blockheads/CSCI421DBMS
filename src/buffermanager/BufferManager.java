@@ -1,6 +1,7 @@
 package buffermanager;
 
 import buffermanager.Page.Page;
+import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
 
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class BufferManager {
             newPageName = Integer.parseInt(pages.get(pages.size() -1 )) + 1;
         }
 
-        Page page = new Page(String.valueOf(newPageName), table.getMaxRecords(), table.getRecordSize());
+        Page page = new RecordPage(newPageName, table, this);
 
         DataManager.savePage(page,tableId);
         // then load the page into memory

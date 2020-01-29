@@ -48,6 +48,8 @@ public class Table implements Serializable {
         return recordSize;
     }
 
+    public int dataTypeCount() {return datatypes.size();}
+
     public Integer[] getKeyIndices() {
         return keyIndices;
     }

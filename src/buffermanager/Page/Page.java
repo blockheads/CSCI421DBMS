@@ -1,58 +1,54 @@
 package buffermanager.Page;
 
+import buffermanager.BufferManager;
 import buffermanager.Table;
+import storagemanager.StorageManagerException;
 
 import java.io.Serializable;
 
-public class Page implements Serializable,Comparable<Page> {
+public abstract class Page<E> implements Serializable, Comparable<Page> {
 
-    /**
-     * A page class, this stores our records and id ( does not need to be volatile talked to professor )
-     * Oh also it makes sense for a page to be a Java file, as it should have a literal place on the computer
-     * it represents upon construction.
-     */
+    transient int pageID;
+    transient Table table;
+    transient BufferManager bufferManager;
 
-    private static final long serialVersionUID = 2L;
+    int entries = 0;
 
-    private Object[][] records;
-    private String id;
-
-    public int getEntries() {
-        return entries;
+    public Page(int pageID, Table table, BufferManager bufferManager) {
+        this.pageID = pageID;
+        this.table = table;
+        this.bufferManager = bufferManager;
     }
 
-    // the amount of current records stored inside the page
-    private int entries;
-
-    public Page(String id, int maxRecords, int recordSize){
-        this.id = id;
-        // initially just a empty array with no entries?
-        System.out.println("created new page with maxRecords: " + maxRecords + " and record size: " + recordSize);
-        this.records = new Object[maxRecords][recordSize];
+    public void setBufferManager(BufferManager bufferManager) {
+        this.bufferManager = bufferManager;
     }
 
-    public String getId() {
-        return id;
+    public void setTable(Table table) {
+        this.table = table;
     }
 
-    /**
-     * Checks if a page has space to write to
-     * @return
-     */
-    public boolean hasSpace(Table table){
-        return entries < table.getMaxRecords();
+    public void setPageID(int pageID) {
+        this.pageID = pageID;
     }
+
+    public int getPageID() {
+        return pageID;
+    }
+
+    public int getEntriesCount() {
+        return this.entries;
+    }
+
+    public abstract void insertRecord(E record) throws StorageManagerException;
+    public abstract void deleteRecord(E record) throws StorageManagerException;
+    public abstract boolean recordExists(E record);
+    public abstract Page<E> splitPage();
+    public abstract boolean hasSpace();
 
     @Override
     public int compareTo(Page page) {
-        return id.compareTo(page.id);
+        return pageID - page.pageID;
     }
 
-    public void insertRecord(int index, Object[] record){
-        records[index] = record;
-        entries++;
-        // just for nice testing output
-        int remaining = records.length-entries;
-        System.out.println("Inserted " + record[0] + " into page " + id + " there are " + remaining + " records left");
-    }
 }
