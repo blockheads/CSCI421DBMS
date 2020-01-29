@@ -3,6 +3,9 @@ package buffermanager;
 import java.io.Serializable;
 
 public class Table implements Serializable {
+    // specific UID to make several runs compatiable when loading in/saving objects
+    private static final long serialVersionUID = 1L;
+
     private int recordSize = 0;
     private Integer[] keyIndices;
     // This let's us know if the pageMap corresponding to this table has been loaded into memory.
@@ -10,6 +13,10 @@ public class Table implements Serializable {
 
     // this is the list of all the pages associated with the table.
     private Integer[] pages;
+
+    public int getMaxRecords() {
+        return maxRecords;
+    }
 
     // this is the max amount of records which can be stored inside of a table
     private int maxRecords;

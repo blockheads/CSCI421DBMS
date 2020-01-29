@@ -19,13 +19,12 @@ public class BufferManager {
      * table id -> catalog of table
      *
      **/
-    private Map<Integer, TreeSet<Page>> loadedPageMap;
+    private PageBuffer pageBuffer;
     private Map<Integer, Table> tableMap;
-    private DataManager dataManager;
 
     public BufferManager(){
         tableMap = new HashMap<>();
-        dataManager = new DataManager();
+        pageBuffer = new PageBuffer();
     }
 
     /**
@@ -37,7 +36,33 @@ public class BufferManager {
      * if id doesnt then ->
      * inserts a record through insertion sort.
      */
-    public void insertRecord(){
+    public void insertRecord(int tableId, Object[] record){
+
+        if(!tableMap.containsKey(tableId)){
+            loadTable(tableId);
+        }
+
+        ArrayList<String> pages = DataManager.getPages(tableId);
+
+        // in this case just create page and insert in empty page, it's our first entry
+        if(pages.isEmpty()){
+            return;
+        }
+        pages.sort(String::compareToIgnoreCase);
+        //todo: call get record here
+        //getRecord()... doesn't exist continue
+
+        // right now we are just going through the pages iteratively can be changed to binary later
+        for(String pageId: pages){
+            Page page = pageBuffer.getPage(tableId,pageId);
+            // we know our table by now
+            if(page.hasSpace(tableMap.get(tableId))){
+                System.out.println("Writing to page!");
+                pageBuffer.insetRecord(page,record);
+                return;
+            }
+        }
+
 
     }
 
@@ -66,18 +91,18 @@ public class BufferManager {
      * and loaded pageMap for now TODO: should this be stored in loaded page map
      *
      */
-    public void createPage(int table) throws IOException {
-
-        Page page = new Page();
+    public void createPage(int tableId) throws IOException {
 
         // we have to load in our table if it isn't loaded here.
         // todo: check if this is needed
-        if(!tableMap.containsKey(table)){
-            loadTable(table);
+        if(!tableMap.containsKey(tableId)){
+            loadTable(tableId);
         }
 
+        Table table = tableMap.get(tableId);
+
         // right now were just going to add pages like this
-        ArrayList<String> pages = DataManager.getPages(table);
+        ArrayList<String> pages = DataManager.getPages(tableId);
         int newPageName = 0;
 
         if(!pages.isEmpty()) {
@@ -85,22 +110,14 @@ public class BufferManager {
             newPageName = Integer.parseInt(pages.get(pages.size() -1 )) + 1;
         }
 
+        Page page = new Page(String.valueOf(newPageName), table.getMaxRecords(), table.getRecordSize());
 
-
-        DataManager.savePage(page,table,newPageName);
+        DataManager.savePage(page,tableId,newPageName);
         // then load the page into memory
-        loadPage(table);
+//        loadPage(table);
 
     }
 
-    /**
-     * Helper function to load a page into memory
-     */
-    public void loadPage(int tableId){
-
-        Table table = tableMap.get(tableId);
-
-    }
 
     /**
      * tihs function loads a table into memory

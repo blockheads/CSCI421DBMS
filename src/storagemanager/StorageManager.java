@@ -1,5 +1,6 @@
 package storagemanager;
 
+import buffermanager.BufferManager;
 import buffermanager.Table;
 import datamanager.DataManager;
 import util.ObjectSaver;
@@ -7,6 +8,8 @@ import util.ObjectSaver;
 import java.io.File;
 
 public class StorageManager extends AStorageManager {
+
+    private BufferManager bufferManager;
 
     /**
      * Creates an instance of the database. Tries to restart, if requested, the database at the provided location.
@@ -22,6 +25,7 @@ public class StorageManager extends AStorageManager {
      */
     public StorageManager(String dbLoc, int pageBufferSize, int pageSize, boolean restart) throws StorageManagerException {
         super(dbLoc, pageBufferSize, pageSize, restart);
+        bufferManager = new BufferManager();
     }
 
     @Override
@@ -36,7 +40,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void insertRecord(int table, Object[] record) throws StorageManagerException {
-
+        bufferManager.insertRecord(table,record);
     }
 
     @Override

@@ -31,6 +31,8 @@ public class BufferManagerTests {
             e.printStackTrace();
         }
 
+        testWritePage(bufferManager);
+
     }
 
     /**
@@ -47,5 +49,12 @@ public class BufferManagerTests {
 
     public static void testCreatePage(BufferManager bufferManager) throws IOException {
         bufferManager.createPage(0);
+    }
+
+    /**
+     * Testing writing a record to a page.
+     */
+    public static void testWritePage(BufferManager bufferManager){
+        bufferManager.insertRecord(0,new Object[]{0});
     }
 }
