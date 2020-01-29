@@ -1,10 +1,18 @@
 package buffermanager;
 
+import buffermanager.Datatype.Datatype;
+import buffermanager.Datatype.ValidDataTypes;
+import storagemanager.StorageManagerException;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Table implements Serializable {
+    private final int id;
     private int recordSize = 0;
     private Integer[] keyIndices;
+    private ArrayList<Datatype> datatypes = new ArrayList<>();
+
     // This let's us know if the pageMap corresponding to this table has been loaded into memory.
     private boolean loadedPageMap;
 
@@ -14,29 +22,14 @@ public class Table implements Serializable {
     // this is the max amount of records which can be stored inside of a table
     private int maxRecords;
 
-    public Table(int id, String[] dataTypes, Integer[] keyIndices){
+    public Table(int id, String[] dataTypes, Integer[] keyIndices) throws StorageManagerException {
+        this.id = id;
 
         // calculates recordSize
         for(String dataType: dataTypes){
-            dataType = dataType.toLowerCase();
-            if(dataType.equals("integer"))
-                this.recordSize += 4;
-            else if(dataType.equals("double"))
-                this.recordSize += 8;
-            else if(dataType.equals("boolean"))
-                this.recordSize += 1;
-            // TODO: handle these cases....
-            else if(dataType.startsWith("char")){
-                break;
-            }
-            else if(dataType.startsWith("varchar")){
-                break;
-            }
-            else{
-                // ERROR OUT!
-                System.out.println("Invalid type entered: " + dataType);
-            }
-
+            Datatype attribute = ValidDataTypes.resolveType(dataType);
+            recordSize += attribute.getSize();
+            this.datatypes.add(attribute);
         }
         // do some math here
 
@@ -60,4 +53,18 @@ public class Table implements Serializable {
         this.loadedPageMap = loadedPageMap;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("table ").append(id).append(" with attributes: \n");
+        for (Datatype datatype: this.datatypes) {
+            builder.append(datatype.getType() + " size: " + datatype.getSize()).append("\n");
+        }
+        builder.append("Primary keys at: ");
+        for (Integer index: keyIndices) {
+            builder.append(index).append(", ");
+        }
+        builder.replace(builder.lastIndexOf(", "), builder.length(),"");
+        return builder.toString();
+    }
 }
