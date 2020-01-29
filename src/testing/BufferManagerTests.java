@@ -39,7 +39,7 @@ public class BufferManagerTests {
      * Basic method to create a table in a folder.
      */
     public static void testCreateTable(StorageManager storageManager) throws StorageManagerException {
-        storageManager.addTable(0, new String[]{"Integer"}, new Integer[]{0});
+        storageManager.addTable(0, new String[]{"Integer", "varChar(3)"}, new Integer[]{0, 3});
     }
 
     /**

@@ -80,6 +80,7 @@ public class StorageManager extends AStorageManager {
             return;
         }
         Table table = new Table(id, dataTypes, keyIndices);
+        System.out.println(table);
         DataManager.saveTable(table,id);
     }
 
