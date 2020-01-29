@@ -112,7 +112,7 @@ public class BufferManager {
 
         Page page = new Page(String.valueOf(newPageName), table.getMaxRecords(), table.getRecordSize());
 
-        DataManager.savePage(page,tableId,newPageName);
+        DataManager.savePage(page,tableId);
         // then load the page into memory
 //        loadPage(table);
 
@@ -143,10 +143,6 @@ public class BufferManager {
 
     }
 
-    public void purge(){
-
-    }
-
     public void clear(){
 
     }
@@ -157,6 +153,13 @@ public class BufferManager {
 
     public void writeOutPage(){
 
+    }
+
+    /**
+     * Functions to execute when the program is shut down
+     */
+    public void shutDown(){
+        pageBuffer.purge();
     }
 
 }

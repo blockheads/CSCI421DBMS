@@ -33,6 +33,8 @@ public class BufferManagerTests {
 
         testWritePage(bufferManager);
 
+        testShutDown(bufferManager);
+
     }
 
     /**
@@ -56,5 +58,13 @@ public class BufferManagerTests {
      */
     public static void testWritePage(BufferManager bufferManager){
         bufferManager.insertRecord(0,new Object[]{0});
+    }
+
+    /**
+     * Simple test to see how the program handles shutting down
+     * @param bufferManager
+     */
+    public static void testShutDown(BufferManager bufferManager){
+        bufferManager.shutDown();
     }
 }

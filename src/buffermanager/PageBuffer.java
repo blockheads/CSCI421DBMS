@@ -61,7 +61,13 @@ public class PageBuffer extends HashMap<Integer, TreeSet<Page>> {
 
     // empties all the loaded pages out into respective tables
     public void purge(){
-
+        for(Integer tableId: this.keySet()){
+            System.out.println("Purging data for table: " + tableId);
+            for(Page page: this.get(tableId)){
+                System.out.println("Saving page: " + page.getId());
+                DataManager.savePage(page,tableId);
+            }
+        }
     }
 
 

@@ -31,8 +31,8 @@ public class DataManager {
         ObjectSaver.save(table,tableId + "\\tabledata");
     }
 
-    public static void savePage(Page page, int table, int pageId){
-        ObjectSaver.save(page,table + "\\" + pageId);
+    public static void savePage(Page page, int table){
+        ObjectSaver.save(page,table + "\\" + page.getId());
     }
 
     /**
