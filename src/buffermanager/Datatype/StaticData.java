@@ -14,6 +14,4 @@ public abstract class StaticData<E> extends Datatype<E> {
     public int getSize() {
         return type.sizeInBytes;
     }
-
-    public abstract E resolveData();
 }

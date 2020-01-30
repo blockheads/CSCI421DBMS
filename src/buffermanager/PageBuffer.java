@@ -31,9 +31,8 @@ public class PageBuffer {
             return;
         }
         // load a table into the buffer
-        this.pages.put(page.getTableID(), new EnumMap<>(PageTypes.class)).
-                put(page.getPageType(), new TreeSet<>()).
-                add(page);
+        this.pages.put(page.getTableID(), new EnumMap<>(PageTypes.class));
+        this.pages.get(page.getTableID()).put(page.getPageType(), new TreeSet<>(){{add(page);}});
         // add age tracker
     }
 

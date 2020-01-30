@@ -16,7 +16,19 @@ public abstract class Datatype<E> implements Serializable {
         return type;
     }
 
-    public abstract E resolveData();
+    public E resolveData(Object obj) {
+        try {
+            return (E) type.objectClass.cast(obj);
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return null;
+    }
+
+    public String resolveToString(Object obj) {
+        return resolveData(obj).toString();
+    }
 
     public int compareObjects(Object obj1, Object obj2) {
         return type.comparator.compare(obj1, obj2);

@@ -6,8 +6,4 @@ public class DoubleData extends StaticData<Double> {
         super(ValidDataTypes.DOUBLE);
     }
 
-    @Override
-    public Double resolveData() {
-        return null;
-    }
 }

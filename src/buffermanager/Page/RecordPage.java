@@ -1,8 +1,12 @@
 package buffermanager.Page;
 
 import buffermanager.BufferManager;
+import buffermanager.Datatype.Datatype;
 import buffermanager.Table;
+import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
+
+import java.util.ArrayList;
 
 public class RecordPage extends Page<Object[]> {
 
@@ -43,7 +47,7 @@ public class RecordPage extends Page<Object[]> {
 
             // in this case the record already exists in the page
             if(res == 0)
-                return false;
+                throw new StorageManagerException(String.format(StorageManagerException.INSERT_RECORD_EXISTS_FORMAT, recordToString(record)));
 
             // If record greater, ignore left half
             if (res == 1)
@@ -126,6 +130,18 @@ public class RecordPage extends Page<Object[]> {
      */
     public int[] bounds(Table table, Object[] record){
         return new int[]{compareRecord(table, record, 0), compareRecord(table, record, entries-1)};
+    }
+
+    private String recordToString(Object[] record) {
+        StringBuilder builder = new StringBuilder();
+        ArrayList<Datatype> datatypes = table.getDatatypes();
+        builder.append("{");
+        for (int i = 0; i < datatypes.size(); i++, builder.append(", ")) {
+            Datatype datatype = datatypes.get(i);
+            builder.append(datatype.resolveToString(record[i]));
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
     /**
