@@ -4,12 +4,8 @@ import buffermanager.Page.Page;
 import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
 import storagemanager.StorageManagerException;
-import util.ObjectSaver;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -57,7 +53,7 @@ public class BufferManager {
 
         // right now we are just going through the pages iteratively can be changed to binary later
         for(Integer pageId: pages){
-            Page<Object[]> page = pageBuffer.getPage(tableId, pageId);
+            Page<Object[]> page = pageBuffer.getRecordPage(tableId, pageId);
             // we know our table by now
             page.insertRecord(record);
         }

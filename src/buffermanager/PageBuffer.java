@@ -1,13 +1,13 @@
 package buffermanager;
 
-import buffermanager.Datatype.ValidDataTypes;
 import buffermanager.Page.AgeTracker;
 import buffermanager.Page.Page;
 import buffermanager.Page.PageTypes;
+import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
+import storagemanager.StorageManagerException;
 
 import java.util.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -19,7 +19,7 @@ public class PageBuffer {
     /**
      * loads a page into memory
      */
-    private Page loadPage(int tableId, int pageId){
+    private RecordPage loadPage(int tableId, int pageId){
         Page page = DataManager.getPage(tableId, String.valueOf(pageId));
         // already loaded pages from this table
         if(pages.containsKey(tableId)){
@@ -28,49 +28,45 @@ public class PageBuffer {
         // have not loaded pages from this table
         else{
             EnumMap<PageTypes, TreeSet<Page>> properties = new EnumMap<PageTypes, TreeSet<Page>>(PageTypes.class);
-            TreeSet<Page> pages = new TreeSet<Page>();
-            properties.put(PageTypes.RECORD_PAGE, pages);
+            TreeSet<Page> recordPages = new TreeSet<Page>();
+            properties.put(PageTypes.RECORD_PAGE, recordPages);
             // load index here
             // actually get our page
-            pages.add(page);
+            recordPages.add(page);
             this.pages.put(tableId, properties);
         }
 
-        return page;
+        return (RecordPage) page;
     }
 
     /**
      * Retrieves a page, returns from  the tree-set if it's already in memory
      * @return
      */
-    public Page getPage(int tableId, int pageId){
+    public RecordPage getRecordPage(int tableId, int pageId){
 
         if(this.pages.containsKey(tableId)){
 
             // check if loaded in
             for(Page page: this.pages.get(tableId).get(PageTypes.RECORD_PAGE)){
                 if(pageId == page.getPageID()){
-                    return page;
+                    return (RecordPage) page;
                 }
             }
 
         }
 
-        return loadPage(tableId, pageId);
+        return (RecordPage) loadPage(tableId, pageId);
     }
 
     /**
      * Inserts a record into a page at appropriate spot
      */
-    public void insetRecord(Table table, Integer[] pageIds, Object[] record){
+    public void insetRecord(Table table, Integer[] pageIds, Object[] record) throws StorageManagerException {
         // right now it just inserts at first available spot
-        Page page = searchPages(table,pageIds,record);
-        System.out.println("Selected page: " + page.getId());
-        boolean res = page.insertRecord(table, record);
-        if(res)
-            System.out.println("inserted record succesfully");
-        else
-            System.out.println("failed to insert record, already exists.");
+        Page<Object[]> page = searchPages(table,pageIds,record);
+        System.out.println("Selected page: " + page.getPageID());
+        page.insertRecord(record);
     }
 
     // empties all the loaded pages out into respective tables
@@ -88,7 +84,7 @@ public class PageBuffer {
     /**
      * This manages searching over pages to find the correct page using a binary search
      */
-    public Page searchPages(Table table,Integer[] pageIds,Object[] record){
+    public Page<Object[]> searchPages(Table table,Integer[] pageIds,Object[] record){
 
         if(pageIds.length == 0){
             // in this case there is no page to even find.
@@ -106,10 +102,10 @@ public class PageBuffer {
             int m = l + (r - l) / 2;
 
             // retrieve page at m
-            Page page = getPage(table.getId(),Integer.toString(m));
+            RecordPage page = getRecordPage(table.getId(), m);
 
             // page is empty
-            if(page.getEntries() == 0){
+            if(page.getEntriesCount() == 0){
                 // in this case, we say we want to move to the left from the empty page. Mark this page for
                 // deletion potentially?
                 r = m - 1;

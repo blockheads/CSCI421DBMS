@@ -55,13 +55,6 @@ public class RecordPage extends Page<Object[]> {
     }
 
 
-    // this is used for sorting the pages into the tree-set please don't modify!
-    // compare record is use for record comparison
-    @Override
-    public int compareTo(Page page) {
-        return id.compareTo(page.id);
-    }
-
     public boolean insertRecord(Table table, Object[] record){
 
         // iterative binary search
@@ -94,6 +87,7 @@ public class RecordPage extends Page<Object[]> {
         // just for nice testing output
         int remaining = records.length-entries;
         System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
+        return true;
     }
 
     @Override
@@ -104,8 +98,6 @@ public class RecordPage extends Page<Object[]> {
     @Override
     public boolean hasSpace() {
         return table.getMaxRecords() > entries;
-        System.out.println("Inserted " + record[0] + " into page " + id + " there are " + remaining + " records left");
-        return true;
     }
 
     /**
@@ -148,7 +140,7 @@ public class RecordPage extends Page<Object[]> {
      * -1: the record is less than the other record
      * 0: the record is equal to the other record
      */
-    private int compareRecord(Table table,Object[] record, int index){
+    private int compareRecord(Table table, Object[] record, int index){
 
         for(int i=0; i < table.getKeyIndices().length; i++){
 
