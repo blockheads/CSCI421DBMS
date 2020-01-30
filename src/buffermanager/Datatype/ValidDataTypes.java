@@ -2,17 +2,24 @@ package buffermanager.Datatype;
 
 import storagemanager.StorageManagerException;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 /**
  * The valid data types for the dbms
  *
  * @author Nicholas Chieppa
  */
 public enum ValidDataTypes {
-    CHAR(2, Character[].class),
-    VARCHAR(2, Character[].class),
-    INTEGER(4, Integer.class),
-    DOUBLE(8, Double.class),
-    BOOLEAN(1, Boolean.class); // end of types
+    CHAR(2, Character[].class, (o1, o2) -> {
+        return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
+    }),
+    VARCHAR(2, Character[].class, (o1, o2) -> {
+        return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
+    }),
+    INTEGER(4, Integer.class, Integer::compareTo),
+    DOUBLE(8, Double.class, Double::compareTo),
+    BOOLEAN(1, Boolean.class, Boolean::compareTo); // end of types
 
     final int sizeInBytes;
 
@@ -21,10 +28,12 @@ public enum ValidDataTypes {
     }
 
     final Class<?> objectClass;
+    final Comparator comparator;
 
-    ValidDataTypes(int sizeInBytes, Class<?> objectClass) {
+    <E> ValidDataTypes(int sizeInBytes, Class<E> objectClass, Comparator<E> comparator) {
         this.sizeInBytes = sizeInBytes;
         this.objectClass = objectClass;
+        this.comparator = comparator;
     }
 
     public static Datatype resolveType(String string) throws StorageManagerException {

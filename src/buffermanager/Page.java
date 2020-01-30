@@ -139,33 +139,36 @@ public class Page implements Serializable,Comparable<Page> {
 
             int ret = 0;
 
-            // this is a big if statement which basically just compares values depending on their underlying
-            // data type as a object, calling Java's built in compare
-            if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.BOOLEAN)){
-                Boolean firstVal = (Boolean)obj;
-                Boolean secondVal = (Boolean)records[index][keyIndex];
-                ret = firstVal.compareTo(secondVal);
-            }
-            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.CHAR)){
-                Character firstVal = (Character)obj;
-                Character secondVal = (Character)records[index][keyIndex];
-                ret = firstVal.compareTo(secondVal);
-            }
-            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.DOUBLE)){
-                Double firstVal = (Double)obj;
-                Double secondVal = (Double)records[index][keyIndex];
-                ret = firstVal.compareTo(secondVal);
-            }
-            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.INTEGER)){
-                Integer firstVal = (Integer)obj;
-                Integer secondVal = (Integer)records[index][keyIndex];
-                ret = firstVal.compareTo(secondVal);
-            }
-            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.VARCHAR)){
-                String firstVal = String.valueOf(obj);
-                String secondVal = String.valueOf(records[index][keyIndex]);
-                ret = firstVal.compareTo(secondVal);
-            }
+            ret = table.compareDataTypes(i, obj, records[index][keyIndex]);
+
+
+//            // this is a big if statement which basically just compares values depending on their underlying
+//            // data type as a object, calling Java's built in compare
+//            if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.BOOLEAN)){
+//                Boolean firstVal = (Boolean)obj;
+//                Boolean secondVal = (Boolean)records[index][keyIndex];
+//                ret = firstVal.compareTo(secondVal);
+//            }
+//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.CHAR)){
+//                Character firstVal = (Character)obj;
+//                Character secondVal = (Character)records[index][keyIndex];
+//                ret = firstVal.compareTo(secondVal);
+//            }
+//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.DOUBLE)){
+//                Double firstVal = (Double)obj;
+//                Double secondVal = (Double)records[index][keyIndex];
+//                ret = firstVal.compareTo(secondVal);
+//            }
+//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.INTEGER)){
+//                Integer firstVal = (Integer)obj;
+//                Integer secondVal = (Integer)records[index][keyIndex];
+//                ret = firstVal.compareTo(secondVal);
+//            }
+//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.VARCHAR)){
+//                String firstVal = String.valueOf(obj);
+//                String secondVal = String.valueOf(records[index][keyIndex]);
+//                ret = firstVal.compareTo(secondVal);
+//            }
 
            if(ret != 0)
               return ret;

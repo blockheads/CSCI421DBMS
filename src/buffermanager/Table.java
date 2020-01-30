@@ -21,10 +21,6 @@ public class Table implements Serializable {
     private int recordSize = 0;
     private Integer[] keyIndices;
 
-    public ArrayList<Datatype> getDatatypes() {
-        return datatypes;
-    }
-
     private ArrayList<Datatype> datatypes = new ArrayList<>();
 
     // This let's us know if the pageMap corresponding to this table has been loaded into memory.
@@ -63,6 +59,15 @@ public class Table implements Serializable {
         return keyIndices;
     }
 
+    public ArrayList<Datatype> getDatatypes() {
+        return datatypes;
+    }
+
+    public int compareDataTypes(int index, Object obj1, Object obj2) {
+        return datatypes.get(index).compareObjects(obj1, obj2);
+    }
+
+
     public boolean isLoadedPageMap() {
         return loadedPageMap;
     }
@@ -85,6 +90,5 @@ public class Table implements Serializable {
         builder.replace(builder.lastIndexOf(", "), builder.length(),"");
         return builder.toString();
     }
-
 
 }

@@ -41,7 +41,7 @@ public class BufferManagerTests {
      * Basic method to create a table in a folder.
      */
     public static void testCreateTable(StorageManager storageManager) throws StorageManagerException {
-        storageManager.addTable(0, new String[]{"Integer", "varChar(3)"}, new Integer[]{0, 3});
+        storageManager.addTable(0, new String[]{"Integer", "varChar(3)", "boolean", "char(3)"}, new Integer[]{0, 2, 3});
     }
 
     /**
@@ -57,7 +57,9 @@ public class BufferManagerTests {
      * Testing writing a record to a page.
      */
     public static void testWritePage(BufferManager bufferManager){
-        bufferManager.insertRecord(0,new Object[]{0,"test","turk turk, un turk turk, un da-da-da","123"});
+        bufferManager.insertRecord(0,new Object[]{0, "test", true, "123"});
+        bufferManager.insertRecord(0,new Object[]{0, "test", true, "124"});
+        bufferManager.insertRecord(0,new Object[]{2, "test", false, "123"});
     }
 
     /**
