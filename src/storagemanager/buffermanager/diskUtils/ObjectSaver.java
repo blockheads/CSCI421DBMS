@@ -1,4 +1,4 @@
-package util;
+package storagemanager.buffermanager.diskUtils;
 
 import java.io.*;
 /**

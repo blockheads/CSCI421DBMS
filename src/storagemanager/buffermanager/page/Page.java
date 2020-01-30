@@ -1,8 +1,8 @@
-package buffermanager.Page;
+package storagemanager.buffermanager.page;
 
-import buffermanager.BufferManager;
-import buffermanager.PageBuffer;
-import buffermanager.Table;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.pageManager.PageBuffer;
+import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
 import java.io.Serializable;

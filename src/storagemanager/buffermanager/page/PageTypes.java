@@ -1,4 +1,4 @@
-package buffermanager.Page;
+package storagemanager.buffermanager.page;
 
 public enum PageTypes {
     RECORD_PAGE(RecordPage.class),

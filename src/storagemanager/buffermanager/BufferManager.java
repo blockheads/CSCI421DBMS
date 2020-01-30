@@ -1,9 +1,10 @@
-package buffermanager;
+package storagemanager.buffermanager;
 
-import buffermanager.Page.Page;
-import buffermanager.Page.RecordPage;
-import datamanager.DataManager;
+import storagemanager.buffermanager.page.Page;
+import storagemanager.buffermanager.page.RecordPage;
+import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.IOException;
 import java.util.*;

@@ -1,4 +1,4 @@
-package buffermanager.Datatype;
+package storagemanager.buffermanager.datatypes;
 
 /**
  * Represent data that does not change in size

@@ -1,9 +1,7 @@
-package buffermanager;
+package storagemanager.buffermanager;
 
-import buffermanager.Datatype.Datatype;
-import buffermanager.Datatype.StaticData;
-import buffermanager.Datatype.ValidDataTypes;
-import datamanager.DataManager;
+import storagemanager.buffermanager.datatypes.Datatype;
+import storagemanager.buffermanager.datatypes.ValidDataTypes;
 import storagemanager.StorageManagerException;
 
 import java.io.Serializable;

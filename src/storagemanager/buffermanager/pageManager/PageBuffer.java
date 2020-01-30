@@ -1,10 +1,11 @@
-package buffermanager;
+package storagemanager.buffermanager.pageManager;
 
-import buffermanager.Page.AgeTracker;
-import buffermanager.Page.Page;
-import buffermanager.Page.PageTypes;
-import buffermanager.Page.RecordPage;
-import datamanager.DataManager;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.page.Page;
+import storagemanager.buffermanager.page.PageTypes;
+import storagemanager.buffermanager.page.RecordPage;
+import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ public class PageBuffer {
 
     private final HashMap<Integer, EnumMap<PageTypes, TreeSet<Page>>> pages = new HashMap<>();
     private final BufferManager bufferManager;
-    private Set<AgeTracker> ageTrackers;
 
     public PageBuffer(BufferManager bufferManager) {
         this.bufferManager = bufferManager;

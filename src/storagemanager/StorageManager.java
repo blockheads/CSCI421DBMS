@@ -1,9 +1,8 @@
 package storagemanager;
 
-import buffermanager.BufferManager;
-import buffermanager.Table;
-import datamanager.DataManager;
-import util.ObjectSaver;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.File;
 

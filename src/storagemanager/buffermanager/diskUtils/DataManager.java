@@ -1,14 +1,12 @@
-package datamanager;
+package storagemanager.buffermanager.diskUtils;
 
-import buffermanager.Page.Page;
-import buffermanager.Table;
-import util.ObjectSaver;
+import storagemanager.buffermanager.page.Page;
+import storagemanager.buffermanager.Table;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.TreeSet;
 
-public class DataManager {
+public abstract class DataManager {
     /**
      * The goal of this class is to keep track of things like file names
      * for both pages and tables.

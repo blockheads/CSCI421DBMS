@@ -1,4 +1,4 @@
-package buffermanager.Datatype;
+package storagemanager.buffermanager.datatypes;
 
 public class BooleanData extends StaticData<Boolean> {
     protected BooleanData() {
