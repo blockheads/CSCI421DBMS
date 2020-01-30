@@ -31,32 +31,7 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
-    public void insertRecord(Object[] record) throws StorageManagerException {
-
-    }
-
-    @Override
-    public void deleteRecord(Object[] record) throws StorageManagerException {
-
-    }
-
-    @Override
-    public boolean recordExists(Object[] record) {
-        return false;
-    }
-
-
-    /**
-     * Checks if a page has space to write to
-     * @return
-     */
-    public boolean hasSpace(Table table){
-        return entries < table.getMaxRecords();
-    }
-
-
-    public boolean insertRecord(Table table, Object[] record){
-
+    public boolean insertRecord(Object[] record) throws StorageManagerException {
         // iterative binary search
         int l = 0, r = entries - 1,m=0;
         while (l <= r) {
@@ -88,6 +63,25 @@ public class RecordPage extends Page<Object[]> {
         int remaining = records.length-entries;
         System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
         return true;
+    }
+
+    @Override
+    public boolean deleteRecord(Object[] record) throws StorageManagerException {
+        return true;
+    }
+
+    @Override
+    public boolean recordExists(Object[] record) {
+        return false;
+    }
+
+
+    /**
+     * Checks if a page has space to write to
+     * @return
+     */
+    public boolean hasSpace(Table table){
+        return entries < table.getMaxRecords();
     }
 
     @Override

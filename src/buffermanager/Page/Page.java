@@ -40,8 +40,8 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         return this.entries;
     }
 
-    public abstract void insertRecord(E record) throws StorageManagerException;
-    public abstract void deleteRecord(E record) throws StorageManagerException;
+    public abstract boolean insertRecord(E record) throws StorageManagerException;
+    public abstract boolean deleteRecord(E record) throws StorageManagerException;
     public abstract boolean recordExists(E record);
     public abstract Page<E> splitPage();
     public abstract boolean hasSpace();

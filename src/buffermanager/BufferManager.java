@@ -23,7 +23,7 @@ public class BufferManager {
 
     public BufferManager(){
         tableMap = new HashMap<>();
-        pageBuffer = new PageBuffer();
+        pageBuffer = new PageBuffer(this);
     }
 
     /**
@@ -117,9 +117,14 @@ public class BufferManager {
     /**
      * tihs function loads a table into memory
      */
-    public void loadTable(int id){
+    public Table loadTable(int id){
         Table table = DataManager.getTable(id);
         tableMap.put(id,table);
+        return table;
+    }
+
+    public Table getTable(int id) {
+        return tableMap.getOrDefault(id, loadTable(id));
     }
 
     /**

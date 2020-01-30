@@ -14,13 +14,22 @@ import java.util.TreeSet;
 public class PageBuffer {
 
     private final HashMap<Integer, EnumMap<PageTypes, TreeSet<Page>>> pages = new HashMap<>();
+    private final BufferManager bufferManager;
     private Set<AgeTracker> ageTrackers;
+
+    public PageBuffer(BufferManager bufferManager) {
+        this.bufferManager = bufferManager;
+    }
+
 
     /**
      * loads a page into memory
      */
     private RecordPage loadPage(int tableId, int pageId){
         Page page = DataManager.getPage(tableId, String.valueOf(pageId));
+        page.setPageID(pageId);
+        page.setBufferManager(bufferManager);
+        page.setTable(bufferManager.getTable(tableId));
         // already loaded pages from this table
         if(pages.containsKey(tableId)){
             this.pages.get(tableId).get(PageTypes.RECORD_PAGE).add(page);

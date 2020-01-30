@@ -13,7 +13,7 @@ public class BufferManagerTests {
      * work...
      */
 
-    public static void main(String... args){
+    public static void main(String... args) throws StorageManagerException {
         BufferManager bufferManager = new BufferManager();
         // also testing some storage manager stuff
         try{
@@ -56,7 +56,7 @@ public class BufferManagerTests {
     /**
      * Testing writing a record to a page.
      */
-    public static void testWritePage(BufferManager bufferManager){
+    public static void testWritePage(BufferManager bufferManager) throws StorageManagerException {
         bufferManager.insertRecord(0,new Object[]{0, new char[]{'t', 'e', 's', 't'}, true, "123".toCharArray()});
         bufferManager.insertRecord(0,new Object[]{0, "test".toCharArray(), true, "124".toCharArray()});
         bufferManager.insertRecord(0,new Object[]{2, "test".toCharArray(), false, "123".toCharArray()});

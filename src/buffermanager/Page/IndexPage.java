@@ -10,13 +10,13 @@ public class IndexPage extends Page<Object[]> {
     }
 
     @Override
-    public void insertRecord(Object[] record) throws StorageManagerException {
-
+    public boolean insertRecord(Object[] record) throws StorageManagerException {
+        return false;
     }
 
     @Override
-    public void deleteRecord(Object[] record) throws StorageManagerException {
-
+    public boolean deleteRecord(Object[] record) throws StorageManagerException {
+        return false;
     }
 
     @Override
