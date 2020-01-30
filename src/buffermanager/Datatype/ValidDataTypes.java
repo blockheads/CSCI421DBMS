@@ -11,10 +11,10 @@ import java.util.Comparator;
  * @author Nicholas Chieppa
  */
 public enum ValidDataTypes {
-    CHAR(2, Character[].class, (o1, o2) -> {
+    CHAR(2, char[].class, (o1, o2) -> {
         return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
     }),
-    VARCHAR(2, Character[].class, (o1, o2) -> {
+    VARCHAR(2, char[].class, (o1, o2) -> {
         return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
     }),
     INTEGER(4, Integer.class, Integer::compareTo),

@@ -150,7 +150,7 @@ public class RecordPage extends Page<Object[]> {
 
             int ret = 0;
 
-            ret = table.compareDataTypes(i, obj, records[index][keyIndex]);
+            ret = table.compareDataTypes(keyIndex, obj, records[index][keyIndex]);
 
 
 //            // this is a big if statement which basically just compares values depending on their underlying
