@@ -6,6 +6,7 @@ import util.ObjectSaver;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 public class DataManager {
     /**
@@ -37,11 +38,11 @@ public class DataManager {
      * @param id: THe table id
      * @return a list of strings containing all the pages associated with a table
      */
-    public static ArrayList<Integer> getPages(int id){
+    public static TreeSet<Integer> getPages(int id){
         File file = new File(String.valueOf(id));
         File[] pageList = file.listFiles();
 
-        ArrayList<Integer> pageNames = new ArrayList<>();
+        TreeSet<Integer> pageNames = new TreeSet<>();
         if(pageList != null){
             for(File pageFile: pageList){
                 // TODO: we can get rid of this check if we just add a prefix or sufix

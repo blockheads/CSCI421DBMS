@@ -24,7 +24,7 @@ public class RecordPage extends Page<Object[]> {
     private int entries;
 
     public RecordPage(int id, Table table, BufferManager bufferManager){
-        super(id, table, bufferManager);
+        super(id, table, bufferManager, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
         this.records = new Object[table.getMaxRecords()][table.dataTypeCount()];
@@ -139,7 +139,6 @@ public class RecordPage extends Page<Object[]> {
         for(int i=0; i < table.getKeyIndices().length; i++){
 
             int keyIndex = table.getKeyIndices()[i];
-            System.out.println("Key index: " + keyIndex);
             Object obj = record[keyIndex];
 
             int ret = 0;

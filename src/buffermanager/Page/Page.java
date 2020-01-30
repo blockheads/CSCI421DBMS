@@ -13,13 +13,15 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     transient Table table;
     transient BufferManager bufferManager;
     transient PageBuffer pageBuffer;
+    private final PageTypes pageType;
 
     int entries = 0;
 
-    public Page(int pageID, Table table, BufferManager bufferManager) {
+    public Page(int pageID, Table table, BufferManager bufferManager, PageTypes pageType) {
         this.pageID = pageID;
         this.table = table;
         this.bufferManager = bufferManager;
+        this.pageType = pageType;
     }
 
     public void setBufferManager(BufferManager bufferManager) {
@@ -45,9 +47,14 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public int getPageID() {
         return pageID;
     }
+    public int getTableID() {return table.getId();}
 
     public int getEntriesCount() {
         return this.entries;
+    }
+
+    public PageTypes getPageType() {
+        return pageType;
     }
 
     public abstract boolean insertRecord(E record) throws StorageManagerException;

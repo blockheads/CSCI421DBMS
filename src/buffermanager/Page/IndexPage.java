@@ -6,7 +6,7 @@ import storagemanager.StorageManagerException;
 
 public class IndexPage extends Page<Object[]> {
     public IndexPage(int pageID, Table table, BufferManager bufferManager) {
-        super(pageID, table, bufferManager);
+        super(pageID, table, bufferManager, PageTypes.INDEX_PAGE);
     }
 
     @Override

@@ -7,6 +7,7 @@ import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
 import storagemanager.StorageManagerException;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -19,8 +20,22 @@ public class PageBuffer {
 
     public PageBuffer(BufferManager bufferManager) {
         this.bufferManager = bufferManager;
+//        this.tableMap = bufferManager.getTableMap();
     }
 
+    public void addPage(Page page) {
+        bufferManager.getTable(page.getTableID());
+        if (pages.containsKey(page.getTableID())) { // table already in page buffer
+            pages.get(page.getTableID()).get(page.getPageType()).add(page);
+            // add age tracker
+            return;
+        }
+        // load a table into the buffer
+        this.pages.put(page.getTableID(), new EnumMap<>(PageTypes.class)).
+                put(page.getPageType(), new TreeSet<>()).
+                add(page);
+        // add age tracker
+    }
 
     /**
      * loads a page into memory
@@ -69,12 +84,26 @@ public class PageBuffer {
         return (RecordPage) loadPage(tableId, pageId);
     }
 
+    public void insertRecord(int table, Object[] record) throws  StorageManagerException{
+        TreeSet<Integer> pagesOnDisk = DataManager.getPages(table);
+        if (pagesOnDisk.isEmpty()) {
+            try {
+                RecordPage newRecordPage = (RecordPage) bufferManager.createPage(table);
+                addPage(newRecordPage);
+                pagesOnDisk.add(newRecordPage.getPageID());
+            } catch (IOException e) {
+                throw new StorageManagerException("");
+            }
+        }
+        insertRecord(bufferManager.getTable(table), pagesOnDisk, record);
+    }
+
     /**
      * Inserts a record into a page at appropriate spot
      */
-    public void insetRecord(Table table, Integer[] pageIds, Object[] record) throws StorageManagerException {
+    private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException {
         // right now it just inserts at first available spot
-        Page<Object[]> page = searchPages(table,pageIds,record);
+        RecordPage page = (RecordPage) searchPages(table, pageIds, record);
         System.out.println("Selected page: " + page.getPageID());
         page.insertRecord(record);
     }
@@ -94,9 +123,9 @@ public class PageBuffer {
     /**
      * This manages searching over pages to find the correct page using a binary search
      */
-    public Page<Object[]> searchPages(Table table,Integer[] pageIds,Object[] record){
+    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record){
 
-        if(pageIds.length == 0){
+        if(pageIds.isEmpty()){
             // in this case there is no page to even find.
             return null;
         }
@@ -104,9 +133,9 @@ public class PageBuffer {
         // first I guess we perform a bst over the pages already loaded into memory
 
         // iterative binary search
-        int l = 0, r = pageIds.length - 1;
+        int l = 0, r = pageIds.size() - 1;
 
-        Page lastEmptyPage = null;
+        RecordPage lastEmptyPage = null;
 
         while (l <= r) {
             int m = l + (r - l) / 2;
@@ -128,7 +157,11 @@ public class PageBuffer {
                 int[] bounds = page.bounds(table,record);
                 // if we are contained within the bounds of the page, or the first/last entries of the page are our
                 // entry, then this is most certainly our page
-                if((bounds[0] == 1 && bounds[1] == -1) || bounds[0] == 0 || bounds[1] == 0)
+
+                if ((bounds[0] == 1 && bounds[1] == -1) // bigger than first element and smaller than last element
+                        || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
+                        || (bounds[1] == 1 && pageIds.last() == m) // there is no page bigger than me, but im larger than the first element: this is my page
+                        || (bounds[0] == -1 && pageIds.first() == m)) // there is no page smaller than me, but im smaller than the first element: this is my page
                     return page;
 
                 // otherwise we check if we are greater than the page
