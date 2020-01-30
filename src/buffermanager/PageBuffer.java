@@ -30,6 +30,7 @@ public class PageBuffer {
         page.setPageID(pageId);
         page.setBufferManager(bufferManager);
         page.setTable(bufferManager.getTable(tableId));
+        page.setPageBuffer(this);
         // already loaded pages from this table
         if(pages.containsKey(tableId)){
             this.pages.get(tableId).get(PageTypes.RECORD_PAGE).add(page);

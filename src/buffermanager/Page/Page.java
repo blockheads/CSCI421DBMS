@@ -1,6 +1,7 @@
 package buffermanager.Page;
 
 import buffermanager.BufferManager;
+import buffermanager.PageBuffer;
 import buffermanager.Table;
 import storagemanager.StorageManagerException;
 
@@ -11,6 +12,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     transient int pageID;
     transient Table table;
     transient BufferManager bufferManager;
+    transient PageBuffer pageBuffer;
 
     int entries = 0;
 
@@ -28,8 +30,16 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         this.table = table;
     }
 
+    public Table getTable() {
+        return table;
+    }
+
     public void setPageID(int pageID) {
         this.pageID = pageID;
+    }
+
+    public void setPageBuffer(PageBuffer pageBuffer) {
+        this.pageBuffer = pageBuffer;
     }
 
     public int getPageID() {
