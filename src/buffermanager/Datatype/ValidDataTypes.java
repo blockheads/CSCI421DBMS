@@ -8,13 +8,18 @@ import storagemanager.StorageManagerException;
  * @author Nicholas Chieppa
  */
 public enum ValidDataTypes {
-    CHAR(2, char[].class),
-    VARCHAR(2, char[].class),
-    INTEGER(4, int.class),
-    DOUBLE(8, double.class),
-    BOOLEAN(1, boolean.class); // end of types
+    CHAR(2, Character[].class),
+    VARCHAR(2, Character[].class),
+    INTEGER(4, Integer.class),
+    DOUBLE(8, Double.class),
+    BOOLEAN(1, Boolean.class); // end of types
 
     final int sizeInBytes;
+
+    public Class<?> getObjectClass() {
+        return objectClass;
+    }
+
     final Class<?> objectClass;
 
     ValidDataTypes(int sizeInBytes, Class<?> objectClass) {

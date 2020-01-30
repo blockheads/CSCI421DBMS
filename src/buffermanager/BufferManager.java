@@ -42,26 +42,18 @@ public class BufferManager {
             loadTable(tableId);
         }
 
-        ArrayList<String> pages = DataManager.getPages(tableId);
+        ArrayList<Integer> pages = DataManager.getPages(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry
         if(pages.isEmpty()){
             return;
         }
-        pages.sort(String::compareToIgnoreCase);
+        pages.sort(Integer::compareTo);
         //todo: call get record here
         //getRecord()... doesn't exist continue
-
-        // right now we are just going through the pages iteratively can be changed to binary later
-        for(String pageId: pages){
-            Page page = pageBuffer.getPage(tableId,pageId);
-            // we know our table by now
-            if(page.hasSpace(tableMap.get(tableId))){
-                System.out.println("Writing to page!");
-                pageBuffer.insetRecord(page,record);
-                return;
-            }
-        }
+        Integer[] pageIds = new Integer[pages.size()];
+        pages.toArray(pageIds);
+        pageBuffer.insetRecord(tableMap.get(tableId),pageIds,record);
 
 
     }
@@ -102,15 +94,15 @@ public class BufferManager {
         Table table = tableMap.get(tableId);
 
         // right now were just going to add pages like this
-        ArrayList<String> pages = DataManager.getPages(tableId);
+        ArrayList<Integer> pages = DataManager.getPages(tableId);
         int newPageName = 0;
 
         if(!pages.isEmpty()) {
-            pages.sort(String::compareToIgnoreCase);
-            newPageName = Integer.parseInt(pages.get(pages.size() -1 )) + 1;
+            pages.sort(Integer::compareTo);
+            newPageName = pages.get(pages.size() -1 ) + 1;
         }
 
-        Page page = new Page(String.valueOf(newPageName), table.getMaxRecords(), table.getRecordSize());
+        Page page = new Page(newPageName, table.getMaxRecords(), table.getRecordSize());
 
         DataManager.savePage(page,tableId);
         // then load the page into memory

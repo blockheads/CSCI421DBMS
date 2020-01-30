@@ -57,7 +57,7 @@ public class BufferManagerTests {
      * Testing writing a record to a page.
      */
     public static void testWritePage(BufferManager bufferManager){
-        bufferManager.insertRecord(0,new Object[]{0});
+        bufferManager.insertRecord(0,new Object[]{0,"test","turk turk, un turk turk, un da-da-da","123"});
     }
 
     /**

@@ -1,19 +1,30 @@
 package buffermanager;
 
 import buffermanager.Datatype.Datatype;
+import buffermanager.Datatype.StaticData;
 import buffermanager.Datatype.ValidDataTypes;
+import datamanager.DataManager;
 import storagemanager.StorageManagerException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Table implements Serializable {
+    public int getId() {
+        return id;
+    }
+
     private final int id;
     // specific UID to make several runs compatiable when loading in/saving objects
     private static final long serialVersionUID = 1L;
 
     private int recordSize = 0;
     private Integer[] keyIndices;
+
+    public ArrayList<Datatype> getDatatypes() {
+        return datatypes;
+    }
+
     private ArrayList<Datatype> datatypes = new ArrayList<>();
 
     // This let's us know if the pageMap corresponding to this table has been loaded into memory.
@@ -74,4 +85,6 @@ public class Table implements Serializable {
         builder.replace(builder.lastIndexOf(", "), builder.length(),"");
         return builder.toString();
     }
+
+
 }
