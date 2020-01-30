@@ -4,8 +4,12 @@ import buffermanager.Page.Page;
 import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
 import storagemanager.StorageManagerException;
+import util.ObjectSaver;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -41,19 +45,19 @@ public class BufferManager {
             loadTable(tableId);
         }
 
-        ArrayList<String> pages = DataManager.getPages(tableId);
+        ArrayList<Integer> pages = DataManager.getPages(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry
         if(pages.isEmpty()){
             return;
         }
-        pages.sort(String::compareToIgnoreCase);
+        pages.sort(Integer::compareTo);
         //todo: call get record here
         //getRecord()... doesn't exist continue
 
         // right now we are just going through the pages iteratively can be changed to binary later
-        for(String pageId: pages){
-            Page<Object[]> page = pageBuffer.getPage(tableId, Integer.parseInt(pageId));
+        for(Integer pageId: pages){
+            Page<Object[]> page = pageBuffer.getPage(tableId, pageId);
             // we know our table by now
             page.insertRecord(record);
         }
@@ -97,12 +101,12 @@ public class BufferManager {
         Table table = tableMap.get(tableId);
 
         // right now were just going to add pages like this
-        ArrayList<String> pages = DataManager.getPages(tableId);
+        ArrayList<Integer> pages = DataManager.getPages(tableId);
         int newPageName = 0;
 
         if(!pages.isEmpty()) {
-            pages.sort(String::compareToIgnoreCase);
-            newPageName = Integer.parseInt(pages.get(pages.size() -1 )) + 1;
+            pages.sort(Integer::compareTo);
+            newPageName = pages.get(pages.size() -1 ) + 1;
         }
 
         Page page = new RecordPage(newPageName, table, this);

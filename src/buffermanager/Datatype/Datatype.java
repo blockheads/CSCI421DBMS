@@ -18,6 +18,10 @@ public abstract class Datatype<E> implements Serializable {
 
     public abstract E resolveData();
 
+    public int compareObjects(Object obj1, Object obj2) {
+        return type.comparator.compare(obj1, obj2);
+    }
+
     @Override
     public String toString() {
         return type.toString();

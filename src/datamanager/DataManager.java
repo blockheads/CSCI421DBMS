@@ -37,17 +37,24 @@ public class DataManager {
      * @param id: THe table id
      * @return a list of strings containing all the pages associated with a table
      */
-    public static ArrayList<String> getPages(int id){
+    public static ArrayList<Integer> getPages(int id){
         File file = new File(String.valueOf(id));
         File[] pageList = file.listFiles();
 
-        ArrayList<String> pageNames = new ArrayList<>();
+        ArrayList<Integer> pageNames = new ArrayList<>();
         if(pageList != null){
             for(File pageFile: pageList){
                 // TODO: we can get rid of this check if we just add a prefix or sufix
                 // TODO: or some sort of identifier to a page.
                 if(!pageFile.getName().equals("tabledata")){
-                    pageNames.add(pageFile.getName());
+                    try{
+                        pageNames.add(Integer.parseInt( pageFile.getName() ));
+                    }
+                    catch (Exception e){
+                        // todo: handle exception extra file which is not a integer based file name inside
+                        // todo: the folder.
+                    }
+
                 }
             }
         }
