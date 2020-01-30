@@ -29,7 +29,7 @@ public class DataManager {
     }
 
     public static void savePage(Page page, int table){
-        ObjectSaver.save(page,table + "\\" + page.getId());
+        ObjectSaver.save(page,table + "\\" + page.getPageID());
     }
 
     /**

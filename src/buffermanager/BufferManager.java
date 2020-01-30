@@ -3,6 +3,7 @@ package buffermanager;
 import buffermanager.Page.Page;
 import buffermanager.Page.RecordPage;
 import datamanager.DataManager;
+import storagemanager.StorageManagerException;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,7 +35,7 @@ public class BufferManager {
      * if id doesnt then ->
      * inserts a record through insertion sort.
      */
-    public void insertRecord(int tableId, Object[] record){
+    public void insertRecord(int tableId, Object[] record) throws StorageManagerException {
 
         if(!tableMap.containsKey(tableId)){
             loadTable(tableId);
@@ -52,13 +53,9 @@ public class BufferManager {
 
         // right now we are just going through the pages iteratively can be changed to binary later
         for(String pageId: pages){
-            Page page = pageBuffer.getPage(tableId,pageId);
+            Page<Object[]> page = pageBuffer.getPage(tableId, Integer.parseInt(pageId));
             // we know our table by now
-            if(page.hasSpace(tableMap.get(tableId))){
-                System.out.println("Writing to page!");
-                pageBuffer.insetRecord(page,record);
-                return;
-            }
+            page.insertRecord(record);
         }
 
 
