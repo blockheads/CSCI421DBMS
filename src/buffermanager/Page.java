@@ -57,9 +57,9 @@ public class Page implements Serializable,Comparable<Page> {
     public boolean insertRecord(Table table, Object[] record){
 
         // iterative binary search
-        int l = 0, r = entries - 1;
+        int l = 0, r = entries - 1,m=0;
         while (l <= r) {
-            int m = l + (r - l) / 2;
+            m = l + (r - l) / 2;
 
             // retrieve record at m
             // Check if record is present at mid
@@ -76,7 +76,7 @@ public class Page implements Serializable,Comparable<Page> {
             else
                 r = m - 1;
         }
-        System.out.println("We should insert after " + l + " and before " + r + ".");
+        System.out.println("We should insert at " + m);
         // if we reach here, then element was
         // not present
 
