@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.pageManager;
 
+import javafx.scene.control.Tab;
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.Page;
@@ -97,18 +98,18 @@ public class PageBuffer {
         return (RecordPage) loadPage(tableId, pageId);
     }
 
-    public void insertRecord(int table, Object[] record) throws  StorageManagerException{
-        TreeSet<Integer> pagesOnDisk = DataManager.getPages(table);
+    public void insertRecord(BufferManager bufferManager, Table table, Object[] record) throws  StorageManagerException{
+        TreeSet<Integer> pagesOnDisk = DataManager.getPages(table.getId());
         if (pagesOnDisk.isEmpty()) {
             try {
-                RecordPage newRecordPage = (RecordPage) bufferManager.createPage(table);
+                RecordPage newRecordPage = (RecordPage) createPage(bufferManager,table);
                 addPage(newRecordPage);
                 pagesOnDisk.add(newRecordPage.getPageID());
             } catch (IOException e) {
                 throw new StorageManagerException("");
             }
         }
-        insertRecord(bufferManager.getTable(table), pagesOnDisk, record);
+        insertRecord(table, pagesOnDisk, record);
     }
 
     /**
@@ -193,6 +194,27 @@ public class PageBuffer {
         // we return a null page if there is no page here, todo: add exception
         return null;
 
+    }
+
+    /**
+     * This creates a 4k page which will be stored in our pageMap
+     * and loaded pageMap for now TODO: should this be stored in loaded page map
+     *
+     */
+    public Page createPage(BufferManager bufferManager, Table table) throws IOException {
+
+        // right now were just going to add pages like this
+        TreeSet<Integer> pages = DataManager.getPages(table.getId());
+        int newPageName = 0;
+
+        if(!pages.isEmpty()) {
+            newPageName = pages.last() + 1;
+        }
+
+        Page page = new RecordPage(newPageName, table, bufferManager);
+
+        DataManager.savePage(page,table.getId());
+        return page;
     }
 
     public void destroyPage(Page page) { // delete a page from the system

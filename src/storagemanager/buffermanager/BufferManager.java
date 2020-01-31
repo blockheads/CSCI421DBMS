@@ -47,11 +47,10 @@ public class BufferManager {
      * inserts a record through insertion sort.
      */
     public void insertRecord(int tableId, Object[] record) throws StorageManagerException {
-        if(!tableMap.containsKey(tableId)){
-            loadTable(tableId);
-        }
+        Table table = getTable(tableId);
+
         // in this case just create page and insert in empty page, it's our first entry
-        pageBuffer.insertRecord(tableId, record);
+        pageBuffer.insertRecord(this, table, record);
     }
 
     /**
@@ -72,35 +71,6 @@ public class BufferManager {
      */
     public void deleteRecord(){
 
-    }
-
-    /**
-     * This creates a 4k page which will be stored in our pageMap
-     * and loaded pageMap for now TODO: should this be stored in loaded page map
-     *
-     */
-    public Page createPage(int tableId) throws IOException {
-
-        // we have to load in our table if it isn't loaded here.
-        // todo: check if this is needed
-        if(!tableMap.containsKey(tableId)){
-            loadTable(tableId);
-        }
-
-        Table table = tableMap.get(tableId);
-
-        // right now were just going to add pages like this
-        TreeSet<Integer> pages = DataManager.getPages(tableId);
-        int newPageName = 0;
-
-        if(!pages.isEmpty()) {
-            newPageName = pages.last() + 1;
-        }
-
-        Page page = new RecordPage(newPageName, table, this);
-
-        DataManager.savePage(page,tableId);
-        return page;
     }
 
 
