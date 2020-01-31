@@ -68,7 +68,7 @@ public class BufferManagerTests {
     public static void testSplitting(BufferManager bufferManager) throws IOException {
         // casually writing 500 entries. rip console output
 
-        for(int i=0; i<500; i++){
+        for(int i=500; i>0; i--){
             System.out.println("Inserting " + i);
             Object[] data = new Object[]{i, "a".toCharArray(), false, "123".toCharArray()};
             try {

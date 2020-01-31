@@ -6,6 +6,7 @@ import storagemanager.buffermanager.pageManager.PageBuffer;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -66,13 +67,14 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public int getEntriesCount() {
         return this.entries;
     }
+
     public boolean isEmpty() {return this.entries == 0;}
 
     public PageTypes getPageType() {
         return pageType;
     }
 
-    public abstract boolean insertRecord(E record) throws StorageManagerException;
+    public abstract boolean insertRecord(E record) throws StorageManagerException, IOException;
     public abstract boolean deleteRecord(E record) throws StorageManagerException;
     public abstract boolean recordExists(E record);
     public abstract Page<E> splitPage();

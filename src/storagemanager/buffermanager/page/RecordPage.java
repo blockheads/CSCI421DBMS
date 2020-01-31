@@ -38,21 +38,28 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
-    public boolean insertRecord(Object[] record) throws StorageManagerException {
+    public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
         // we split if we are full.
         if(!hasSpace()){
             System.out.println("Splitting!");
             splitPage();
+
+            bufferManager.insertRecord(getTableID(),record);
+            return true;
         }
 
 
-        // iterative binary search
-        int l = 0, r = entries - 1,m=0;
+        // iterative binary
+        int l = 0,r=entries, m=0;
         while (l <= r) {
             m = l + (r - l) / 2;
 
             // retrieve record at m
             // Check if record is present at mid
+            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
+            if(records[m][0] == null)
+                break;
+
             int res = compareRecord(table,record,m);
 
             // in this case the record already exists in the page
@@ -66,10 +73,6 @@ public class RecordPage extends Page<Object[]> {
             else
                 r = m - 1;
         }
-        // entries that are past the first entry must be inserted up one more than where the midpoint is found
-        // from the binary search ( I think. )
-        if(m != 0)
-            m+=1;
 
         System.out.println("We should insert at " + m);
         // if we reach here, then element was
@@ -125,15 +128,17 @@ public class RecordPage extends Page<Object[]> {
             // split at n/2
             int splitPoint = Math.floorDiv(entries, 2);
             int j=0;
-            for(int i=splitPoint; i<records.length; i++){
-                other.setRecord(this.records[splitPoint], j);
-                this.records[splitPoint] = null;
+            for(int i=splitPoint; i<entries; i++){
+                other.setRecord(this.records[i].clone(), j);
+                this.records[i] = null;
                 j++;
-                other.entries = this.entries-splitPoint;
-                this.entries = splitPoint;
-                pageBuffer.addPage(other);
             }
-
+            System.out.println("Our entries before splitting: " + entries);
+            other.setEntriesCount(splitPoint);
+            setEntriesCount(j);
+            System.out.println("Entries after: " + entries);
+            System.out.println("Other entries: " + other.getEntriesCount());
+            pageBuffer.addPage(other);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -149,6 +154,10 @@ public class RecordPage extends Page<Object[]> {
     @Override
     public void save() {
         DataManager.savePage(this,table.getId());
+    }
+
+    public void setEntriesCount(int entries) {
+        this.entries = entries;
     }
 
     /**
