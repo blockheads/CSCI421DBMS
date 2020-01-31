@@ -16,6 +16,10 @@ public class AgedObjectPool<E> {
         @Override
         protected void onUpdate(AgeTracker<E> next) {
             Collections.sort(objects);
+            int basis = objects.get(0).getAge();
+            if (next.getAge() == Integer.MAX_VALUE) {
+                objects.forEach(eAgeTracker -> eAgeTracker.resetAge(basis));
+            }
         }
     };
 

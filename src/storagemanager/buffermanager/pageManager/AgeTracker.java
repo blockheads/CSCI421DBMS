@@ -11,7 +11,7 @@ import java.util.Comparator;
  *
  * @author Nicholas Chieppa
  */
-public class AgeTracker<E> extends Subscriber<E> implements Comparable<AgeTracker<E>>, Comparator<AgeTracker<E>> {
+public class AgeTracker<E> implements Comparable<AgeTracker<E>>, Comparator<AgeTracker<E>> {
 
     private final E object;
     private int age;
@@ -25,11 +25,11 @@ public class AgeTracker<E> extends Subscriber<E> implements Comparable<AgeTracke
         this.age = pool.getHighestAge();
     }
 
-    public void resetAge(AgeTracker<E> basis) {
-        this.age %= basis.age;
+    public void resetAge(int basis) {
+        this.age %= basis;
     }
 
-    private boolean ageIncrement() {
+    public boolean ageIncrement() {
         age++;
         ageIncrement.push(this);
         return age == Integer.MAX_VALUE;
@@ -67,11 +67,6 @@ public class AgeTracker<E> extends Subscriber<E> implements Comparable<AgeTracke
     @Override
     public int hashCode() {
         return object.hashCode();
-    }
-
-    @Override
-    public void onUpdate(E next) {
-        ageIncrement();
     }
 
     public void ageSubscriber(Subscriber<AgeTracker<E>> ageTrackerSubscriber) {

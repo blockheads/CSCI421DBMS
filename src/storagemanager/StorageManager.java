@@ -24,7 +24,7 @@ public class StorageManager extends AStorageManager {
      */
     public StorageManager(String dbLoc, int pageBufferSize, int pageSize, boolean restart) throws StorageManagerException {
         super(dbLoc, pageBufferSize, pageSize, restart);
-        bufferManager = new BufferManager();
+        bufferManager = new BufferManager(dbLoc, pageBufferSize, pageSize);
     }
 
     @Override
