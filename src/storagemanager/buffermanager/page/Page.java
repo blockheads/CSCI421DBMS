@@ -15,7 +15,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     transient Table table;
     transient BufferManager bufferManager;
     transient PageBuffer pageBuffer;
-    transient AgeTracker<Page> pageAgeTracker;
+    private transient AgeTracker<Page> pageAgeTracker;
 
     private final PageTypes pageType;
 
@@ -50,6 +50,10 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
 
     public void setPageAgeTracker(AgeTracker<Page> pageAgeTracker) {
         this.pageAgeTracker = pageAgeTracker;
+    }
+    public void increaseAge() {
+        Objects.requireNonNull(pageAgeTracker,"An age tracker is needed to increase object age");
+        pageAgeTracker.ageIncrement();
     }
 
     public int getPageID() {
