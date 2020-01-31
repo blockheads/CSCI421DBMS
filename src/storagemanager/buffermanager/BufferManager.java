@@ -46,7 +46,7 @@ public class BufferManager {
      * if id doesnt then ->
      * inserts a record through insertion sort.
      */
-    public void insertRecord(int tableId, Object[] record) throws StorageManagerException {
+    public void insertRecord(int tableId, Object[] record) throws StorageManagerException, IOException {
         Table table = getTable(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry
@@ -124,6 +124,10 @@ public class BufferManager {
      */
     public void shutDown(){
         pageBuffer.purge();
+        // need to write out our tables as well
+        for(Table table: tableMap.values()){
+            DataManager.saveTable(table,table.getId());
+        }
     }
 
 }

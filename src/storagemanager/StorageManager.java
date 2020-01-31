@@ -5,6 +5,7 @@ import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.File;
+import java.io.IOException;
 
 public class StorageManager extends AStorageManager {
 
@@ -39,7 +40,11 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void insertRecord(int table, Object[] record) throws StorageManagerException {
-        bufferManager.insertRecord(table,record);
+        try {
+            bufferManager.insertRecord(table,record);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

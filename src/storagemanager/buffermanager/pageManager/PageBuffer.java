@@ -98,7 +98,7 @@ public class PageBuffer {
         return (RecordPage) loadPage(tableId, pageId);
     }
 
-    public void insertRecord(BufferManager bufferManager, Table table, Object[] record) throws  StorageManagerException{
+    public void insertRecord(BufferManager bufferManager, Table table, Object[] record) throws  StorageManagerException, IOException{
         TreeSet<Integer> pagesOnDisk = DataManager.getPages(table.getId());
         if (pagesOnDisk.isEmpty()) {
             try {
@@ -115,10 +115,17 @@ public class PageBuffer {
     /**
      * Inserts a record into a page at appropriate spot
      */
-    private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException {
+    private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException, IOException {
         // right now it just inserts at first available spot
         RecordPage page = (RecordPage) searchPages(table, pageIds, record);
         System.out.println("Selected page: " + page.getPageID());
+
+        // we split if we are full.
+        if(!page.hasSpace()){
+            System.out.println("Splitting!");
+            page.splitPage();
+        }
+
         page.insertRecord(record);
     }
 
@@ -144,52 +151,84 @@ public class PageBuffer {
             return null;
         }
 
-        // first I guess we perform a bst over the pages already loaded into memory
-
-        // iterative binary search
-        int l = 0, r = pageIds.size() - 1;
-
+        // this is the iterative approach to searching for a page
         RecordPage lastEmptyPage = null;
 
-        while (l <= r) {
-            int m = l + (r - l) / 2;
+        // this code no longer is usefull as our pages are not guaranteed in order
+        for(int pageId: pageIds){
+            // grab our record page.
+            RecordPage page = getRecordPage(table.getId(), pageId);
 
-            // retrieve page at m
-            RecordPage page = getRecordPage(table.getId(), m);
-
-            // page is empty
             if(page.getEntriesCount() == 0){
-                // in this case, we say we want to move to the left from the empty page. Mark this page for
-                // deletion potentially?
-                r = m - 1;
-                // we want to mark the last empty page we visited, this is so we can use it to return our result
-                // as opposed to not finding any possible page for our result
                 lastEmptyPage = page;
             }
-            else{
+            else {
                 // Check if x is present at mid
-                int[] bounds = page.bounds(table,record);
+                int[] bounds = page.bounds(table, record);
                 // if we are contained within the bounds of the page, or the first/last entries of the page are our
                 // entry, then this is most certainly our page
 
                 if ((bounds[0] == 1 && bounds[1] == -1) // bigger than first element and smaller than last element
                         || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
-                        || (bounds[1] == 1 && pageIds.last() == m) // there is no page bigger than me, but im larger than the first element: this is my page
-                        || (bounds[0] == -1 && pageIds.first() == m)) // there is no page smaller than me, but im smaller than the first element: this is my page
+                        || (bounds[1] == 1 && pageIds.last() == pageId) // there is no page bigger than me, but im larger than the first element: this is my page
+                        || (bounds[0] == -1 && pageIds.first() == pageId)) // there is no page smaller than me, but im smaller than the first element: this is my page
                     return page;
 
-                // otherwise we check if we are greater than the page
-                if (bounds[1] == 1)
-                    l = m + 1;
-
-                    // Then we mus be smaller
-                else
-                    r = m - 1;
+                // otherwise we just continue to iterate...
             }
+
         }
 
         if(lastEmptyPage != null)
             return lastEmptyPage;
+
+//
+//        // first I guess we perform a bst over the pages already loaded into memory
+//
+//        // iterative binary search
+//        int l = 0, r = pageIds.size() - 1;
+//
+//        RecordPage lastEmptyPage = null;
+//
+//        while (l <= r) {
+//            int m = l + (r - l) / 2;
+//
+//            // retrieve page at m
+//            RecordPage page = getRecordPage(table.getId(), m);
+//
+//            // page is empty
+//            if(page.getEntriesCount() == 0){
+//                // in this case, we say we want to move to the left from the empty page. Mark this page for
+//                // deletion potentially?
+//                r = m - 1;
+//                // we want to mark the last empty page we visited, this is so we can use it to return our result
+//                // as opposed to not finding any possible page for our result
+//                lastEmptyPage = page;
+//            }
+//            else{
+//                // Check if x is present at mid
+//                int[] bounds = page.bounds(table,record);
+//                // if we are contained within the bounds of the page, or the first/last entries of the page are our
+//                // entry, then this is most certainly our page
+//
+//                if ((bounds[0] == 1 && bounds[1] == -1) // bigger than first element and smaller than last element
+//                        || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
+//                        || (bounds[1] == 1 && pageIds.last() == m) // there is no page bigger than me, but im larger than the first element: this is my page
+//                        || (bounds[0] == -1 && pageIds.first() == m)) // there is no page smaller than me, but im smaller than the first element: this is my page
+//                    return page;
+//
+//                // otherwise we check if we are greater than the page
+//                if (bounds[1] == 1)
+//                    l = m + 1;
+//
+//                    // Then we mus be smaller
+//                else
+//                    r = m - 1;
+//            }
+//        }
+//
+//        if(lastEmptyPage != null)
+//            return lastEmptyPage;
 
         // we return a null page if there is no page here, todo: add exception
         return null;
@@ -204,18 +243,13 @@ public class PageBuffer {
     public Page createPage(BufferManager bufferManager, Table table) throws IOException {
 
         // right now were just going to add pages like this
-        TreeSet<Integer> pages = DataManager.getPages(table.getId());
-        int newPageName = 0;
 
-        if(!pages.isEmpty()) {
-            newPageName = pages.last() + 1;
-        }
-
-        Page page = new RecordPage(newPageName, table, bufferManager);
+        Page page = new RecordPage(table.getNewHighestPage(), table, bufferManager);
 
         DataManager.savePage(page,table.getId());
         return page;
     }
+
 
     public void destroyPage(Page page) { // delete a page from the system
         removePage(page);

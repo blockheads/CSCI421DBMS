@@ -5,6 +5,7 @@ import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class RecordPage extends Page<Object[]> {
@@ -102,7 +103,27 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
+    /**
+     *
+     */
     public Page splitPage() {
+
+        try {
+            RecordPage other = (RecordPage) pageBuffer.createPage(bufferManager,table);
+
+            // split at n/2
+            int splitPoint = Math.floorDiv(entries, 2);
+            int j=0;
+            for(int i=splitPoint; i<records.length; i++){
+                other.setRecord(this.records[splitPoint], j);
+                this.records[splitPoint] = null;
+                j++;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
@@ -211,5 +232,13 @@ public class RecordPage extends Page<Object[]> {
 
         return 0;
 
+    }
+
+    /**
+     * Sets a pages records to a passed in value at given index
+     * @param records
+     */
+    public void setRecord(Object[] records, int index){
+        this.records[index] = records;
     }
 }

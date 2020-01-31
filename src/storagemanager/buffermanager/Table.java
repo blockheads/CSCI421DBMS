@@ -21,6 +21,19 @@ public class Table implements Serializable {
 
     private ArrayList<Datatype> datatypes = new ArrayList<>();
 
+    public int getNewHighestPage(){
+        this.highestPage++;
+        System.out.println("Our new highest page is " + this.highestPage);
+        return this.highestPage;
+    }
+
+    public void setHighestPage(int highestPage) {
+        this.highestPage = highestPage;
+    }
+
+    // int that tells us the current highest page
+    private int highestPage;
+
     // This let's us know if the pageMap corresponding to this table has been loaded into memory.
     private boolean loadedPageMap;
 
@@ -47,6 +60,8 @@ public class Table implements Serializable {
 
         this.keyIndices = keyIndices;
         this.maxRecords = Math.floorDiv(4096, recordSize);
+        // initially our highest page is 0, since we increment each time start at -1
+        this.highestPage = -1;
     }
 
     public int getRecordSize() {

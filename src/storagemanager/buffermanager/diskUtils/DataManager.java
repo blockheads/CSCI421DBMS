@@ -60,4 +60,16 @@ public abstract class DataManager {
         return pageNames;
     }
 
+
+    public static void renamePage(int table, int previousId, int newId){
+        File file = new File(table + String.valueOf(previousId));
+        File newFile = new File(table + String.valueOf(newId));
+        System.out.println("Renamed page " + previousId + " to page " + newId);
+        if(file.renameTo(newFile)){
+            System.out.println("File rename success");;
+        }else{
+            System.out.println("File rename failed");
+        }
+    }
+
 }
