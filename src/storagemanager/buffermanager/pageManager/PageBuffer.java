@@ -44,7 +44,7 @@ public class PageBuffer {
         }
         // load a table into the buffer
         this.pages.put(page.getTableID(), new EnumMap<>(PageTypes.class));
-        this.pages.get(page.getTableID()).put(page.getPageType(), new AgingTreeSet<>(pagePool){{add(page);}});
+        this.pages.get(page.getTableID()).put(page.getPageType(), new TreeSet<>(){{add(page);}});
         page.setPageAgeTracker(pagePool.createTrackerForPool(page));
         // add age tracker
     }
