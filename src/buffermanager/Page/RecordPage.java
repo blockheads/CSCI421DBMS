@@ -2,6 +2,7 @@ package buffermanager.Page;
 
 import buffermanager.BufferManager;
 import buffermanager.Datatype.Datatype;
+import buffermanager.Datatype.ValidDataTypes;
 import buffermanager.Table;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
@@ -56,12 +57,26 @@ public class RecordPage extends Page<Object[]> {
             else
                 r = m - 1;
         }
+        // entries that are past the first entry must be inserted up one more than where the midpoint is found
+        // from the binary search ( I think. )
+        if(m != 0)
+            m+=1;
+
         System.out.println("We should insert at " + m);
         // if we reach here, then element was
         // not present
 
+        // this gives us all the entries above m
+        int aboveIndex = entries-(m+1);
+        System.out.println("Above: " + aboveIndex);
+        for(int i=aboveIndex; i>=0; i--){
+            int currentIndex = m+i;
+            int newIndex = m+i+1;
+            System.out.println("Moving record " + currentIndex + " to index " + newIndex);
+            records[newIndex] = records[currentIndex];
+        }
 
-        records[entries] = record;
+        records[m] = record;
         entries++;
         // just for nice testing output
         int remaining = records.length-entries;
@@ -161,37 +176,39 @@ public class RecordPage extends Page<Object[]> {
 
             ret = table.compareDataTypes(keyIndex, obj, records[index][keyIndex]);
 
-
-//            // this is a big if statement which basically just compares values depending on their underlying
-//            // data type as a object, calling Java's built in compare
-//            if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.BOOLEAN)){
+            // this is a big if statement which basically just compares values depending on their underlying
+            // data type as a object, calling Java's built in compare
+//            if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.BOOLEAN)){
 //                Boolean firstVal = (Boolean)obj;
 //                Boolean secondVal = (Boolean)records[index][keyIndex];
 //                ret = firstVal.compareTo(secondVal);
 //            }
-//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.CHAR)){
-//                Character firstVal = (Character)obj;
-//                Character secondVal = (Character)records[index][keyIndex];
-//                ret = firstVal.compareTo(secondVal);
-//            }
-//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.DOUBLE)){
+//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.DOUBLE)){
 //                Double firstVal = (Double)obj;
 //                Double secondVal = (Double)records[index][keyIndex];
 //                ret = firstVal.compareTo(secondVal);
 //            }
-//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.INTEGER)){
+//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.INTEGER)){
 //                Integer firstVal = (Integer)obj;
 //                Integer secondVal = (Integer)records[index][keyIndex];
 //                ret = firstVal.compareTo(secondVal);
 //            }
-//            else if(table.getDatatypes().get(i).getType().equals(ValidDataTypes.VARCHAR)){
-//                String firstVal = String.valueOf(obj);
-//                String secondVal = String.valueOf(records[index][keyIndex]);
+//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.VARCHAR) ||
+//                    table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.CHAR)){
+//                // casting to a string to compare, makes comparisons easier.
+//                String firstVal =  String.valueOf((char[])obj);
+//                String secondVal = String.valueOf((char[])records[index][keyIndex]);
+//
 //                ret = firstVal.compareTo(secondVal);
 //            }
 
-           if(ret != 0)
-              return ret;
+           if(ret != 0) {
+               // restricting this function to return -1 or 1
+               if(ret >= 1)
+                   return 1;
+               else
+                   return -1;
+           }
         }
 
         return 0;
