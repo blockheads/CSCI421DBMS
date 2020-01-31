@@ -67,6 +67,9 @@ public class AgedObjectPool<E> {
     }
 
     public int getHighestAge() {
+        // if there are no ages being tracked just return 0
+        if(objects.size() == 0)
+            return 0;
         return objects.get(objects.size() - 1).getAge();
     }
 

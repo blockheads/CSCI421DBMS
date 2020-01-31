@@ -24,6 +24,12 @@ public class BufferManager {
     private final String dbLoc;
     private final int pageSize;
 
+    public BufferManager(){
+        tableMap = new HashMap<>();
+        dbLoc = "\\";
+        pageSize = 100;
+    }
+
     public BufferManager(String dbLoc, int maxPages, int pageSize){
         this.dbLoc = dbLoc;
         this.pageSize = pageSize;
