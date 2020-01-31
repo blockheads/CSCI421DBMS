@@ -1,9 +1,8 @@
 package storagemanager;
 
-import buffermanager.BufferManager;
-import buffermanager.Table;
-import datamanager.DataManager;
-import util.ObjectSaver;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.File;
 
@@ -25,7 +24,7 @@ public class StorageManager extends AStorageManager {
      */
     public StorageManager(String dbLoc, int pageBufferSize, int pageSize, boolean restart) throws StorageManagerException {
         super(dbLoc, pageBufferSize, pageSize, restart);
-        bufferManager = new BufferManager();
+        bufferManager = new BufferManager(dbLoc, pageBufferSize, pageSize);
     }
 
     @Override

@@ -1,7 +1,7 @@
-package buffermanager.Page;
+package storagemanager.buffermanager.page;
 
-import buffermanager.BufferManager;
-import buffermanager.Table;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
 public class IndexPage extends Page<Object[]> {

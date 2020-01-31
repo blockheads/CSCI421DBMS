@@ -1,10 +1,8 @@
 package testing;
 
-import buffermanager.BufferManager;
+import storagemanager.buffermanager.BufferManager;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
-
-import java.io.IOException;
 
 public class BufferManagerTests {
     /**

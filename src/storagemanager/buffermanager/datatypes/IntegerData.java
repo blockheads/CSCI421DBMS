@@ -1,4 +1,4 @@
-package buffermanager.Datatype;
+package storagemanager.buffermanager.datatypes;
 
 public class IntegerData extends StaticData<Integer> {
     protected IntegerData() {

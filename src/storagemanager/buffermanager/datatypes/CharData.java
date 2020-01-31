@@ -1,6 +1,4 @@
-package buffermanager.Datatype;
-
-import java.util.Arrays;
+package storagemanager.buffermanager.datatypes;
 
 /**
  *

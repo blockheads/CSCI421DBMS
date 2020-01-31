@@ -1,9 +1,10 @@
-package buffermanager;
+package storagemanager.buffermanager;
 
-import buffermanager.Page.Page;
-import buffermanager.Page.RecordPage;
-import datamanager.DataManager;
+import storagemanager.buffermanager.page.Page;
+import storagemanager.buffermanager.page.RecordPage;
+import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,11 +20,15 @@ public class BufferManager {
      *
      **/
     private PageBuffer pageBuffer;
-    private Map<Integer, Table> tableMap;
+    private final Map<Integer, Table> tableMap;
+    private final String dbLoc;
+    private final int pageSize;
 
-    public BufferManager(){
+    public BufferManager(String dbLoc, int maxPages, int pageSize){
+        this.dbLoc = dbLoc;
+        this.pageSize = pageSize;
         tableMap = new HashMap<>();
-        pageBuffer = new PageBuffer(this);
+        pageBuffer = new PageBuffer(this, maxPages);
     }
 
     /**

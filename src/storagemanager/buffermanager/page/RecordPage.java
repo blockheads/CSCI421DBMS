@@ -1,10 +1,8 @@
-package buffermanager.Page;
+package storagemanager.buffermanager.page;
 
-import buffermanager.BufferManager;
-import buffermanager.Datatype.Datatype;
-import buffermanager.Datatype.ValidDataTypes;
-import buffermanager.Table;
-import storagemanager.StorageManager;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.datatypes.Datatype;
+import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
 import java.util.ArrayList;

@@ -1,11 +1,13 @@
-package buffermanager;
+package storagemanager.buffermanager.pageManager;
 
-import buffermanager.Page.AgeTracker;
-import buffermanager.Page.Page;
-import buffermanager.Page.PageTypes;
-import buffermanager.Page.RecordPage;
-import datamanager.DataManager;
+import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.page.Page;
+import storagemanager.buffermanager.page.PageTypes;
+import storagemanager.buffermanager.page.RecordPage;
+import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import util.Subscriber;
 
 import java.io.IOException;
 import java.util.*;
@@ -16,11 +18,21 @@ public class PageBuffer {
 
     private final HashMap<Integer, EnumMap<PageTypes, TreeSet<Page>>> pages = new HashMap<>();
     private final BufferManager bufferManager;
-    private Set<AgeTracker> ageTrackers;
 
-    public PageBuffer(BufferManager bufferManager) {
+    private final AgedObjectPool<Page> pagePool;
+    private final Subscriber<Page> removalSubscriber = new Subscriber<Page>() {
+        @Override
+        protected void onUpdate(Page next) {
+            pages.get(next.getTableID()).get(next.getPageType()).remove(next);
+            if (next.isEmpty()) destroyPage(next);
+            else writeOutPage(next);
+        }
+    };
+
+    public PageBuffer(BufferManager bufferManager, int maxPages) {
         this.bufferManager = bufferManager;
-//        this.tableMap = bufferManager.getTableMap();
+        pagePool = new AgedObjectPool<>(maxPages);
+        pagePool.subscribe(removalSubscriber);
     }
 
     public void addPage(Page page) {
@@ -33,34 +45,36 @@ public class PageBuffer {
         // load a table into the buffer
         this.pages.put(page.getTableID(), new EnumMap<>(PageTypes.class));
         this.pages.get(page.getTableID()).put(page.getPageType(), new TreeSet<>(){{add(page);}});
+        page.setPageAgeTracker(pagePool.createTrackerForPool(page));
         // add age tracker
     }
 
     /**
      * loads a page into memory
      */
-    private RecordPage loadPage(int tableId, int pageId){
+    private Page loadPage(int tableId, int pageId){
         Page page = DataManager.getPage(tableId, String.valueOf(pageId));
         page.setPageID(pageId);
         page.setBufferManager(bufferManager);
         page.setTable(bufferManager.getTable(tableId));
         page.setPageBuffer(this);
+        page.setPageAgeTracker(pagePool.createTrackerForPool(page));
+
         // already loaded pages from this table
         if(pages.containsKey(tableId)){
             this.pages.get(tableId).get(PageTypes.RECORD_PAGE).add(page);
         }
-        // have not loaded pages from this table
-        else{
-            EnumMap<PageTypes, TreeSet<Page>> properties = new EnumMap<PageTypes, TreeSet<Page>>(PageTypes.class);
-            TreeSet<Page> recordPages = new TreeSet<Page>();
-            properties.put(PageTypes.RECORD_PAGE, recordPages);
+        else{ // have not loaded pages from this table
+            EnumMap<PageTypes, TreeSet<Page>> properties = new EnumMap<>(PageTypes.class);
+            TreeSet<Page> recordPages = new TreeSet<>();
+            properties.put(page.getPageType(), recordPages);
             // load index here
             // actually get our page
             recordPages.add(page);
             this.pages.put(tableId, properties);
         }
 
-        return (RecordPage) page;
+        return page;
     }
 
     /**
@@ -179,6 +193,18 @@ public class PageBuffer {
         // we return a null page if there is no page here, todo: add exception
         return null;
 
+    }
+
+    public void destroyPage(Page page) { // delete a page from the system
+        removePage(page);
+    }
+
+    public void writeOutPage(Page page) { // write out a page to disk and remove it from the buffer
+        removePage(page);
+    }
+
+    private void removePage(Page page) { // remove a page without saving it to disk
+        pages.get(page.getTableID()).get(page.getPageType()).remove(page);
     }
 
 }
