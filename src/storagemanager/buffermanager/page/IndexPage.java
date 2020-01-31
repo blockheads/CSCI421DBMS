@@ -34,4 +34,9 @@ public class IndexPage extends Page<Object[]> {
     public boolean hasSpace() {
         return false;
     }
+
+    @Override
+    public void save() {
+
+    }
 }

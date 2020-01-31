@@ -6,6 +6,10 @@ import storagemanager.StorageManagerException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.IntStream;
 
 public class Table implements Serializable {
     public int getId() {
@@ -29,6 +33,23 @@ public class Table implements Serializable {
 
     public void setHighestPage(int highestPage) {
         this.highestPage = highestPage;
+    }
+
+    public int getHighestPage() {
+        return highestPage;
+    }
+
+    /**
+     * Simply returns all the pages associated with this table, in this case it's a range from 0 to the
+     * highest page
+     * @return
+     */
+    public List<Integer> getPages(){
+        List<Integer> pages = new ArrayList<>();
+        for(int i = 0; i<=getHighestPage(); i++){
+            pages.add(i);
+        }
+        return pages;
     }
 
     // int that tells us the current highest page

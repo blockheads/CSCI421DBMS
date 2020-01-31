@@ -84,6 +84,8 @@ public class StorageManager extends AStorageManager {
             return;
         }
         Table table = new Table(id, dataTypes, keyIndices);
+        table.setHighestPage(-1);
+
         System.out.println(table);
         DataManager.saveTable(table,id);
     }

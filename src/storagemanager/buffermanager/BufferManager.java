@@ -50,7 +50,7 @@ public class BufferManager {
         Table table = getTable(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry
-        pageBuffer.insertRecord(this, table, record);
+        pageBuffer.insertRecord(table, record);
     }
 
     /**
@@ -73,6 +73,12 @@ public class BufferManager {
 
     }
 
+    /**
+     * Updates a table after it has been modified in the table map
+     */
+    public void updateTable(Table table){
+        tableMap.put(table.getId(),table);
+    }
 
     /**
      * tihs function loads a table into memory
@@ -84,7 +90,14 @@ public class BufferManager {
     }
 
     public Table getTable(int id) {
-        return tableMap.getOrDefault(id, loadTable(id));
+        // for some reason get or default isn't working. I do not know why
+        // todo: figure out why
+        if(tableMap.containsKey(id)){
+            return tableMap.get(id);
+        }
+        else{
+            return tableMap.getOrDefault(id, loadTable(id));
+        }
     }
 
     public Map<Integer, Table> getTableMap() {

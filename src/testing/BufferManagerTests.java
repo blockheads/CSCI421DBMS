@@ -5,6 +5,8 @@ import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Random;
 
 public class BufferManagerTests {
     /**
@@ -27,6 +29,13 @@ public class BufferManagerTests {
 
         try {
             testWritePage(bufferManager);
+        } catch (IOException | StorageManagerException e) {
+            e.printStackTrace();
+        }
+
+        // time for the money
+        try {
+            testSplitting(bufferManager);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,6 +60,24 @@ public class BufferManagerTests {
         bufferManager.insertRecord(0,new Object[]{2, "test".toCharArray(), false, "123".toCharArray()});
         bufferManager.insertRecord(0,new Object[]{3, "test".toCharArray(), false, "123".toCharArray()});
         bufferManager.insertRecord(0,new Object[]{0, "a".toCharArray(), false, "123".toCharArray()});
+    }
+
+    /**
+     * "Ah shit, here we go again" - 'C.J' Johnson, From the Grand Theft Auto Series, 'Grand Theft Auto: San Andreas'
+     */
+    public static void testSplitting(BufferManager bufferManager) throws IOException {
+        // casually writing 500 entries. rip console output
+
+        for(int i=0; i<500; i++){
+            System.out.println("Inserting " + i);
+            Object[] data = new Object[]{i, "a".toCharArray(), false, "123".toCharArray()};
+            try {
+                bufferManager.insertRecord(0,data);
+            } catch (StorageManagerException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**

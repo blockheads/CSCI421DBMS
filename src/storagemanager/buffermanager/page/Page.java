@@ -26,6 +26,8 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         this.table = table;
         this.bufferManager = bufferManager;
         this.pageType = pageType;
+        // we are going to want to update our table every time a new page is created to track information
+        this.bufferManager.updateTable(table);
     }
 
     public void setBufferManager(BufferManager bufferManager) {
@@ -75,6 +77,11 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public abstract boolean recordExists(E record);
     public abstract Page<E> splitPage();
     public abstract boolean hasSpace();
+
+    /**
+     * Writes out a page from memory into a hard coded location on disk
+     */
+    public abstract void save();
 
     @Override
     public int compareTo(Page page) {

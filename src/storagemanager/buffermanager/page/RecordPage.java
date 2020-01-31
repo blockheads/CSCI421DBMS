@@ -4,6 +4,8 @@ import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.diskUtils.DataManager;
+import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +29,23 @@ public class RecordPage extends Page<Object[]> {
     // the amount of current records stored inside the page
     private int entries;
 
-    public RecordPage(int id, Table table, BufferManager bufferManager){
-        super(id, table, bufferManager, PageTypes.RECORD_PAGE);
+    public RecordPage(Table table, BufferManager bufferManager, PageBuffer pageBuffer){
+        super(table.getNewHighestPage(), table, bufferManager, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
         this.records = new Object[table.getMaxRecords()][table.dataTypeCount()];
+        this.setPageBuffer(pageBuffer);
     }
 
     @Override
     public boolean insertRecord(Object[] record) throws StorageManagerException {
+        // we split if we are full.
+        if(!hasSpace()){
+            System.out.println("Splitting!");
+            splitPage();
+        }
+
+
         // iterative binary search
         int l = 0, r = entries - 1,m=0;
         while (l <= r) {
@@ -77,6 +87,7 @@ public class RecordPage extends Page<Object[]> {
 
         records[m] = record;
         entries++;
+        System.out.println("Entries: " + entries);
         // just for nice testing output
         int remaining = records.length-entries;
         System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
@@ -107,9 +118,9 @@ public class RecordPage extends Page<Object[]> {
      *
      */
     public Page splitPage() {
-
+        System.out.println("Page buffer: " + pageBuffer);
         try {
-            RecordPage other = (RecordPage) pageBuffer.createPage(bufferManager,table);
+            RecordPage other = (RecordPage) pageBuffer.createPage(table);
 
             // split at n/2
             int splitPoint = Math.floorDiv(entries, 2);
@@ -118,6 +129,9 @@ public class RecordPage extends Page<Object[]> {
                 other.setRecord(this.records[splitPoint], j);
                 this.records[splitPoint] = null;
                 j++;
+                other.entries = this.entries-splitPoint;
+                this.entries = splitPoint;
+                pageBuffer.addPage(other);
             }
 
         } catch (IOException e) {
@@ -130,6 +144,11 @@ public class RecordPage extends Page<Object[]> {
     @Override
     public boolean hasSpace() {
         return table.getMaxRecords() > entries;
+    }
+
+    @Override
+    public void save() {
+        DataManager.savePage(this,table.getId());
     }
 
     /**

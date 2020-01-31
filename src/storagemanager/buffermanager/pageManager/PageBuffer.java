@@ -37,7 +37,8 @@ public class PageBuffer {
     }
 
     public void addPage(Page page) {
-        bufferManager.getTable(page.getTableID());
+//        page.getTable()
+//        bufferManager.getTable(page.getTableID());
         if (pages.containsKey(page.getTableID())) { // table already in page buffer
             pages.get(page.getTableID()).get(page.getPageType()).add(page);
             // add age tracker
@@ -98,18 +99,29 @@ public class PageBuffer {
         return (RecordPage) loadPage(tableId, pageId);
     }
 
-    public void insertRecord(BufferManager bufferManager, Table table, Object[] record) throws  StorageManagerException, IOException{
-        TreeSet<Integer> pagesOnDisk = DataManager.getPages(table.getId());
-        if (pagesOnDisk.isEmpty()) {
-            try {
-                RecordPage newRecordPage = (RecordPage) createPage(bufferManager,table);
-                addPage(newRecordPage);
-                pagesOnDisk.add(newRecordPage.getPageID());
-            } catch (IOException e) {
-                throw new StorageManagerException("");
-            }
+    public void insertRecord(Table table, Object[] record) throws  StorageManagerException, IOException{
+        // Code updated to check the table for pages.
+//        TreeSet<Integer> pagesOnDisk = DataManager.getPages(table.getId());
+//        if (pagesOnDisk.isEmpty()) {
+//            try {
+//                RecordPage newRecordPage = (RecordPage) createPage(bufferManager,table);
+//                addPage(newRecordPage);
+//                pagesOnDisk.add(newRecordPage.getPageID());
+//            } catch (IOException e) {
+//                throw new StorageManagerException("");
+//            }
+//        }
+//        insertRecord(table, pagesOnDisk, record);
+
+        // in this case no pages have been created or loaded into memory.
+        if(table.getHighestPage() == -1){
+            System.out.println("Highest page is -1.");
+            RecordPage newRecordPage = (RecordPage) createPage(table);
+            addPage(newRecordPage);
         }
-        insertRecord(table, pagesOnDisk, record);
+
+        TreeSet<Integer> pages = new TreeSet<>(table.getPages());
+        insertRecord(table, pages, record);
     }
 
     /**
@@ -119,12 +131,6 @@ public class PageBuffer {
         // right now it just inserts at first available spot
         RecordPage page = (RecordPage) searchPages(table, pageIds, record);
         System.out.println("Selected page: " + page.getPageID());
-
-        // we split if we are full.
-        if(!page.hasSpace()){
-            System.out.println("Splitting!");
-            page.splitPage();
-        }
 
         page.insertRecord(record);
     }
@@ -240,13 +246,9 @@ public class PageBuffer {
      * and loaded pageMap for now TODO: should this be stored in loaded page map
      *
      */
-    public Page createPage(BufferManager bufferManager, Table table) throws IOException {
+    public Page createPage(Table table) throws IOException {
+        Page page = new RecordPage(table, bufferManager, this);
 
-        // right now were just going to add pages like this
-
-        Page page = new RecordPage(table.getNewHighestPage(), table, bufferManager);
-
-        DataManager.savePage(page,table.getId());
         return page;
     }
 
@@ -256,6 +258,8 @@ public class PageBuffer {
     }
 
     public void writeOutPage(Page page) { // write out a page to disk and remove it from the buffer
+        // writing out a page to disk
+        page.save();
         removePage(page);
     }
 
