@@ -1,11 +1,13 @@
 package storagemanager.buffermanager.page;
 
 import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.pageManager.AgeTracker;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public abstract class Page<E> implements Serializable, Comparable<Page> {
 
@@ -13,6 +15,8 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     transient Table table;
     transient BufferManager bufferManager;
     transient PageBuffer pageBuffer;
+    transient AgeTracker<Page> pageAgeTracker;
+
     private final PageTypes pageType;
 
     int entries = 0;
@@ -44,6 +48,10 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         this.pageBuffer = pageBuffer;
     }
 
+    public void setPageAgeTracker(AgeTracker<Page> pageAgeTracker) {
+        this.pageAgeTracker = pageAgeTracker;
+    }
+
     public int getPageID() {
         return pageID;
     }
@@ -52,6 +60,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public int getEntriesCount() {
         return this.entries;
     }
+    public boolean isEmpty() {return this.entries == 0;}
 
     public PageTypes getPageType() {
         return pageType;
@@ -68,4 +77,15 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         return pageID - page.pageID;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Page)
+            return ((Page) obj).pageID == pageID && ((Page) obj).getTableID() == getTableID();
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pageID, this.getTableID());
+    }
 }

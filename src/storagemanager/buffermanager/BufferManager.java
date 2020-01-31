@@ -22,9 +22,9 @@ public class BufferManager {
     private PageBuffer pageBuffer;
     private Map<Integer, Table> tableMap;
 
-    public BufferManager(){
+    public BufferManager(int maxPages){
         tableMap = new HashMap<>();
-        pageBuffer = new PageBuffer(this);
+        pageBuffer = new PageBuffer(this, maxPages);
     }
 
     /**
