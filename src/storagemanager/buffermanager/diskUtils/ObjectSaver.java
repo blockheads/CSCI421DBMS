@@ -26,13 +26,11 @@ public abstract class ObjectSaver {
      * @param location the object to load
      * @return the object loaded or null if not found
      */
-    public static Object load(String location) {
+    public static Object load(String location) throws FileNotFoundException, IOException{
         Object obj = null;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(location))) {
             return stream.readObject();
-        } catch (FileNotFoundException | ClassNotFoundException e) {
-            System.out.println("File not found: " + location);
-        } catch (IOException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         return obj;

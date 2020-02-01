@@ -1,7 +1,5 @@
 package storagemanager.buffermanager;
 
-import storagemanager.buffermanager.page.Page;
-import storagemanager.buffermanager.page.RecordPage;
 import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.pageManager.PageBuffer;
@@ -23,12 +21,6 @@ public class BufferManager {
     private final Map<Integer, Table> tableMap;
     private final String dbLoc;
     private final int pageSize;
-
-    public BufferManager(){
-        tableMap = new HashMap<>();
-        dbLoc = "\\";
-        pageSize = 100;
-    }
 
     public BufferManager(String dbLoc, int maxPages, int pageSize){
         this.dbLoc = dbLoc;
@@ -84,7 +76,12 @@ public class BufferManager {
      * tihs function loads a table into memory
      */
     public Table loadTable(int id) {
-        Table table = DataManager.getTable(id);
+        Table table = null;
+        try {
+            table = DataManager.getTable(id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         tableMap.put(id,table);
         return table;
     }

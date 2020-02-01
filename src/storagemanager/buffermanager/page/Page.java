@@ -1,6 +1,7 @@
 package storagemanager.buffermanager.page;
 
 import storagemanager.buffermanager.BufferManager;
+import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.buffermanager.pageManager.AgeTracker;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 import storagemanager.buffermanager.Table;
@@ -12,7 +13,7 @@ import java.util.Objects;
 
 public abstract class Page<E> implements Serializable, Comparable<Page> {
 
-    transient int pageID;
+    final int pageID;
     transient Table table;
     transient BufferManager bufferManager;
     transient PageBuffer pageBuffer;
@@ -22,43 +23,75 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
 
     int entries = 0;
 
-    public Page(int pageID, Table table, BufferManager bufferManager, PageTypes pageType) {
-        this.pageID = pageID;
+    Page(Table table, PageTypes pageType) {
+        this.pageID = table.getNewHighestPage();
         this.table = table;
-        this.bufferManager = bufferManager;
         this.pageType = pageType;
-        // we are going to want to update our table every time a new page is created to track information
-        this.bufferManager.updateTable(table);
     }
 
-    public void setBufferManager(BufferManager bufferManager) {
+    public static Page loadPageFromDisk(Table table, PageTypes pageType, int pageID,
+                                        BufferManager bufferManager, PageBuffer pageBuffer) throws IOException {
+        Page loadedPage = DataManager.getPage(table.getId(), pageType, pageID);
+        loadedPage.setBufferManager(bufferManager);
+        loadedPage.setTable(table);
+        loadedPage.setPageBuffer(pageBuffer);
+        pageBuffer.addPageToPool(loadedPage);
+
+        return loadedPage;
+    }
+
+    public static Page createPage(Table table, PageTypes pageType,
+                                  BufferManager bufferManager, PageBuffer pageBuffer) {
+        Page newPage;
+        if (pageType.pageClass == RecordPage.class) {
+            newPage = createRecordPage(table);
+        } else {
+            newPage = createIndexPage(table);
+        }
+
+        newPage.setPageBuffer(pageBuffer);
+        newPage.setBufferManager(bufferManager);
+        newPage.bufferManager.updateTable(table);
+        pageBuffer.addPageToPool(newPage);
+
+        return newPage;
+    }
+
+    private static RecordPage createRecordPage(Table table) {
+        return new RecordPage(table);
+    }
+
+    private static IndexPage createIndexPage(Table table) {
+        return new IndexPage(table);
+    }
+
+    private void setBufferManager(BufferManager bufferManager) {
         this.bufferManager = bufferManager;
     }
-
-    public void setTable(Table table) {
+    private void setTable(Table table) {
         this.table = table;
     }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setPageID(int pageID) {
-        this.pageID = pageID;
-    }
-
-    public void setPageBuffer(PageBuffer pageBuffer) {
+    private void setPageBuffer(PageBuffer pageBuffer) {
         this.pageBuffer = pageBuffer;
     }
-
-    public void setPageAgeTracker(AgeTracker<Page> pageAgeTracker) {
+    private void setPageAgeTracker(AgeTracker<Page> pageAgeTracker) {
         this.pageAgeTracker = pageAgeTracker;
     }
+
+    /**
+     * Increases the pages 'age' value,
+     * a pages age determines if it should be removed from the page pool
+     * in accordance to LRU-DB principle the page with the lowest age is the least used
+     * and should be removed when the pool is full
+     */
     public void increaseAge() {
         Objects.requireNonNull(pageAgeTracker,"An age tracker is needed to increase object age");
         pageAgeTracker.ageIncrement();
     }
 
+    public Table getTable() {
+        return table;
+    }
     public int getPageID() {
         return pageID;
     }

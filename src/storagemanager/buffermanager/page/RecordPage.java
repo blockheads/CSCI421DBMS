@@ -29,12 +29,11 @@ public class RecordPage extends Page<Object[]> {
     // the amount of current records stored inside the page
     private int entries;
 
-    public RecordPage(Table table, BufferManager bufferManager, PageBuffer pageBuffer){
-        super(table.getNewHighestPage(), table, bufferManager, PageTypes.RECORD_PAGE);
+    RecordPage(Table table){
+        super(table, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
         this.records = new Object[table.getMaxRecords()][table.dataTypeCount()];
-        this.setPageBuffer(pageBuffer);
     }
 
     @Override
@@ -122,26 +121,21 @@ public class RecordPage extends Page<Object[]> {
      */
     public Page splitPage() {
         System.out.println("Page buffer: " + pageBuffer);
-        try {
-            RecordPage other = (RecordPage) pageBuffer.createPage(table);
+        RecordPage other = (RecordPage) Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
-            // split at n/2
-            int splitPoint = Math.floorDiv(entries, 2);
-            int j=0;
-            for(int i=splitPoint; i<entries; i++){
-                other.setRecord(this.records[i].clone(), j);
-                this.records[i] = null;
-                j++;
-            }
-            System.out.println("Our entries before splitting: " + entries);
-            other.setEntriesCount(splitPoint);
-            setEntriesCount(j);
-            System.out.println("Entries after: " + entries);
-            System.out.println("Other entries: " + other.getEntriesCount());
-            pageBuffer.addPage(other);
-        } catch (IOException e) {
-            e.printStackTrace();
+        // split at n/2
+        int splitPoint = Math.floorDiv(entries, 2);
+        int j=0;
+        for(int i=splitPoint; i<entries; i++){
+            other.setRecord(this.records[i].clone(), j);
+            this.records[i] = null;
+            j++;
         }
+        System.out.println("Our entries before splitting: " + entries);
+        other.setEntriesCount(splitPoint);
+        setEntriesCount(j);
+        System.out.println("Entries after: " + entries);
+        System.out.println("Other entries: " + other.getEntriesCount());
 
         return null;
     }

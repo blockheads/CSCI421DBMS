@@ -2,8 +2,10 @@ package storagemanager.buffermanager.diskUtils;
 
 import storagemanager.buffermanager.page.Page;
 import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.page.PageTypes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.TreeSet;
 
 public abstract class DataManager {
@@ -13,22 +15,24 @@ public abstract class DataManager {
      * I guess for now we can keep it simple with just some static helper methods
      */
 
+    public static String dbdmPath = "./";
 
-
-    public static Table getTable(int table){
-        return (Table)ObjectSaver.load(table + "\\tableData");
+    public static Table getTable(int table) throws IOException {
+        return (Table)ObjectSaver.load(dbdmPath + table + "\\tableData");
     }
 
-    public static Page getPage(int table, String page){
-        return (Page)ObjectSaver.load(table + "\\" + page);
+    public static Page getPage(int table, PageTypes pageTypes, int page) throws IOException {
+        return (Page)ObjectSaver.load(dbdmPath + table + "/" + pageTypes.relLoc + page);
     }
 
     public static void saveTable(Table table, int tableId){
-        ObjectSaver.save(table,tableId + "\\tabledata");
+        ObjectSaver.save(table,dbdmPath + tableId + "\\tabledata");
     }
 
     public static void savePage(Page page, int table){
-        ObjectSaver.save(page,table + "\\" + page.getPageID());
+        String superPath = dbdmPath + table + "/";
+        new File(superPath + page.getPageType().relLoc).mkdir();
+        ObjectSaver.save(page,superPath + page.getPageType().relLoc + page.getPageID());
     }
 
     /**
@@ -59,17 +63,4 @@ public abstract class DataManager {
         }
         return pageNames;
     }
-
-
-    public static void renamePage(int table, int previousId, int newId){
-        File file = new File(table + String.valueOf(previousId));
-        File newFile = new File(table + String.valueOf(newId));
-        System.out.println("Renamed page " + previousId + " to page " + newId);
-        if(file.renameTo(newFile)){
-            System.out.println("File rename success");;
-        }else{
-            System.out.println("File rename failed");
-        }
-    }
-
 }
