@@ -1,6 +1,5 @@
 package storagemanager.buffermanager.pageManager;
 
-import javafx.scene.control.Tab;
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.Page;
