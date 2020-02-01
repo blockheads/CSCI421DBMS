@@ -35,7 +35,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         loadedPage.setBufferManager(bufferManager);
         loadedPage.setTable(table);
         loadedPage.setPageBuffer(pageBuffer);
-        pageBuffer.addPageToPool(loadedPage);
+        loadedPage.setPageAgeTracker(pageBuffer.addPageToPool(loadedPage));
 
         return loadedPage;
     }
@@ -52,7 +52,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         newPage.setPageBuffer(pageBuffer);
         newPage.setBufferManager(bufferManager);
         newPage.bufferManager.updateTable(table);
-        pageBuffer.addPageToPool(newPage);
+        newPage.setPageAgeTracker(pageBuffer.addPageToPool(newPage));
 
         return newPage;
     }
