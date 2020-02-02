@@ -123,7 +123,7 @@ public class PageBuffer {
             RecordPage page = getRecordPage(table.getId(), pageId);
 
             if (page.getEntriesCount() == 0) {
-                smallestAvaliblePage = page;
+                return page;
             } else {
                 // Check if x is present at mid
                 int[] bounds = page.bounds(table, record);
