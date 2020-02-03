@@ -131,14 +131,22 @@ public class RecordPage extends Page<Object[]> {
     /**
      *
      */
-    public Page splitPage() {
+    public Page     splitPage() {
         System.out.println("Page buffer: " + pageBuffer);
         RecordPage other = (RecordPage) Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
         // split at n/2
         int splitPoint = Math.floorDiv(entries, 2);
         int j=0;
-        for(int i=splitPoint; i<entries; i++){
+
+        int startOffset = splitPoint;
+
+        // if we don't have a equal split we increment the start offset up one
+        if(entries-splitPoint != splitPoint){
+            startOffset+=1;
+        }
+
+        for(int i=startOffset; i<entries; i++){
             other.setRecord(this.records[i].clone(), j);
             this.records[i] = null;
             j++;
