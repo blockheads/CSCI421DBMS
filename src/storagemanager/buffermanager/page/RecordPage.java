@@ -33,7 +33,7 @@ public class RecordPage extends Page<Object[]> {
         super(table, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
-        this.records = new Object[table.getMaxRecords()][table.dataTypeCount()];
+        this.records = new Object[table.getMaxRecords()][];
     }
 
     @Override
@@ -55,9 +55,12 @@ public class RecordPage extends Page<Object[]> {
 
             // retrieve record at m
             // Check if record is present at mid
-            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
-            if(records[m][0] == null)
+            if(records[m] == null) {
+                System.out.println("Inserting in null spot, record exceeds every other records value");
                 break;
+            }
+
+            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
 
             int res = compareRecord(table,record,m);
 
@@ -71,6 +74,15 @@ public class RecordPage extends Page<Object[]> {
                 // If record is smaller, ignore right half
             else
                 r = m - 1;
+        }
+        // we need to compare our value to the value we are inserting on
+        //m = l;
+        // if we are greater than the record we are inserting over, and it is not null we are inbetewen two values
+        // and we are greater than the record we are inserting over, so we want to insert +1 more than where we are inserting
+        if(records[m] != null) {
+            int res = compareRecord(table,record,m);
+            if(res == 1)
+                m += 1;
         }
 
         System.out.println("We should insert at " + m);

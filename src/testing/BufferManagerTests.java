@@ -87,14 +87,16 @@ public class BufferManagerTests {
      */
     public static void testSplitting(BufferManager bufferManager) throws IOException {
         // casually writing 500 entries. rip console output
-
+        Random random = new Random();
         int expCount = 0;
         for(int i=500; i>0; i--){
-            System.out.println("Inserting " + i);
-            Object[] data = new Object[]{i, "a".toCharArray(), false, "123".toCharArray()};
+            int index = random.nextInt(500);
+            System.out.println("Inserting " + index);
+            Object[] data = new Object[]{index, "a".toCharArray(), false, "123".toCharArray()};
             try {
                 bufferManager.insertRecord(0,data);
             } catch (StorageManagerException e) {
+                //e.printStackTrace();
                 expCount += 1;
             }
         }
