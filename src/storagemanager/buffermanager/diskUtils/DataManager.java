@@ -32,7 +32,7 @@ public abstract class DataManager {
     public static void savePage(Page page, int table){
         String superPath = dbmsPath + table + File.separator;
         new File(superPath + page.getPageType().relLoc).mkdir();
-        ObjectSaver.save(page,superPath + page.getPageType().relLoc + page.getPageID());
+        ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID());
     }
 
     /**
