@@ -15,22 +15,22 @@ public abstract class DataManager {
      * I guess for now we can keep it simple with just some static helper methods
      */
 
-    public static String dbdmPath = "./";
+    public static String dbmsPath = "";
 
     public static Table getTable(int table) throws IOException {
-        return (Table)ObjectSaver.load(dbdmPath + table + "\\tableData");
+        return (Table)ObjectSaver.load(dbmsPath + table + File.separator + "tabledata");
     }
 
     public static Page getPage(int table, PageTypes pageTypes, int page) throws IOException {
-        return (Page)ObjectSaver.load(dbdmPath + table + "/" + pageTypes.relLoc + page);
+        return (Page)ObjectSaver.load(dbmsPath + table + File.separator + pageTypes.relLoc + File.separator + page);
     }
 
     public static void saveTable(Table table, int tableId){
-        ObjectSaver.save(table,dbdmPath + tableId + "\\tabledata");
+        ObjectSaver.save(table, dbmsPath + tableId + File.separator + "tabledata");
     }
 
     public static void savePage(Page page, int table){
-        String superPath = dbdmPath + table + "/";
+        String superPath = dbmsPath + table + File.separator;
         new File(superPath + page.getPageType().relLoc).mkdir();
         ObjectSaver.save(page,superPath + page.getPageType().relLoc + page.getPageID());
     }
