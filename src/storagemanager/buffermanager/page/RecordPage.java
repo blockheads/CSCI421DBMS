@@ -150,8 +150,8 @@ public class RecordPage extends Page<Object[]> {
             j++;
         }
         System.out.println("Our entries before splitting: " + entries);
-        other.setEntriesCount(splitPoint);
-        setEntriesCount(j);
+        other.entries = splitPoint;
+        this.entries = j;
         System.out.println("Entries after: " + entries);
         System.out.println("Other entries: " + other.getEntriesCount());
 
@@ -166,10 +166,6 @@ public class RecordPage extends Page<Object[]> {
     @Override
     public void save() {
         DataManager.savePage(this,table.getId());
-    }
-
-    public void setEntriesCount(int entries) {
-        this.entries = entries;
     }
 
     /**
