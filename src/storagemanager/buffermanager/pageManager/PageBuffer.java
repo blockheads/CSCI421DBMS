@@ -64,9 +64,9 @@ public class PageBuffer {
         }
 
         try {
-            return (RecordPage) Page.loadPageFromDisk(bufferManager.loadTable(tableId), PageTypes.RECORD_PAGE, pageId, bufferManager, this);
+            return (RecordPage) Page.loadPageFromDisk(bufferManager.getTable(tableId), PageTypes.RECORD_PAGE, pageId, bufferManager, this);
         } catch (FileNotFoundException e) {
-            return (RecordPage) Page.createPage(bufferManager.loadTable(tableId), PageTypes.RECORD_PAGE, bufferManager, this);
+            return (RecordPage) Page.createPage(bufferManager.getTable(tableId), PageTypes.RECORD_PAGE, bufferManager, this);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

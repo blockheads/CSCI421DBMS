@@ -277,4 +277,12 @@ public class RecordPage extends Page<Object[]> {
     public void setRecord(Object[] records, int index){
         this.records[index] = records;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getPageType()).append(":").append(pageID).append("\n");
+        builder.append("\t").append("Entries\\Max").append(": ").append(entries).append(" ").append(table.getMaxRecords());
+        return builder.toString();
+    }
 }

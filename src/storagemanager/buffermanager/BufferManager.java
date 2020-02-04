@@ -75,7 +75,7 @@ public class BufferManager {
     /**
      * tihs function loads a table into memory
      */
-    public Table loadTable(int id) {
+     private Table loadTable(int id) {
         Table table = null;
         try {
             table = DataManager.getTable(id);
@@ -87,14 +87,10 @@ public class BufferManager {
     }
 
     public Table getTable(int id) {
-        // for some reason get or default isn't working. I do not know why
-        // todo: figure out why
-        if(tableMap.containsKey(id)){
-            return tableMap.get(id);
+        if(tableMap.get(id) == null) {
+            return loadTable(id);
         }
-        else{
-            return tableMap.getOrDefault(id, loadTable(id));
-        }
+        return tableMap.get(id);
     }
 
     public Map<Integer, Table> getTableMap() {
