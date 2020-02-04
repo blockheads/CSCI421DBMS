@@ -8,6 +8,7 @@ import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class RecordPage extends Page<Object[]> {
@@ -25,9 +26,6 @@ public class RecordPage extends Page<Object[]> {
     public int getEntriesCount() {
         return entries;
     }
-
-    // the amount of current records stored inside the page
-    private int entries;
 
     RecordPage(Table table){
         super(table, PageTypes.RECORD_PAGE);
@@ -60,7 +58,7 @@ public class RecordPage extends Page<Object[]> {
                 break;
             }
 
-            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
+//            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
 
             int res = compareRecord(table,record,m);
 
@@ -95,7 +93,7 @@ public class RecordPage extends Page<Object[]> {
         for(int i=aboveIndex; i>=0; i--){
             int currentIndex = m+i;
             int newIndex = m+i+1;
-            System.out.println("Moving record " + currentIndex + " to index " + newIndex);
+//            System.out.println("Moving record " + currentIndex + " to index " + newIndex);
             records[newIndex] = records[currentIndex];
         }
 
