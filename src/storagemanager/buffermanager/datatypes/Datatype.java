@@ -5,6 +5,7 @@ import java.io.Serializable;
 public abstract class Datatype<E> implements Serializable {
 
     protected final ValidDataTypes type;
+    private int index;
 
     protected Datatype(ValidDataTypes type) {
         this.type = type;
@@ -25,6 +26,24 @@ public abstract class Datatype<E> implements Serializable {
         }
         return null;
     }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public int nextIndex() {
+        return index + type.sizeInBytes;
+    }
+
+    public abstract byte[] toByteArray(E attribute);
+
+    public abstract E toObject(byte[] attributes, int start);
+
+    public abstract boolean matches(Object obj);
 
     public String resolveToString(Object obj) {
         return resolveData(obj).toString();

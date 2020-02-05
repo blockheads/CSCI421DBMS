@@ -6,5 +6,6 @@ public class VarcharData extends CharData {
      */
     public VarcharData(int maxChars) {
         super(ValidDataTypes.VARCHAR, maxChars);
+        padding = '\0';
     }
 }

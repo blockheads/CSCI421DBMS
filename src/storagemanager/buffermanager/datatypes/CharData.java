@@ -1,11 +1,14 @@
 package storagemanager.buffermanager.datatypes;
 
+import java.nio.ByteBuffer;
+
 /**
  *
  */
 public class CharData extends Datatype<char[]>{
 
     int maxChars;
+    char padding = ' ';
 
     /**
      * @param maxChars The amount of chars this attr can hold
@@ -37,6 +40,38 @@ public class CharData extends Datatype<char[]>{
             }
         }
         return chars;
+    }
+
+    @Override
+    public byte[] toByteArray(char[] attribute) {
+        ByteBuffer b = ByteBuffer.allocate(getSize());
+        for (int i = 0; i < attribute.length; i++)
+            b.putChar(attribute[i]);
+        for (int i = attribute.length; i < maxChars; i++)
+            b.putChar(padding);
+        return b.array();
+    }
+
+    @Override
+    public char[] toObject(byte[] attributes, int start) {
+        ByteBuffer b = ByteBuffer.wrap(attributes, start, getSize() * maxChars);
+        return b.toString().toCharArray();
+    }
+
+    @Override
+    public boolean matches(Object obj) {
+        char[] chars;
+        try {
+            chars = (char[]) type.objectClass.cast(obj);
+        } catch (ClassCastException e) {
+            return false;
+        }
+        return chars.length <= maxChars;
+    }
+
+    @Override
+    public int nextIndex() {
+        return getIndex() + maxChars * type.sizeInBytes;
     }
 
     @Override

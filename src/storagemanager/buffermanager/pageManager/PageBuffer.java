@@ -81,8 +81,7 @@ public class PageBuffer {
             Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, this);
         }
 
-        TreeSet<Integer> pages = new TreeSet<>(table.getPages());
-        insertRecord(table, pages, record);
+        insertRecord(table, table.getPages(), record);
     }
 
     /**

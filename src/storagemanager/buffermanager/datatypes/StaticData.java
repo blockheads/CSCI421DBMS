@@ -14,4 +14,14 @@ public abstract class StaticData<E> extends Datatype<E> {
     public int getSize() {
         return type.sizeInBytes;
     }
+
+    @Override
+    public boolean matches(Object obj) {
+        try {
+            type.objectClass.cast(obj);
+        } catch (ClassCastException e) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -231,32 +231,6 @@ public class RecordPage extends Page<Object[]> {
 
             ret = table.compareDataTypes(keyIndex, obj, records[index][keyIndex]);
 
-            // this is a big if statement which basically just compares values depending on their underlying
-            // data type as a object, calling Java's built in compare
-//            if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.BOOLEAN)){
-//                Boolean firstVal = (Boolean)obj;
-//                Boolean secondVal = (Boolean)records[index][keyIndex];
-//                ret = firstVal.compareTo(secondVal);
-//            }
-//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.DOUBLE)){
-//                Double firstVal = (Double)obj;
-//                Double secondVal = (Double)records[index][keyIndex];
-//                ret = firstVal.compareTo(secondVal);
-//            }
-//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.INTEGER)){
-//                Integer firstVal = (Integer)obj;
-//                Integer secondVal = (Integer)records[index][keyIndex];
-//                ret = firstVal.compareTo(secondVal);
-//            }
-//            else if(table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.VARCHAR) ||
-//                    table.getDatatypes().get(keyIndex).getType().equals(ValidDataTypes.CHAR)){
-//                // casting to a string to compare, makes comparisons easier.
-//                String firstVal =  String.valueOf((char[])obj);
-//                String secondVal = String.valueOf((char[])records[index][keyIndex]);
-//
-//                ret = firstVal.compareTo(secondVal);
-//            }
-
            if(ret != 0) {
                // restricting this function to return -1 or 1
                if(ret >= 1)
