@@ -41,7 +41,7 @@ public abstract class DataManager {
      * @return a list of strings containing all the pages associated with a table
      */
     public static TreeSet<Integer> getPages(int id){
-        File file = new File(String.valueOf(id));
+        File file = new File(dbmsPath + String.valueOf(id) + File.separator + PageTypes.RECORD_PAGE.relLoc);
         File[] pageList = file.listFiles();
 
         TreeSet<Integer> pageNames = new TreeSet<>();
@@ -49,16 +49,14 @@ public abstract class DataManager {
             for(File pageFile: pageList){
                 // TODO: we can get rid of this check if we just add a prefix or sufix
                 // TODO: or some sort of identifier to a page.
-                if(!pageFile.getName().equals("tabledata")){
                     try{
-                        pageNames.add(Integer.parseInt( pageFile.getName() ));
-                    }
-                    catch (Exception e){
-                        // todo: handle exception extra file which is not a integer based file name inside
-                        // todo: the folder.
-                    }
-
+                    pageNames.add(Integer.parseInt( pageFile.getName() ));
                 }
+                catch (Exception e){
+                    // todo: handle exception extra file which is not a integer based file name inside
+                    // todo: the folder.
+                }
+
             }
         }
         return pageNames;
