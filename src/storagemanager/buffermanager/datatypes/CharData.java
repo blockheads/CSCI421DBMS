@@ -54,7 +54,7 @@ public class CharData extends Datatype<char[]>{
 
     @Override
     public char[] toObject(byte[] attributes, int start) {
-        ByteBuffer b = ByteBuffer.wrap(attributes, start, getSize() * maxChars);
+        ByteBuffer b = ByteBuffer.wrap(attributes, start, getSize());
         return b.toString().toCharArray();
     }
 

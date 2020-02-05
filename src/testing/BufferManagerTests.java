@@ -27,11 +27,11 @@ public class BufferManagerTests {
             e.printStackTrace();
         }
 
-        try {
-            testWritePage(bufferManager);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            testWritePage(bufferManager);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         // time for the money
         try {
@@ -90,7 +90,7 @@ public class BufferManagerTests {
         Random random = new Random();
         int expCount = 0;
         for(int i=500; i>0; i--){
-            int index = random.nextInt(500);
+            int index = i;// random.nextInt(500);
             System.out.println("Inserting " + index);
             Object[] data = new Object[]{index, "a".toCharArray(), false, "123".toCharArray()};
             try {

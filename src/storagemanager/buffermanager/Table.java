@@ -22,6 +22,7 @@ public class Table implements Serializable {
 
     private int recordSize = 0;
     private Integer[] keyIndices;
+    private Integer[] byteKeyIndices;
 
     private ArrayList<Datatype> datatypes = new ArrayList<>();
 
@@ -41,13 +42,19 @@ public class Table implements Serializable {
         for(String dataType: dataTypes){
             Datatype attribute = ValidDataTypes.resolveType(dataType);
             recordSize += attribute.getSize();
-            this.datatypes.add(attribute);
             if (this.datatypes.size() == 0) attribute.setIndex(0);
-            attribute.setIndex(this.datatypes.get(this.datatypes.size() - 1).nextIndex());
+            else attribute.setIndex(this.datatypes.get(this.datatypes.size() - 1).nextIndex());
+            this.datatypes.add(attribute);
         }
         // do some math here
 
         this.keyIndices = keyIndices;
+        this.byteKeyIndices = new Integer[keyIndices.length];
+        Integer[] indices = this.keyIndices;
+        for (int i = 0; i < indices.length; i++) {
+            Integer keyIndex = indices[i];
+            byteKeyIndices[i] = this.datatypes.get(keyIndex).getIndex();
+        }
         this.maxRecords = Math.floorDiv(4096, recordSize);
     }
 
@@ -58,11 +65,15 @@ public class Table implements Serializable {
     public int getNewHighestPage() {
         if (this.highestPage == null)
             this.highestPage = DataManager.getPages(id);
-        this.highestPage.add(this.highestPage.last() + 1);
+        this.highestPage.add(this.getHighestPage() + 1);
         return this.highestPage.last();
     }
 
     public int getHighestPage() {
+        if (highestPage == null)
+            highestPage = DataManager.getPages(id);
+        if (highestPage.isEmpty())
+            return -1;
         return highestPage.last();
     }
 
@@ -91,6 +102,10 @@ public class Table implements Serializable {
 
     public Integer[] getKeyIndices() {
         return keyIndices;
+    }
+
+    public Integer[] getByteKeyIndices() {
+        return byteKeyIndices;
     }
 
     public ArrayList<Datatype> getDatatypes() {
@@ -128,7 +143,7 @@ public class Table implements Serializable {
         return buffer.array();
     }
 
-    public Object resolveBytesAsObject(byte[] record) {
+    public Object[] resolveBytesAsObject(byte[] record) {
         Object[] Orecord = new Object[datatypes.size()];
         for (int i = 0; i < datatypes.size(); i++) {
             Datatype datatype = datatypes.get(i);

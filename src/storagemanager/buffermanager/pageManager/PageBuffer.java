@@ -88,11 +88,13 @@ public class PageBuffer {
      * Inserts a record into a page at appropriate spot
      */
     private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException, IOException {
-        // right now it just inserts at first available spot
-        RecordPage page = (RecordPage) searchPages(table, pageIds, record);
+        if(!table.validRecord(record)) {
+            throw new StorageManagerException("");
+        }
+        byte[] bRecord = table.resolveRecordAsBytes(record);
+        RecordPage page = searchPages(table, pageIds, bRecord);
         System.out.println("Selected page: " + page.getPageID());
-
-        page.insertRecord(record);
+        page.insertRecord(bRecord);
     }
 
     // empties all the loaded pages out into respective tables
@@ -106,7 +108,7 @@ public class PageBuffer {
     /**
      * This manages searching over pages to find the correct page using a binary search
      */
-    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record){
+    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, byte[] record){
 
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
