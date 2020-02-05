@@ -55,7 +55,11 @@ public class CharData extends Datatype<char[]>{
     @Override
     public char[] toObject(byte[] attributes, int start) {
         ByteBuffer b = ByteBuffer.wrap(attributes, start, getSize());
-        return b.toString().toCharArray();
+        char[] chars = new char[maxChars];
+        for (int i = 0, j = 0; i < maxChars; i++) {
+            chars[i] = b.getChar();
+        }
+        return chars;
     }
 
     @Override
@@ -76,7 +80,7 @@ public class CharData extends Datatype<char[]>{
 
     @Override
     public String resolveToString(Object obj) {
-        return String.valueOf(resolveData(obj));
+        return "'" + String.valueOf(resolveData(obj)) + "'";
     }
 
     public int getMaxChars() {

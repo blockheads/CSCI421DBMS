@@ -194,9 +194,10 @@ public class RecordPage extends Page<byte[]> {
         StringBuilder builder = new StringBuilder();
         ArrayList<Datatype> datatypes = table.getDatatypes();
         builder.append("{");
-        for (int i = 0; i < datatypes.size(); i++, builder.append(", ")) {
+        for (int i = 0; i < datatypes.size(); i++) {
             Datatype datatype = datatypes.get(i);
             builder.append(datatype.resolveToString(record[i]));
+            if (i + 1 < datatypes.size()) builder.append(", ");
         }
         builder.append("}");
         return builder.toString();
