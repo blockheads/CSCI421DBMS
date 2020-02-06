@@ -35,7 +35,7 @@ public class Table implements Serializable {
     // this is the max amount of records which can be stored inside of a table
     private int maxRecords;
 
-    public Table(int id, String[] dataTypes, Integer[] keyIndices) throws StorageManagerException {
+    public Table(int id, String[] dataTypes, Integer[] keyIndices, int pageSize) throws StorageManagerException {
         this.id = id;
 
         // calculates recordSize
@@ -55,7 +55,7 @@ public class Table implements Serializable {
             Integer keyIndex = indices[i];
             byteKeyIndices[i] = this.datatypes.get(keyIndex).getIndex();
         }
-        this.maxRecords = Math.floorDiv(4096, recordSize);
+        this.maxRecords = Math.floorDiv(pageSize, recordSize);
     }
 
     public int getMaxRecords() {

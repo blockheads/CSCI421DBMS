@@ -6,6 +6,8 @@ import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class StorageManager extends AStorageManager {
 
@@ -83,7 +85,7 @@ public class StorageManager extends AStorageManager {
             System.out.println("Failed to create table");
             return;
         }
-        Table table = new Table(id, dataTypes, keyIndices);
+        Table table = new Table(id, dataTypes, keyIndices, bufferManager.getPageSize());
 
         System.out.println(table);
         DataManager.saveTable(table,id);
@@ -101,7 +103,12 @@ public class StorageManager extends AStorageManager {
 
     @Override
     protected void restartDatabase(String dbLoc) throws StorageManagerException {
-
+        // try and path to the folder, if it doesn't exist error out.
+        if (!Files.exists(Paths.get(dbLoc))) {
+            throw new StorageManagerException("Invalid database path, attempting to restart in a directory that does" +
+                    "not exist!");
+        }
+        // we don't need to do anything when our database restarts
     }
 
     @Override

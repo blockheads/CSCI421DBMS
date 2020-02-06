@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 public abstract class DataManager {
+
     /**
      * The goal of this class is to keep track of things like file names
      * for both pages and tables.
@@ -16,9 +17,14 @@ public abstract class DataManager {
      */
 
     public static String dbmsPath = "";
+    public static final String tableObjName = "tabledata";
+
+    public static void setDbmsPath(String dbmsPath) {
+        DataManager.dbmsPath = dbmsPath;
+    }
 
     public static Table getTable(int table) throws IOException {
-        return (Table)ObjectSaver.load(dbmsPath + table + File.separator + "tabledata");
+        return (Table)ObjectSaver.load(dbmsPath + table + File.separator + tableObjName);
     }
 
     public static Page getPage(int table, PageTypes pageTypes, int page) throws IOException {
@@ -26,7 +32,7 @@ public abstract class DataManager {
     }
 
     public static void saveTable(Table table, int tableId){
-        ObjectSaver.save(table, dbmsPath + tableId + File.separator + "tabledata");
+        ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName);
     }
 
     public static void savePage(Page page, int table){

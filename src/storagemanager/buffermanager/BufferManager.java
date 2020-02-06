@@ -19,11 +19,10 @@ public class BufferManager {
      **/
     private PageBuffer pageBuffer;
     private final Map<Integer, Table> tableMap;
-    private final String dbLoc;
     private final int pageSize;
 
     public BufferManager(String dbLoc, int maxPages, int pageSize){
-        this.dbLoc = dbLoc;
+        DataManager.setDbmsPath(dbLoc);
         this.pageSize = pageSize;
         tableMap = new HashMap<>();
         pageBuffer = new PageBuffer(this, maxPages);
@@ -123,6 +122,10 @@ public class BufferManager {
 
     public void writeOutPage(){
 
+    }
+
+    public int getPageSize() {
+        return pageSize;
     }
 
     /**
