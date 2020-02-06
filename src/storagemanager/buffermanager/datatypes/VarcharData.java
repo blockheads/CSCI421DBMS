@@ -8,4 +8,9 @@ public class VarcharData extends CharData {
         super(ValidDataTypes.VARCHAR, maxChars);
         padding = '\0';
     }
+
+    @Override
+    public char[] resolveData(Object obj) {
+        return String.valueOf(super.resolveData(obj)).trim().toCharArray();
+    }
 }
