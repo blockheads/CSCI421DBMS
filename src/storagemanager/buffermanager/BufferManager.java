@@ -69,6 +69,13 @@ public class BufferManager {
         return record_pos;
     }
 
+
+    public void updateRecord(int tableId, Object[] record) throws StorageManagerException{
+        Table table = getTable(tableId);
+
+        pageBuffer.updateRecord(table, record);
+    }
+
     /**
      * deletes the record and moves all the records below up one
      */

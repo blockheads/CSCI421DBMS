@@ -75,6 +75,16 @@ public class PageBuffer {
         return null;
     }
 
+    public void updateRecord(Table table, Object[] record) throws StorageManagerException{
+
+        if(!table.validRecord(record)) {
+            throw new StorageManagerException(StorageManager.UPDATE_RECORD_INVALID_DATA);
+        }
+        RecordPage page = searchPages(table, table.getPages(), record);
+        System.out.println("Selected page: " + page.getPageID());
+        page.updateRecord(record);
+    }
+
     public void insertRecord(Table table, Object[] record) throws  StorageManagerException, IOException{
 
         // in this case no pages have been created or loaded into memory.

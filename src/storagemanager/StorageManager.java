@@ -15,6 +15,8 @@ public class StorageManager extends AStorageManager {
     public static final String INVALID_CHAR_BOUNDS = "the attribute %s requires a numerical boundary.";
     public static final String INSERT_RECORD_EXISTS_FORMAT = "the record %s already exists and cannot be inserted.";
     public static final String INSERT_RECORD_INVALID_DATA = "a record contains invalid data and cannot be inserted.";
+    public static final String UPDATE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be updated.";
+    public static final String UPDATE_RECORD_NOT_FOUND = "a record cannot be found and cannot be updated.";
 
     private BufferManager bufferManager;
 
@@ -56,7 +58,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void updateRecord(int table, Object[] record) throws StorageManagerException {
-
+        bufferManager.updateRecord(table, record);
     }
 
     @Override

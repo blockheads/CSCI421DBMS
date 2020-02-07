@@ -32,6 +32,19 @@ public class RecordPage extends Page<Object[]> {
         this.records = new Object[table.getMaxRecords()][];
     }
 
+
+    public void updateRecord(Object[] record) throws StorageManagerException {
+
+        int index = findRecord(getTable(),record);
+
+        if(index < 0)
+            throw new StorageManagerException(StorageManager.UPDATE_RECORD_NOT_FOUND);
+
+        // otherwise we just update it
+        records[index] = record;
+
+    }
+
     @Override
     public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
         // we split if we are full.
