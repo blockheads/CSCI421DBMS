@@ -9,7 +9,7 @@ import storagemanager.buffermanager.diskUtils.DataManager;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class RecordPage extends Page<byte[]> {
+public class RecordPage extends Page<Object[]> {
 
     /**
      * A page class, this stores our records and id ( does not need to be volatile talked to professor )
@@ -19,7 +19,7 @@ public class RecordPage extends Page<byte[]> {
 
     private static final long serialVersionUID = 2L;
 
-    private byte[][] records;
+    private Object[][] records;
 
     public int getEntriesCount() {
         return entries;
@@ -29,18 +29,18 @@ public class RecordPage extends Page<byte[]> {
         super(table, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
-        this.records = new byte[table.getMaxRecords()][];
+        this.records = new Object[table.getMaxRecords()][];
     }
 
     @Override
-    public boolean insertRecord(byte[] record) throws StorageManagerException, IOException {
+    public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
         // we split if we are full.
         if(!hasSpace()){
             System.out.println("Splitting!");
             splitPage();
 
-            bufferManager.insertRecord(getTableID(), table.resolveBytesAsObject(record));
-            return true;
+//            bufferManager.insertRecord(getTableID(), record);
+//            return insertRecord(record);
         }
 
 
@@ -62,7 +62,7 @@ public class RecordPage extends Page<byte[]> {
 
             // in this case the record already exists in the page
             if(res == 0)
-                throw new StorageManagerException(String.format(StorageManager.INSERT_RECORD_EXISTS_FORMAT, recordToString(table.resolveBytesAsObject(record))));
+                throw new StorageManagerException(String.format(StorageManager.INSERT_RECORD_EXISTS_FORMAT, recordToString(record)));
 
             // If record greater, ignore left half
             if (res == 1)
@@ -105,12 +105,12 @@ public class RecordPage extends Page<byte[]> {
     }
 
     @Override
-    public boolean deleteRecord(byte[] record) throws StorageManagerException {
+    public boolean deleteRecord(Object[] record) throws StorageManagerException {
         return true;
     }
 
     @Override
-    public boolean recordExists(byte[] record) {
+    public boolean recordExists(Object[] record) {
         return false;
     }
 
@@ -160,7 +160,7 @@ public class RecordPage extends Page<byte[]> {
     /**
      * find's a record within a page
      */
-    public int findRecord(Table table, byte[] record){
+    public int findRecord(Table table, Object[] record){
         // iterative binary search
         int l = 0, r = entries - 1;
         while (l <= r) {
@@ -187,7 +187,7 @@ public class RecordPage extends Page<byte[]> {
     /**
      * Get's the bounds of a page
      */
-    public int[] bounds(Table table, byte[] record) {
+    public int[] bounds(Table table, Object[] record) {
         return new int[]{compareRecord(table, record, 0), compareRecord(table, record, entries-1)};
     }
 
@@ -210,7 +210,7 @@ public class RecordPage extends Page<byte[]> {
      * -1: the record is less than the other record
      * 0: the record is equal to the other record
      */
-    private int compareRecord(Table table, byte[] record, int index) {
+    private int compareRecord(Table table, Object[] record, int index) {
 
         for(int i=0; i < table.getKeyIndices().length; i++){
 
@@ -218,7 +218,7 @@ public class RecordPage extends Page<byte[]> {
 
             int ret = 0;
 
-            ret = table.compareArrayRecords(keyIndex, record, records[index]);
+            ret = table.compareDataTypes(keyIndex, record[keyIndex], records[index][keyIndex]);
 
            if(ret != 0) {
                // restricting this function to return -1 or 1
@@ -237,7 +237,7 @@ public class RecordPage extends Page<byte[]> {
      * Sets a pages records to a passed in value at given index
      * @param records
      */
-    public void setRecord(byte[] records, int index) {
+    public void setRecord(Object[] records, int index) {
         this.records[index] = records;
     }
 
