@@ -127,12 +127,12 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void purgeBuffer() throws StorageManagerException {
-
+        bufferManager.shutDown();
     }
 
     @Override
     public void terminateDatabase() throws StorageManagerException {
-
+        purgeBuffer();
     }
 
     @Override
@@ -147,6 +147,6 @@ public class StorageManager extends AStorageManager {
 
     @Override
     protected void newDatabase(String dbLoc, int pageBufferSize, int pageSize) throws StorageManagerException {
-
+        // i don't think we do anything for this, we initialize in our constructor.
     }
 }
