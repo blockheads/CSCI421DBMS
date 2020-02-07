@@ -83,13 +83,6 @@ public class BufferManager {
     }
 
     /**
-     * deletes the record and moves all the records below up one
-     */
-    public void deleteRecord(){
-
-    }
-
-    /**
      * Updates a table after it has been modified in the table map
      */
     public void updateTable(Table table){
@@ -119,34 +112,6 @@ public class BufferManager {
 
     public Map<Integer, Table> getTableMap() {
         return tableMap;
-    }
-
-    /**
-     *
-     */
-    public void deletePage(){
-
-    }
-
-    /**
-     * take the bottom half of a page, create a new page and write the rest to that
-     * have to check over our values in our page map, check our current page
-     * if there's pages above our current page, update each +1
-     */
-    public void split(){
-
-    }
-
-    public void clear(){
-
-    }
-
-    public boolean isFull(){
-        return false;
-    }
-
-    public void writeOutPage(){
-
     }
 
     public int getPageSize() {
