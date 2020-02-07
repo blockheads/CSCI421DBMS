@@ -2,6 +2,7 @@ package storagemanager.buffermanager;
 
 import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.page.RecordPage;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.IOException;
@@ -52,9 +53,20 @@ public class BufferManager {
      * 3. tells us the page it is in.
      * How to find the correct page:
      *    binary-search on the pages, and go through the records of each page
+     *
+     *    returns the position of the record in the table
      */
-    public void getRecord(){
+    public int getRecord(Table table, byte[] key){
 
+        Table target_table = tableMap.get(table.getId());
+        //call getPages in dataManager
+        //call searchPages in pageBuffer to get the record page
+        RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), key);
+        int record_pos = record.findRecord(target_table, key);
+        if (record_pos < 0) {
+            System.out.println("Record does not exist");
+        }
+        return record_pos;
     }
 
     /**

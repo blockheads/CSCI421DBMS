@@ -62,6 +62,31 @@ public class StorageManager extends AStorageManager {
     @Override
     public void dropTable(int table) throws StorageManagerException {
 
+        //check to see if directory exists
+        //delete directory
+        try {
+            String current_dir = new File(".").getCanonicalPath();
+            String dir_to_delete = current_dir + String.valueOf(table);
+            deleteDir(new File(dir_to_delete));
+        }
+        catch (IOException e){
+            System.out.println("Current dir not found");
+        }
+
+    }
+    //helper method to get rid of directory holding pages for DropTable
+    private static boolean deleteDir(File file) {
+        if (file.isDirectory()) {
+            String[] children = file.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(file, children[i]));
+
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return file.delete();
     }
 
     @Override
