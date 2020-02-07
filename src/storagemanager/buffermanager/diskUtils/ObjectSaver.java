@@ -13,9 +13,15 @@ public abstract class ObjectSaver {
      * @param object the object to save
      * @param path   the file path
      */
-    public static void save(Object object, String path) {
-        try (ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(path))) {
+    public static void save(Object object, String path, boolean useMinPageSize) {
+        File file = new File(path);
+        try (ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(file)); RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             stream.writeObject(object);
+
+            if (useMinPageSize && file.length() < DataManager.getPageSize()) {
+                raf.setLength(DataManager.getPageSize());
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

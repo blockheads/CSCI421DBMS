@@ -16,7 +16,8 @@ public abstract class DataManager {
      * I guess for now we can keep it simple with just some static helper methods
      */
 
-    public static String dbmsPath = "db" + File.separator;
+    private static String dbmsPath = "db" + File.separator;
+    private static int pageSize = 4096;
     public static final String tableObjName = "tabledata";
 
     public static void setDbmsPath(String dbmsPath) {
@@ -25,6 +26,14 @@ public abstract class DataManager {
             dbmsPath += File.separator;
         DataManager.dbmsPath = dbmsPath + DataManager.dbmsPath;
         new File(DataManager.dbmsPath).mkdirs();
+    }
+
+    public static void setPageSize(int pageSize) {
+        DataManager.pageSize = pageSize;
+    }
+
+    public static int getPageSize() {
+        return pageSize;
     }
 
     public static Table getTable(int table) throws IOException {
@@ -36,7 +45,7 @@ public abstract class DataManager {
     }
 
     public static void saveTable(Table table, int tableId){
-        ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName);
+        ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName, true);
     }
 
     public static boolean createTableDirectory(int tableID) {
@@ -46,7 +55,7 @@ public abstract class DataManager {
     public static void savePage(Page page, int table){
         String superPath = dbmsPath + table + File.separator;
         new File(superPath + page.getPageType().relLoc).mkdir();
-        ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID());
+        ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID(), true);
     }
 
     /**
