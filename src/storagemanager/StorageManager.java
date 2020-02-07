@@ -65,7 +65,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void removeRecord(int table, Object[] keyValue) throws StorageManagerException {
-        bufferManager.removeRecord();
+        bufferManager.removeRecord(table,keyValue);
     }
 
     @Override
