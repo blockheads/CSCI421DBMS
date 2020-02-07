@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.datatypes;
 
+import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
 
 import java.util.Arrays;
@@ -11,11 +12,11 @@ import java.util.Comparator;
  * @author Nicholas Chieppa
  */
 public enum ValidDataTypes {
-    CHAR(2, char[].class, (o1, o2) -> {
-        return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
+    CHAR(2, String.class, (o1, o2) -> {
+        return o1.toUpperCase().compareTo(o2.toUpperCase());
     }),
-    VARCHAR(2, char[].class, (o1, o2) -> {
-        return Arrays.toString(o1).toUpperCase().compareTo(Arrays.toString(o2).toUpperCase());
+    VARCHAR(2, String.class, (o1, o2) -> {
+        return o1.toUpperCase().compareTo(o2.toUpperCase());
     }),
     INTEGER(4, Integer.class, Integer::compareTo),
     DOUBLE(8, Double.class, Double::compareTo),
@@ -39,7 +40,7 @@ public enum ValidDataTypes {
     public static Datatype resolveType(String string) throws StorageManagerException {
         String[] attribute = string.split("([()])");
         if (attribute.length == 3 && !attribute[2].equals("")) {
-            throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
+            throw new StorageManagerException(String.format(StorageManager.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
         }
         switch (attribute[0].toUpperCase()) {
             case "INTEGER":
@@ -52,16 +53,16 @@ public enum ValidDataTypes {
                 try {
                     return new VarcharData(Integer.parseInt(attribute[1]));
                 } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                    throw new StorageManagerException(String.format(StorageManager.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
                 }
             case "CHAR":
                 try {
                     return new CharData(Integer.parseInt(attribute[1]));
                 } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                    throw new StorageManagerException(String.format(StorageManager.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
                 }
         }
-        throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
+        throw new StorageManagerException(String.format(StorageManager.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
     }
 
 }

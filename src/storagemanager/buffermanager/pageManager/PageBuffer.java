@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.pageManager;
 
+import storagemanager.StorageManager;
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.Page;
@@ -89,12 +90,11 @@ public class PageBuffer {
      */
     private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException, IOException {
         if(!table.validRecord(record)) {
-            throw new StorageManagerException("");
+            throw new StorageManagerException(StorageManager.INSERT_RECORD_INVALID_DATA);
         }
-        byte[] bRecord = table.resolveRecordAsBytes(record);
-        RecordPage page = searchPages(table, pageIds, bRecord);
+        RecordPage page = searchPages(table, pageIds, record);
         System.out.println("Selected page: " + page.getPageID());
-        page.insertRecord(bRecord);
+        page.insertRecord(record);
     }
 
     // empties all the loaded pages out into respective tables
@@ -108,7 +108,7 @@ public class PageBuffer {
     /**
      * This manages searching over pages to find the correct page using a binary search
      */
-    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, byte[] record){
+    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record){
 
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.

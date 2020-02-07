@@ -10,7 +10,7 @@ public class VarcharData extends CharData {
     }
 
     @Override
-    public char[] resolveData(Object obj) {
-        return String.valueOf(super.resolveData(obj)).trim().toCharArray();
+    public String resolveData(Object obj) {
+        return String.valueOf(super.resolveData(obj)).trim();
     }
 }

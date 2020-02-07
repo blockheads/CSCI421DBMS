@@ -15,6 +15,9 @@ public class BufferManagerTests {
      * work...
      */
 
+
+
+
     public static void main(String... args) throws StorageManagerException {
         BufferManager bufferManager = new BufferManager("./",100,4096);
         // also testing some storage manager stuff
@@ -48,7 +51,7 @@ public class BufferManagerTests {
      * Basic method to create a table in a folder.
      */
     public static void testCreateTable(StorageManager storageManager) throws StorageManagerException {
-        storageManager.addTable(0, new String[]{"Integer", "varChar(3)", "boolean", "char(3)"}, new Integer[]{0, 2, 3});
+        storageManager.addTable(0, new String[]{"double", "varChar(3)", "boolean", "char(3)"}, new Integer[]{0, 2, 3});
     }
 
     /**
@@ -56,27 +59,27 @@ public class BufferManagerTests {
      */
     public static void testWritePage(BufferManager bufferManager) throws IOException {
         try {
-            bufferManager.insertRecord(0,new Object[]{0, new char[]{'t', 'e', 's', 't'}, true, "123".toCharArray()});
+            bufferManager.insertRecord(0,new Object[]{0, "test", true, "123"});
         } catch (StorageManagerException e) {
             e.printStackTrace();
         }
         try {
-            bufferManager.insertRecord(0,new Object[]{0, "test".toCharArray(), true, "124".toCharArray()});
+            bufferManager.insertRecord(0,new Object[]{0, "test", true, "124"});
         } catch (StorageManagerException e) {
             e.printStackTrace();
         }
         try {
-            bufferManager.insertRecord(0,new Object[]{2, "test".toCharArray(), false, "123".toCharArray()});
+            bufferManager.insertRecord(0,new Object[]{2, "test", false, "123"});
         } catch (StorageManagerException e) {
             e.printStackTrace();
         }
         try {
-            bufferManager.insertRecord(0,new Object[]{3, "test".toCharArray(), false, "123".toCharArray()});
+            bufferManager.insertRecord(0,new Object[]{3, "test", false, "123"});
         } catch (StorageManagerException e) {
             e.printStackTrace();
         }
         try {
-            bufferManager.insertRecord(0,new Object[]{0, "a".toCharArray(), false, "123".toCharArray()});
+            bufferManager.insertRecord(0,new Object[]{0, "a", false, "123"});
         } catch (StorageManagerException e) {
             e.printStackTrace();
         }
@@ -89,20 +92,23 @@ public class BufferManagerTests {
         // casually writing 500 entries. rip console output
         Random random = new Random();
         int expCount = 0;
+        int success = 0;
         for(int i=500; i>0; i--){
-            int index = i;// random.nextInt(500);
+            Double index = (double) i;// random.nextInt(500);
             System.out.println("Inserting " + index);
-            Object[] data = new Object[]{index, "a".toCharArray(), false, "123".toCharArray()};
+            Object[] data = new Object[]{index, "a", false, "12"};
             try {
                 bufferManager.insertRecord(0,data);
+                success ++;
+                System.out.println("success");
             } catch (StorageManagerException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
                 expCount += 1;
             }
         }
 
         System.err.println("Total failed inserts " + expCount);
-
+        System.err.println("Total inserts " + success);
     }
 
     /**
