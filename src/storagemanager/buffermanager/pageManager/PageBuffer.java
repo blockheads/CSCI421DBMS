@@ -81,8 +81,16 @@ public class PageBuffer {
             throw new StorageManagerException(StorageManager.UPDATE_RECORD_INVALID_DATA);
         }
         RecordPage page = searchPages(table, table.getPages(), record);
-        System.out.println("Selected page: " + page.getPageID());
         page.updateRecord(record);
+    }
+
+    public void removeRecord(Table table, Object[] keyValue) throws StorageManagerException{
+
+        if(!table.validRecord(keyValue)) {
+            throw new StorageManagerException(StorageManager.REMOVE_RECORD_INVALID_DATA);
+        }
+        RecordPage page = searchPages(table, table.getPages(), keyValue);
+        page.removeRecord(keyValue);
     }
 
     public void insertRecord(Table table, Object[] record) throws  StorageManagerException, IOException{

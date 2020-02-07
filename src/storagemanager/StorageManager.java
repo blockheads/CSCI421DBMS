@@ -17,6 +17,8 @@ public class StorageManager extends AStorageManager {
     public static final String INSERT_RECORD_INVALID_DATA = "a record contains invalid data and cannot be inserted.";
     public static final String UPDATE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be updated.";
     public static final String UPDATE_RECORD_NOT_FOUND = "a record cannot be found and cannot be updated.";
+    public static final String REMOVE_RECORD_NOT_FOUND = "a record cannot be found and cannot be removed.";
+    public static final String REMOVE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be  removed.";
 
     private BufferManager bufferManager;
 
@@ -63,7 +65,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void removeRecord(int table, Object[] keyValue) throws StorageManagerException {
-
+        bufferManager.removeRecord();
     }
 
     @Override

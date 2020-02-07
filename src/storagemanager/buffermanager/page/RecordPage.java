@@ -33,9 +33,21 @@ public class RecordPage extends Page<Object[]> {
     }
 
 
+    public void removeRecord(Object[] keyValue) throws StorageManagerException{
+
+        int index = findRecord(getTable(), keyValue);
+
+        if(index < 0)
+            throw new StorageManagerException(StorageManager.REMOVE_RECORD_NOT_FOUND);
+
+        // otherwise we remove it
+        records[index] = null;
+        entries--;
+    }
+
     public void updateRecord(Object[] record) throws StorageManagerException {
 
-        int index = findRecord(getTable(),record);
+        int index = findRecord(getTable(),table.getKeys(record));
 
         if(index < 0)
             throw new StorageManagerException(StorageManager.UPDATE_RECORD_NOT_FOUND);

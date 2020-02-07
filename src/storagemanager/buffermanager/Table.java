@@ -104,6 +104,23 @@ public class Table implements Serializable {
         return keyIndices;
     }
 
+    /**
+     * Takes in a record and returns only the part's of the object[] which contain
+     * key indices
+     * @param record
+     * @return
+     */
+    public Object[] getKeys(Object[] record){
+        Integer[] keyIndeces = getKeyIndices();
+        Object[] keys = new Object[keyIndeces.length];
+        int j=0;
+        for( int i: keyIndeces){
+            keys[j] = record[i];
+            j++;
+        }
+        return keys;
+    }
+
     public Integer[] getByteKeyIndices() {
         return byteKeyIndices;
     }
