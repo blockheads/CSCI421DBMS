@@ -16,11 +16,15 @@ public abstract class DataManager {
      * I guess for now we can keep it simple with just some static helper methods
      */
 
-    public static String dbmsPath = "";
+    public static String dbmsPath = "db" + File.separator;
     public static final String tableObjName = "tabledata";
 
     public static void setDbmsPath(String dbmsPath) {
-        DataManager.dbmsPath = dbmsPath;
+        dbmsPath = dbmsPath.replace("/", File.separator).replace("\\", File.separator);
+        if (dbmsPath.lastIndexOf(File.separator) != dbmsPath.length() - 1)
+            dbmsPath += File.separator;
+        DataManager.dbmsPath = dbmsPath + DataManager.dbmsPath;
+        new File(DataManager.dbmsPath).mkdirs();
     }
 
     public static Table getTable(int table) throws IOException {
@@ -33,6 +37,10 @@ public abstract class DataManager {
 
     public static void saveTable(Table table, int tableId){
         ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName);
+    }
+
+    public static boolean createTableDirectory(int tableID) {
+        return new File(dbmsPath + tableID).mkdir();
     }
 
     public static void savePage(Page page, int table){

@@ -146,7 +146,7 @@ public class PageBuffer {
             } else {
                 // Check if x is present at mid
                 int[] bounds = page.bounds(table, record);
-                System.out.println("Bounds for page " + pageId + ": (" + bounds[0] + "," + bounds[1] + ")");
+//                System.out.println("Bounds for page " + pageId + ": (" + bounds[0] + "," + bounds[1] + ")");
                 // if we are contained within the bounds of the page, or the first/last entries of the page are our
                 // entry, then this is most certainly our page
 

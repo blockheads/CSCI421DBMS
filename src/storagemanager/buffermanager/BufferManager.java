@@ -56,7 +56,7 @@ public class BufferManager {
      *
      *    returns the position of the record in the table
      */
-    public int getRecord(Table table, byte[] key){
+    public int getRecord(Table table, Object[] key){
 
         Table target_table = tableMap.get(table.getId());
         //call getPages in dataManager

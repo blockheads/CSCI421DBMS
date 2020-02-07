@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 
 public class StorageManager extends AStorageManager {
 
+    public static final String TABLE_EXISTS_EXCEPTION_FORMAT = "table %s cannot be created because it already exists";
     public static final String INVALID_TYPE_EXCEPTION_FORMAT = "%s is not a valid attribute type.";
     public static final String INVALID_CHAR_BOUNDS = "the attribute %s requires a numerical boundary.";
     public static final String INSERT_RECORD_EXISTS_FORMAT = "the record %s already exists and cannot be inserted.";
@@ -112,15 +113,10 @@ public class StorageManager extends AStorageManager {
     }
 
     public void addTable(int id, String[] dataTypes, Integer[] keyIndices) throws StorageManagerException{
-        if(new File(String.valueOf(id)).mkdir()){
-            System.out.println("Created directory");
-        }
-        else{
-            System.out.println("Failed to create table");
-            return;
-        }
-        Table table = new Table(id, dataTypes, keyIndices, bufferManager.getPageSize());
+        if(!DataManager.createTableDirectory(id))
+            throw new StorageManagerException(String.format(TABLE_EXISTS_EXCEPTION_FORMAT, id));
 
+        Table table = new Table(id, dataTypes, keyIndices, bufferManager.getPageSize());
         System.out.println(table);
         DataManager.saveTable(table,id);
     }
