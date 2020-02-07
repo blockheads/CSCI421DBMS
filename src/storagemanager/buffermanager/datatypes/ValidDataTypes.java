@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.datatypes;
 
+import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
 
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public enum ValidDataTypes {
     public static Datatype resolveType(String string) throws StorageManagerException {
         String[] attribute = string.split("([()])");
         if (attribute.length == 3 && !attribute[2].equals("")) {
-            throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
+            throw new StorageManagerException(String.format(StorageManager.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
         }
         switch (attribute[0].toUpperCase()) {
             case "INTEGER":
@@ -52,16 +53,16 @@ public enum ValidDataTypes {
                 try {
                     return new VarcharData(Integer.parseInt(attribute[1]));
                 } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                    throw new StorageManagerException(String.format(StorageManager.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
                 }
             case "CHAR":
                 try {
                     return new CharData(Integer.parseInt(attribute[1]));
                 } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                    throw new StorageManagerException(String.format(StorageManagerException.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
+                    throw new StorageManagerException(String.format(StorageManager.INVALID_CHAR_BOUNDS, attribute[0].toLowerCase()));
                 }
         }
-        throw new StorageManagerException(String.format(StorageManagerException.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
+        throw new StorageManagerException(String.format(StorageManager.INVALID_TYPE_EXCEPTION_FORMAT, string.toLowerCase()));
     }
 
 }

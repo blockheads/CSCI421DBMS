@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.pageManager;
 
+import storagemanager.StorageManager;
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.Page;
@@ -89,7 +90,7 @@ public class PageBuffer {
      */
     private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException, IOException {
         if(!table.validRecord(record)) {
-            throw new StorageManagerException("");
+            throw new StorageManagerException(StorageManager.INSERT_RECORD_INVALID_DATA);
         }
         byte[] bRecord = table.resolveRecordAsBytes(record);
         RecordPage page = searchPages(table, pageIds, bRecord);

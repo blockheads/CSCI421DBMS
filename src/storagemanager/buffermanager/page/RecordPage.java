@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.page;
 
+import storagemanager.StorageManager;
 import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
@@ -61,7 +62,7 @@ public class RecordPage extends Page<byte[]> {
 
             // in this case the record already exists in the page
             if(res == 0)
-                throw new StorageManagerException(String.format(StorageManagerException.INSERT_RECORD_EXISTS_FORMAT, recordToString(table.resolveBytesAsObject(record))));
+                throw new StorageManagerException(String.format(StorageManager.INSERT_RECORD_EXISTS_FORMAT, recordToString(table.resolveBytesAsObject(record))));
 
             // If record greater, ignore left half
             if (res == 1)
