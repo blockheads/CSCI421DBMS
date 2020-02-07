@@ -174,11 +174,17 @@ public class PageBuffer {
 
     public void destroyPage(Page page) { // delete a page from the system
         removePage(page);
+        page.delete();
     }
 
     public void writeOutPage(Page page) { // write out a page to disk and remove it from the buffer
         // writing out a page to disk
         page.save();
+        removePage(page);
+    }
+
+    public void removeFromPool(Page page, AgeTracker<Page> pageAgeTracker) {
+        pagePool.remove(pageAgeTracker);
         removePage(page);
     }
 

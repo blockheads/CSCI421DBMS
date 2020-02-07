@@ -58,6 +58,10 @@ public abstract class DataManager {
         ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID(), true);
     }
 
+    public static boolean deletePage(Page page) {
+        return new File(dbmsPath + page.getTableID() + File.separator + page.getPageType() + File.separator +  page.getPageID()).delete();
+    }
+
     /**
      * Function gets all the files given a specified tableId
      * @param id: THe table id

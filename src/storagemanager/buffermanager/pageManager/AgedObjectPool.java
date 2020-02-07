@@ -53,10 +53,13 @@ public class AgedObjectPool<E> {
         return newTrackedObject;
     }
 
+    /**
+     * Remove a page without telling anyone about it
+     * @param o the page
+     * @return page removed
+     */
     public boolean remove(AgeTracker<E> o) {
-        boolean removal = objects.remove(o);
-        if (removal) objectRemoval.push(o.getObject());
-        return removal;
+        return objects.remove(o);
     }
 
     public ArrayList<E> getObjects() {
