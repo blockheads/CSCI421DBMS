@@ -168,9 +168,14 @@ public class PageBuffer {
         if(candidates.size() == 0 && smallestAvaliblePage != null)
             return smallestAvaliblePage;
         for (RecordPage page: candidates) {
-            if (page.findRecord(table, record) != -1) return page;
+            if (page.findRecord(table, record) != -1)
+                return page;
         }
-        if (candidates.size() >= 1) return candidates.get(0);
+        if (candidates.size() >= 1) {
+            RecordPage lowest_candidate = candidates.get(0);
+            candidates.remove(0);
+            return lowest_candidate;
+        }
         return null;
 
     }
