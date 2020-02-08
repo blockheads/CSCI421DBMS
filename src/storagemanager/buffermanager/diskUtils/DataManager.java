@@ -7,6 +7,7 @@ import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.PageTypes;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.TreeSet;
 
@@ -31,10 +32,19 @@ public abstract class DataManager {
     public static void deleteDb (String dbmsPath) throws StorageManagerException {
         resolveDBPath(dbmsPath);
         try {
-            new File(dbmsPath).delete();
-        } catch (SecurityException e) {
+            delete(new File(dbmsPath));
+        } catch (SecurityException | IOException e) {
             throw new StorageManagerException(StorageManager.CANNOT_MAKE_NEW_DB);
         }
+    }
+
+    private static void delete(File f) throws IOException {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles())
+                delete(c);
+        }
+        if (!f.delete())
+            throw new FileNotFoundException("Failed to delete file: " + f);
     }
 
     private static void resolveDBPath(String dbmsPath) {
