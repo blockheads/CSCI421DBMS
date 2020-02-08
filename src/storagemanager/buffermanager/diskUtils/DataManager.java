@@ -38,7 +38,7 @@ public abstract class DataManager {
         }
     }
 
-    private static void delete(File f) throws IOException {
+    private static void delete(File f) throws IOException { // https://stackoverflow.com/questions/779519/delete-directories-recursively-in-java
         if (f.isDirectory()) {
             for (File c : f.listFiles())
                 delete(c);
