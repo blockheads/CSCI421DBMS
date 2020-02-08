@@ -1,7 +1,7 @@
 package storagemanager.buffermanager.pageManager;
 
-import util.Subject;
-import util.Subscriber;
+import storagemanager.util.Subject;
+import storagemanager.util.Subscriber;
 
 import java.util.Comparator;
 

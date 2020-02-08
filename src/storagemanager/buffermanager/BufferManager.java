@@ -61,10 +61,11 @@ public class BufferManager {
     public Object[] getRecord(int table, Object[] key) throws StorageManagerException {
 
         Table target_table = tableMap.get(table);
+        Object[] keyRecord = target_table.keyToRecord(key);
         //call getPages in dataManager
         //call searchPages in pageBuffer to get the record page
-        RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), key);
-        return record.getRecord(target_table, key);
+        RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), keyRecord);
+        return record.getRecord(target_table, keyRecord);
     }
 
 
@@ -76,7 +77,7 @@ public class BufferManager {
 
     public void removeRecord(int tableId, Object[] keyValue) throws StorageManagerException {
         Table table = getTable(tableId);
-        pageBuffer.removeRecord(table, keyValue);
+        pageBuffer.removeRecord(table, table.keyToRecord(keyValue));
     }
 
     public Object[][] getAllRecords(int tableID) throws StorageManagerException {

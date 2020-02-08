@@ -117,6 +117,16 @@ public class Table implements Serializable {
         return  recordKey;
     }
 
+    public Object[] keyToRecord(Object[] key) {
+        Object[] keyRecord = new Object[datatypes.size()];
+        int pos = 0;
+        for (Integer integer: keyIndices) {
+            keyRecord[integer] = key[pos++];
+        }
+        return  keyRecord;
+    }
+
+
     /**
      * Takes in a record and returns only the part's of the object[] which contain
      * key indices

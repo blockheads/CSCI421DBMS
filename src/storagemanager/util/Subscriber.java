@@ -1,4 +1,4 @@
-package util;
+package storagemanager.util;
 
 /**
  * A subscriber receives updates from 0 to many subjects

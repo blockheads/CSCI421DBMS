@@ -7,7 +7,7 @@ import storagemanager.buffermanager.page.Page;
 import storagemanager.buffermanager.page.PageTypes;
 import storagemanager.buffermanager.page.RecordPage;
 import storagemanager.StorageManagerException;
-import util.Subscriber;
+import storagemanager.util.Subscriber;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -89,7 +89,7 @@ public class PageBuffer {
         if(!table.validRecord(keyValue)) {
             throw new StorageManagerException(StorageManager.REMOVE_RECORD_INVALID_DATA);
         }
-        RecordPage page = searchPages(table, table.getPages(), keyValue);
+        RecordPage page = searchPages(table, table.getPages(), table.keyToRecord(keyValue));
         page.removeRecord(keyValue);
     }
 

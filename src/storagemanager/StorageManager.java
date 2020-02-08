@@ -118,7 +118,6 @@ public class StorageManager extends AStorageManager {
             throw new StorageManagerException(String.format(TABLE_EXISTS_EXCEPTION_FORMAT, id));
 
         Table table = new Table(id, dataTypes, keyIndices, bufferManager.getPageSize());
-        System.out.println(table);
         DataManager.saveTable(table,id);
     }
 

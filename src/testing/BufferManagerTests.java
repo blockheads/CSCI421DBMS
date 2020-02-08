@@ -100,7 +100,7 @@ public class BufferManagerTests {
             try {
                 bufferManager.insertRecord(0,data);
                 success ++;
-                System.out.println("success");
+//                System.out.println("success");
             } catch (StorageManagerException e) {
                 e.printStackTrace();
                 expCount += 1;
