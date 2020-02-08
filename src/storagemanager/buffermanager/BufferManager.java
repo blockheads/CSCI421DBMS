@@ -56,17 +56,13 @@ public class BufferManager {
      *
      *    returns the position of the record in the table
      */
-    public int getRecord(Table table, Object[] key){
+    public Object[] getRecord(int table, Object[] key){
 
-        Table target_table = tableMap.get(table.getId());
+        Table target_table = tableMap.get(table);
         //call getPages in dataManager
         //call searchPages in pageBuffer to get the record page
         RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), key);
-        int record_pos = record.findRecord(target_table, key);
-        if (record_pos < 0) {
-            System.out.println("Record does not exist");
-        }
-        return record_pos;
+        return record.getRecord(target_table, key);
     }
 
 
@@ -78,7 +74,6 @@ public class BufferManager {
 
     public void removeRecord(int tableId, Object[] keyValue) throws StorageManagerException {
         Table table = getTable(tableId);
-
         pageBuffer.removeRecord(table, keyValue);
     }
 

@@ -209,6 +209,16 @@ public class RecordPage extends Page<Object[]> {
         // not present
         return -1;
     }
+    /***
+     * getRecord uses the findRecord method to find the index then returns the object[]
+     */
+    public Object[] getRecord(Table table, Object[] record){
+        int index = findRecord(table, record);
+        return records[index];
+    }
+
+
+
     /**
      * Get's the bounds of a page
      */

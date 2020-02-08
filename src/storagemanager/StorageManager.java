@@ -3,6 +3,7 @@ package storagemanager;
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.diskUtils.DataManager;
+import storagemanager.buffermanager.pageManager.PageBuffer;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +47,7 @@ public class StorageManager extends AStorageManager {
     }
 
     @Override
-    public Object[] getRecord(int table, Object[] keyValue) throws StorageManagerException {
-        return new Object[0];
+    public Object[] getRecord(int table, Object[] keyValue) throws StorageManagerException { return bufferManager.getRecord(table, keyValue);
     }
 
     @Override
