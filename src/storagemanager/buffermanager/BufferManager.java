@@ -64,7 +64,7 @@ public class BufferManager {
         Object[] keyRecord = target_table.keyToRecord(key);
         //call getPages in dataManager
         //call searchPages in pageBuffer to get the record page
-        RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), keyRecord);
+        RecordPage  record = pageBuffer.searchPages(target_table, target_table.getPages(), keyRecord);
         return record.getRecord(target_table, keyRecord);
     }
 
@@ -98,6 +98,7 @@ public class BufferManager {
     }
 
     public void clearTable(int table) throws StorageManagerException {
+        pageBuffer.emptyTablePool(getTable(table));
         for(int pageID = 0; pageID <= getTable(table).getHighestPage(); pageID++) {
             DataManager.deletePage(table, pageID, PageTypes.RECORD_PAGE);
         }

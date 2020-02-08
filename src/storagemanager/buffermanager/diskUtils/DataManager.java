@@ -68,6 +68,18 @@ public abstract class DataManager {
         return (Table)ObjectSaver.load(dbmsPath + table + File.separator + tableObjName);
     }
 
+    public static boolean dropTable(int tableID) throws StorageManagerException {
+        try {
+            File path = new File(dbmsPath + tableID + File.separator);
+            if (path.exists())
+                delete(path);
+            else return false;
+        } catch (SecurityException | IOException e) {
+            throw new StorageManagerException(String.format(StorageManager.TABLE_DNE_FORMAT, tableID));
+        }
+        return true;
+    }
+
     public static Page getPage(int table, PageTypes pageTypes, int page) throws IOException {
         return (Page)ObjectSaver.load(dbmsPath + table + File.separator + pageTypes.relLoc + File.separator + page);
     }
@@ -94,12 +106,17 @@ public abstract class DataManager {
         }
     }
 
+    public static void incrementPage(int table, PageTypes pageType, int page) {
+        File file = new File(dbmsPath + table + File.separator + pageType.relLoc + File.separator + page);
+        file.renameTo(new File(dbmsPath + table + File.separator + pageType.relLoc + File.separator + (page + 1)));
+    }
+
     public static boolean deletePage(Page page) {
         return deletePage(page.getTableID(), page.getPageID(), page.getPageType());
     }
 
     public static boolean deletePage(int tableID, int pageID, PageTypes pageType) {
-        return new File(dbmsPath + tableID + File.separator + pageType + File.separator +  pageID).delete();
+        return new File(dbmsPath + tableID + File.separator + pageType.relLoc + File.separator +  pageID).delete();
     }
 
     /**

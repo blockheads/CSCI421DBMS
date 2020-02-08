@@ -26,8 +26,8 @@ public class RecordPage extends Page<Object[]> {
         return entries;
     }
 
-    RecordPage(Table table){
-        super(table, PageTypes.RECORD_PAGE);
+    RecordPage(Table table, int pageID){
+        super(table, pageID, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
         this.records = new Object[table.getMaxRecords()][];
     }
@@ -42,6 +42,13 @@ public class RecordPage extends Page<Object[]> {
 
         // otherwise we remove it
         records[index] = null;
+        for (int i = index; i < entries; i++) {
+            if (i + 1 == table.getMaxRecords()) {
+                records[i] = null;
+                break;
+            }
+            records[i] = records[i+1];
+        }
         entries--;
     }
 
@@ -62,6 +69,7 @@ public class RecordPage extends Page<Object[]> {
         // we split if we are full.
         if(!hasSpace()){
             splitPage();
+            pageBuffer.purge();
             bufferManager.insertRecord(table.getId(), record);
             return true;
         }
@@ -139,7 +147,7 @@ public class RecordPage extends Page<Object[]> {
      *
      */
     public Page splitPage() {
-        RecordPage other = (RecordPage) Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
+        RecordPage other = (RecordPage) Page.createPage(table, pageID + 1, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
         // split at n/2
         int splitPoint = Math.floorDiv(entries, 2);

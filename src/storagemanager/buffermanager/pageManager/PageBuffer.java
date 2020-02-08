@@ -52,17 +52,8 @@ public class PageBuffer {
      * @return
      */
     public RecordPage getRecordPage(int tableId, int pageId) throws  StorageManagerException{
-
-        if(this.pages.containsKey(tableId)){
-
-            // check if loaded in
-            for(Page page: this.pages.get(tableId).get(PageTypes.RECORD_PAGE)){
-                if(pageId == page.getPageID()){
-                    return (RecordPage) page;
-                }
-            }
-
-        }
+        Page page = isPageLoaded(tableId, PageTypes.RECORD_PAGE, pageId);
+        if (page != null) return (RecordPage) page;
 
         try {
             return (RecordPage) Page.loadPageFromDisk(bufferManager.getTable(tableId), PageTypes.RECORD_PAGE, pageId, bufferManager, this);
@@ -71,6 +62,18 @@ public class PageBuffer {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        return null;
+    }
+
+    public Page isPageLoaded(int tableId, PageTypes pageType, int pageId) {
+        if(this.pages.containsKey(tableId)){
+            // check if loaded in
+            for(Page page: this.pages.get(tableId).get(pageType)){
+                if(pageId == page.getPageID()){
+                    return (RecordPage) page;
+                }
+            }
         }
         return null;
     }
@@ -85,11 +88,10 @@ public class PageBuffer {
     }
 
     public void removeRecord(Table table, Object[] keyValue) throws StorageManagerException{
-
         if(!table.validRecord(keyValue)) {
             throw new StorageManagerException(StorageManager.REMOVE_RECORD_INVALID_DATA);
         }
-        RecordPage page = searchPages(table, table.getPages(), table.keyToRecord(keyValue));
+        RecordPage page = searchPages(table, table.getPages(), keyValue);
         page.removeRecord(keyValue);
     }
 
@@ -150,24 +152,21 @@ public class PageBuffer {
                 if ((bounds[0] == 1 && bounds[1] == -1) // bigger than first element and smaller than last element
                         || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
                         || (bounds[1] == 1 && pageIds.last() == pageId) // there is no page bigger than me, but im larger than the first element: this is my page
-                        || (bounds[0] == -1 && pageIds.first() == pageId)) // there is no page smaller than me, but im smaller than the first element: this is my page
+                        || (bounds[0] == -1 && bounds[1] == -1)) // there is no page smaller than me, but im smaller than the first element: this is my page
                     return page;
-                else if ((bounds[0] == bounds[1]) && bounds[0] == 1) {
-                    smallestAvaliblePage = page;
-                }
-
 
                 // otherwise we just continue to iterate...
             }
 
         }
-
-        if(smallestAvaliblePage != null)
-            return smallestAvaliblePage;
         return null;
-
     }
 
+    public void emptyTablePool(Table table) {
+        for (Page page: pages.get(table.getId()).get(PageTypes.RECORD_PAGE)) {
+            destroyPage(page);
+        }
+    }
 
     public void destroyPage(Page page) { // delete a page from the system
         removePage(page);

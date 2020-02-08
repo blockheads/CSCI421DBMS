@@ -83,13 +83,9 @@ public class StorageManager extends AStorageManager {
 
         //check to see if directory exists
         //delete directory
-        try {
-            String current_dir = new File(".").getCanonicalPath();
-            String dir_to_delete = current_dir + String.valueOf(table);
-            if(!deleteDir(new File(dir_to_delete))) throw new StorageManagerException(String.format(TABLE_DNE_FORMAT, table));
-        }
-        catch (IOException e){
-//            System.out.println("Current dir not found");
+
+        if (!DataManager.dropTable(table)) {
+            throw new StorageManagerException(String.format(TABLE_DNE_FORMAT, table));
         }
 
     }

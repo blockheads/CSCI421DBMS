@@ -84,6 +84,9 @@ public class Table implements Serializable {
     public void removePage(RecordPage page) {
         this.highestPage.remove(page.getPageID());
     }
+    public void setPages(TreeSet<Integer> pages) {
+        this.highestPage = pages;
+    }
 
     /**
      * Simply returns all the pages associated with this table, in this case it's a range from 0 to the
@@ -91,6 +94,7 @@ public class Table implements Serializable {
      * @return
      */
     public TreeSet<Integer> getPages(){
+        getHighestPage();
         return new TreeSet<>(highestPage);
     }
 

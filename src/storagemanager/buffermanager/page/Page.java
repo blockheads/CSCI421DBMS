@@ -7,13 +7,16 @@ import storagemanager.buffermanager.pageManager.PageBuffer;
 import storagemanager.buffermanager.Table;
 import storagemanager.StorageManagerException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.TreeSet;
 
 public abstract class Page<E> implements Serializable, Comparable<Page> {
 
-    final int pageID;
+    transient int pageID;
     transient Table table;
     transient BufferManager bufferManager;
     transient PageBuffer pageBuffer;
@@ -23,8 +26,8 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
 
     int entries = 0;
 
-    Page(Table table, PageTypes pageType) {
-        this.pageID = table.getNewHighestPage();
+    Page(Table table, int pageID, PageTypes pageType) {
+        this.pageID = pageID;
         this.table = table;
         this.pageType = pageType;
     }
@@ -32,6 +35,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public static Page loadPageFromDisk(Table table, PageTypes pageType, int pageID,
                                         BufferManager bufferManager, PageBuffer pageBuffer) throws IOException {
         Page loadedPage = DataManager.getPage(table.getId(), pageType, pageID);
+        loadedPage.pageID = pageID;
         loadedPage.setBufferManager(bufferManager);
         loadedPage.setTable(table);
         loadedPage.setPageBuffer(pageBuffer);
@@ -44,9 +48,9 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
                                   BufferManager bufferManager, PageBuffer pageBuffer) {
         Page newPage;
         if (pageType.pageClass == RecordPage.class) {
-            newPage = createRecordPage(table);
+            newPage = createRecordPage(table, table.getNewHighestPage());
         } else {
-            newPage = createIndexPage(table);
+            newPage = createIndexPage(table, table.getNewHighestPage());
         }
 
         newPage.setPageBuffer(pageBuffer);
@@ -57,12 +61,51 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         return newPage;
     }
 
-    private static RecordPage createRecordPage(Table table) {
-        return new RecordPage(table);
+    public static Page createPage(Table table, int pageIDOverride, PageTypes pageType,
+                                  BufferManager bufferManager, PageBuffer pageBuffer) {
+        Page newPage;
+        if (pageType.pageClass == RecordPage.class) {
+            newPage = createRecordPage(table, pageIDOverride);
+        } else {
+            newPage = createIndexPage(table, pageIDOverride);
+        }
+
+        for (Integer pageIDS: table.getPages().descendingSet()) {
+            if (pageIDS + 1 == pageIDOverride) break;
+            DataManager.incrementPage(table.getId(), pageType, pageIDS);
+            Page loadedPage = pageBuffer.isPageLoaded(table.getId(), PageTypes.RECORD_PAGE, pageIDS);
+            if (loadedPage != null) {
+                pageBuffer.removeFromPool(loadedPage, loadedPage.pageAgeTracker);
+                loadedPage.pageID ++;
+                loadedPage.setPageAgeTracker(pageBuffer.addPageToPool(loadedPage));
+            }
+        }
+
+        TreeSet<Integer> pageIDs = new TreeSet<>();
+        table.getPages().forEach(integer -> {
+            if (integer + 1 <= pageIDOverride)
+                pageIDs.add(integer);
+            else
+                pageIDs.add(integer + 1);
+        });
+        pageIDs.add(pageIDOverride);
+
+        table.setPages(pageIDs);
+
+        newPage.setPageBuffer(pageBuffer);
+        newPage.setBufferManager(bufferManager);
+        newPage.bufferManager.updateTable(table);
+        newPage.setPageAgeTracker(pageBuffer.addPageToPool(newPage));
+
+        return newPage;
     }
 
-    private static IndexPage createIndexPage(Table table) {
-        return new IndexPage(table);
+    private static RecordPage createRecordPage(Table table, int pageID) {
+        return new RecordPage(table, pageID);
+    }
+
+    private static IndexPage createIndexPage(Table table, int pageID) {
+        return new IndexPage(table, pageID);
     }
 
     private void setBufferManager(BufferManager bufferManager) {
