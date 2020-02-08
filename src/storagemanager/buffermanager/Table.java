@@ -77,6 +77,10 @@ public class Table implements Serializable {
         return highestPage.last();
     }
 
+    public void resetPages() {
+        highestPage = null;
+    }
+
     public void removePage(RecordPage page) {
         this.highestPage.remove(page.getPageID());
     }

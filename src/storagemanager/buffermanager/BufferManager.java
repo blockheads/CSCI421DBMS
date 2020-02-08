@@ -1,7 +1,9 @@
 package storagemanager.buffermanager;
 
+import storagemanager.StorageManager;
 import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.page.PageTypes;
 import storagemanager.buffermanager.page.RecordPage;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 
@@ -22,8 +24,7 @@ public class BufferManager {
     private final Map<Integer, Table> tableMap;
     private final int pageSize;
 
-    public BufferManager(String dbLoc, int maxPages, int pageSize){
-        DataManager.setDbmsPath(dbLoc);
+    public BufferManager(int maxPages, int pageSize){
         this.pageSize = pageSize;
         tableMap = new HashMap<>();
         pageBuffer = new PageBuffer(this, maxPages);
@@ -56,7 +57,7 @@ public class BufferManager {
      *
      *    returns the position of the record in the table
      */
-    public Object[] getRecord(int table, Object[] key){
+    public Object[] getRecord(int table, Object[] key) throws StorageManagerException {
 
         Table target_table = tableMap.get(table);
         //call getPages in dataManager
@@ -77,6 +78,13 @@ public class BufferManager {
         pageBuffer.removeRecord(table, keyValue);
     }
 
+    public void clearTable(int table) throws StorageManagerException {
+        for(int pageID = 0; pageID <= getTable(table).getHighestPage(); pageID++) {
+            DataManager.deletePage(table, pageID, PageTypes.RECORD_PAGE);
+        }
+        getTable(table).resetPages();
+    }
+
     /**
      * Updates a table after it has been modified in the table map
      */
@@ -86,19 +94,21 @@ public class BufferManager {
 
     /**
      * tihs function loads a table into memory
+     *
+     * @throws StorageManagerException table does not exist
      */
-     private Table loadTable(int id) {
+     private Table loadTable(int id) throws StorageManagerException{
         Table table = null;
         try {
             table = DataManager.getTable(id);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new StorageManagerException(String.format(StorageManager.TABLE_DNE_FORMAT, id));
         }
         tableMap.put(id,table);
         return table;
     }
 
-    public Table getTable(int id) {
+    public Table getTable(int id) throws StorageManagerException {
         if(tableMap.get(id) == null) {
             return loadTable(id);
         }
@@ -116,7 +126,7 @@ public class BufferManager {
     /**
      * Functions to execute when the program is shut down
      */
-    public void shutDown(){
+    public void shutDown() throws StorageManagerException {
         pageBuffer.purge();
         // need to write out our tables as well
         for(Table table: tableMap.values()){

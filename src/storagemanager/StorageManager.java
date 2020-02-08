@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 public class StorageManager extends AStorageManager {
 
     public static final String TABLE_EXISTS_EXCEPTION_FORMAT = "table %s cannot be created because it already exists";
+    public static final String TABLE_DNE_FORMAT = "table %s cannot be loaded because it does not exist or cannot be found";
     public static final String INVALID_TYPE_EXCEPTION_FORMAT = "%s is not a valid attribute type.";
     public static final String INVALID_CHAR_BOUNDS = "the attribute %s requires a numerical boundary.";
     public static final String INSERT_RECORD_EXISTS_FORMAT = "the record %s already exists and cannot be inserted.";
@@ -21,6 +22,11 @@ public class StorageManager extends AStorageManager {
     public static final String UPDATE_RECORD_NOT_FOUND = "a record cannot be found and cannot be updated.";
     public static final String REMOVE_RECORD_NOT_FOUND = "a record cannot be found and cannot be removed.";
     public static final String REMOVE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be  removed.";
+    public static final String CANNOT_SAVE_DATA = "Data failed to be saved to disk.";
+    public static final String CANNOT_MAKE_NEW_DB = "A new database cannot be created";
+    public static final String CANNOT_LOAD_DATA = "Data failed to be loaded from disk.";
+    public static final String CANNOT_LOAD_FILE = "File %s failed to be loaded from disk.";
+
 
     private BufferManager bufferManager;
 
@@ -39,7 +45,8 @@ public class StorageManager extends AStorageManager {
     public StorageManager(String dbLoc, int pageBufferSize, int pageSize, boolean restart) throws StorageManagerException {
         super(dbLoc, pageBufferSize, pageSize, restart);
         DataManager.setPageSize(pageSize);
-        bufferManager = new BufferManager(dbLoc, pageBufferSize, pageSize);
+        DataManager.setDbmsPath(dbLoc);
+        bufferManager = new BufferManager(pageBufferSize, pageSize);
     }
 
     @Override
@@ -78,7 +85,7 @@ public class StorageManager extends AStorageManager {
         try {
             String current_dir = new File(".").getCanonicalPath();
             String dir_to_delete = current_dir + String.valueOf(table);
-            deleteDir(new File(dir_to_delete));
+            if(!deleteDir(new File(dir_to_delete))) throw new StorageManagerException(String.format(TABLE_DNE_FORMAT, table));
         }
         catch (IOException e){
             System.out.println("Current dir not found");
@@ -102,15 +109,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void clearTable(int table) throws StorageManagerException {
-
-    }
-
-    /**
-     * clear out all files in database folder
-     * use File.delete() to delete directory
-     */
-    public void NewDatabase(){
-
+        bufferManager.clearTable(table);
     }
 
     public void addTable(int id, String[] dataTypes, Integer[] keyIndices) throws StorageManagerException{
@@ -144,6 +143,8 @@ public class StorageManager extends AStorageManager {
 
     @Override
     protected void newDatabase(String dbLoc, int pageBufferSize, int pageSize) throws StorageManagerException {
-        // i don't think we do anything for this, we initialize in our constructor.
+        if(!DataManager.deleteDb(dbLoc)) {
+            throw new StorageManagerException(CANNOT_MAKE_NEW_DB);
+        }
     }
 }

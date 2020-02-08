@@ -115,7 +115,7 @@ public class BufferManagerTests {
      * Simple test to see how the program handles shutting down
      * @param bufferManager
      */
-    public static void testShutDown(BufferManager bufferManager){
+    public static void testShutDown(BufferManager bufferManager) throws StorageManagerException {
         bufferManager.shutDown();
     }
 }

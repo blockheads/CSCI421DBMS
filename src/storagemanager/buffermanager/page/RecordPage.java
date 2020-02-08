@@ -168,7 +168,7 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
-    public void save() {
+    public void save() throws StorageManagerException {
         DataManager.savePage(this,table.getId());
     }
 

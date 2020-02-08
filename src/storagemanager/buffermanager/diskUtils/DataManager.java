@@ -1,5 +1,7 @@
 package storagemanager.buffermanager.diskUtils;
 
+import storagemanager.StorageManager;
+import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.page.Page;
 import storagemanager.buffermanager.Table;
 import storagemanager.buffermanager.page.PageTypes;
@@ -16,16 +18,26 @@ public abstract class DataManager {
      * I guess for now we can keep it simple with just some static helper methods
      */
 
-    private static String dbmsPath = "db" + File.separator;
+    private static final String extraPath = "db" + File.separator;
+    private static String dbmsPath = "";
     private static int pageSize = 4096;
     public static final String tableObjName = "tabledata";
 
     public static void setDbmsPath(String dbmsPath) {
+        resolveDBPath(dbmsPath);
+        new File(DataManager.dbmsPath).mkdirs();
+    }
+
+    public static boolean deleteDb (String dbmsPath) {
+        resolveDBPath(dbmsPath);
+        return new File(dbmsPath).delete();
+    }
+
+    private static void resolveDBPath(String dbmsPath) {
         dbmsPath = dbmsPath.replace("/", File.separator).replace("\\", File.separator);
         if (dbmsPath.lastIndexOf(File.separator) != dbmsPath.length() - 1)
             dbmsPath += File.separator;
-        DataManager.dbmsPath = dbmsPath + DataManager.dbmsPath;
-        new File(DataManager.dbmsPath).mkdirs();
+        DataManager.dbmsPath = dbmsPath + DataManager.extraPath;
     }
 
     public static void setPageSize(int pageSize) {
@@ -44,22 +56,34 @@ public abstract class DataManager {
         return (Page)ObjectSaver.load(dbmsPath + table + File.separator + pageTypes.relLoc + File.separator + page);
     }
 
-    public static void saveTable(Table table, int tableId){
-        ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName, true);
+    public static void saveTable(Table table, int tableId) throws StorageManagerException {
+        try {
+            ObjectSaver.save(table, dbmsPath + tableId + File.separator + tableObjName, true);
+        } catch (IOException e) {
+            throw new StorageManagerException(StorageManager.CANNOT_SAVE_DATA);
+        }
     }
 
     public static boolean createTableDirectory(int tableID) {
         return new File(dbmsPath + tableID).mkdir();
     }
 
-    public static void savePage(Page page, int table){
+    public static void savePage(Page page, int table) throws StorageManagerException {
         String superPath = dbmsPath + table + File.separator;
         new File(superPath + page.getPageType().relLoc).mkdir();
-        ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID(), true);
+        try {
+            ObjectSaver.save(page,superPath + page.getPageType().relLoc + File.separator + page.getPageID(), true);
+        } catch (IOException e) {
+            throw new StorageManagerException(StorageManager.CANNOT_SAVE_DATA);
+        }
     }
 
     public static boolean deletePage(Page page) {
-        return new File(dbmsPath + page.getTableID() + File.separator + page.getPageType() + File.separator +  page.getPageID()).delete();
+        return deletePage(page.getTableID(), page.getPageID(), page.getPageType());
+    }
+
+    public static boolean deletePage(int tableID, int pageID, PageTypes pageType) {
+        return new File(dbmsPath + tableID + File.separator + pageType + File.separator +  pageID).delete();
     }
 
     /**

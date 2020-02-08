@@ -116,7 +116,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     /**
      * Writes out a page from memory into a hard coded location on disk
      */
-    public abstract void save();
+    public abstract void save() throws StorageManagerException;
 
     public void delete() {
         if (this instanceof RecordPage)

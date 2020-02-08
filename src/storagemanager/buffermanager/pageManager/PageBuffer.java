@@ -51,7 +51,7 @@ public class PageBuffer {
      * Retrieves a page, returns from  the tree-set if it's already in memory
      * @return
      */
-    public RecordPage getRecordPage(int tableId, int pageId){
+    public RecordPage getRecordPage(int tableId, int pageId) throws  StorageManagerException{
 
         if(this.pages.containsKey(tableId)){
 
@@ -111,12 +111,11 @@ public class PageBuffer {
             throw new StorageManagerException(StorageManager.INSERT_RECORD_INVALID_DATA);
         }
         RecordPage page = searchPages(table, pageIds, record);
-        System.out.println("Selected page: " + page.getPageID());
         page.insertRecord(record);
     }
 
     // empties all the loaded pages out into respective tables
-    public void purge(){
+    public void purge() throws StorageManagerException {
         for (Page page: pagePool.getObjects())
             page.save();
         pagePool.reset();
@@ -126,7 +125,7 @@ public class PageBuffer {
     /**
      * This manages searching over pages to find the correct page using a binary search
      */
-    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record){
+    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException{
 
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
@@ -179,7 +178,11 @@ public class PageBuffer {
 
     public void writeOutPage(Page page) { // write out a page to disk and remove it from the buffer
         // writing out a page to disk
-        page.save();
+        try {
+            page.save();
+        } catch (StorageManagerException e) {
+            e.printStackTrace();
+        }
         removePage(page);
     }
 
