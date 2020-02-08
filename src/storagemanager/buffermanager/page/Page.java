@@ -75,9 +75,9 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
             DataManager.incrementPage(table.getId(), pageType, pageIDS);
             Page loadedPage = pageBuffer.isPageLoaded(table.getId(), PageTypes.RECORD_PAGE, pageIDS);
             if (loadedPage != null) {
-                pageBuffer.removeFromPool(loadedPage, loadedPage.pageAgeTracker);
+//                pageBuffer.removeFromPool(loadedPage, loadedPage.pageAgeTracker);
                 loadedPage.pageID ++;
-                loadedPage.setPageAgeTracker(pageBuffer.addPageToPool(loadedPage));
+//                loadedPage.setPageAgeTracker(pageBuffer.addPageToPool(loadedPage));
             }
         }
 

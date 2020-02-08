@@ -32,6 +32,12 @@ public class AgedObjectPool<E> {
     }
 
     private E add(AgeTracker<E> o) {
+        for (AgeTracker<E> obj: objects) {
+            if (obj.getObject().equals(o.getObject())) {
+                obj.ageIncrement();
+                return null;
+            }
+        }
         objects.add(o);
         if (objects.size() > maxSize) {
             E removed = objects.remove(0).getObject();
