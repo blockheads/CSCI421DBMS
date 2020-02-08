@@ -28,7 +28,7 @@ public class RecordPage extends Page<Object[]> {
     RecordPage(Table table){
         super(table, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
-        System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
+//        System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
         this.records = new Object[table.getMaxRecords()][];
     }
 
@@ -61,11 +61,7 @@ public class RecordPage extends Page<Object[]> {
     public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
         // we split if we are full.
         if(!hasSpace()){
-            System.out.println("Splitting!");
             splitPage();
-
-//            bufferManager.insertRecord(getTableID(), record);
-//            return insertRecord(record);
         }
 
 
@@ -77,7 +73,6 @@ public class RecordPage extends Page<Object[]> {
             // retrieve record at m
             // Check if record is present at mid
             if(records[m] == null) {
-                System.out.println("Inserting in null spot, record exceeds every other records value");
                 break;
             }
 
@@ -106,13 +101,11 @@ public class RecordPage extends Page<Object[]> {
                 m += 1;
         }
 
-        System.out.println("We should insert at " + m);
         // if we reach here, then element was
         // not present
 
         // this gives us all the entries above m
         int aboveIndex = entries-(m+1);
-        System.out.println("Above: " + aboveIndex);
         for(int i=aboveIndex; i>=0; i--){
             int currentIndex = m+i;
             int newIndex = m+i+1;
@@ -122,10 +115,10 @@ public class RecordPage extends Page<Object[]> {
 
         records[m] = record;
         entries++;
-        System.out.println("Entries: " + entries);
+//        System.out.println("Entries: " + entries);
         // just for nice testing output
         int remaining = records.length-entries;
-        System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
+//        System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
         return true;
     }
 
@@ -144,7 +137,6 @@ public class RecordPage extends Page<Object[]> {
      *
      */
     public Page splitPage() {
-        System.out.println("Page buffer: " + pageBuffer);
         RecordPage other = (RecordPage) Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
         // split at n/2
@@ -163,11 +155,9 @@ public class RecordPage extends Page<Object[]> {
             this.records[i] = null;
             j++;
         }
-        System.out.println("Our entries before splitting: " + entries);
+
         other.entries = splitPoint;
-        this.entries = j;
-        System.out.println("Entries after: " + entries);
-        System.out.println("Other entries: " + other.getEntriesCount());
+        this.entries = j + ((table.getMaxRecords() % 2 == 0)?0:1);
 
         return null;
     }

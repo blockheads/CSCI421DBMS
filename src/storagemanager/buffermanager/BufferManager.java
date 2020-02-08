@@ -64,7 +64,7 @@ public class BufferManager {
         RecordPage  record = pageBuffer.searchPages(target_table, DataManager.getPages(target_table.getId()), key);
         int record_pos = record.findRecord(target_table, key);
         if (record_pos < 0) {
-            System.out.println("Record does not exist");
+//            System.out.println("Record does not exist");
         }
         return record_pos;
     }
