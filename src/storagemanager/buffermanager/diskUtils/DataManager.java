@@ -32,7 +32,9 @@ public abstract class DataManager {
     public static void deleteDb (String dbmsPath) throws StorageManagerException {
         resolveDBPath(dbmsPath);
         try {
-            delete(new File(dbmsPath));
+            File path = new File(dbmsPath);
+            if (path.exists())
+                delete(new File(dbmsPath));
         } catch (SecurityException | IOException e) {
             throw new StorageManagerException(StorageManager.CANNOT_MAKE_NEW_DB);
         }
