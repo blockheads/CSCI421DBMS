@@ -47,7 +47,7 @@ public class RecordPage extends Page<Object[]> {
 
     public void updateRecord(Object[] record) throws StorageManagerException {
 
-        int index = findRecord(getTable(),table.getKeys(record));
+        int index = findRecord(getTable(), record);
 
         if(index < 0)
             throw new StorageManagerException(StorageManager.UPDATE_RECORD_NOT_FOUND);
@@ -62,6 +62,8 @@ public class RecordPage extends Page<Object[]> {
         // we split if we are full.
         if(!hasSpace()){
             splitPage();
+            bufferManager.insertRecord(table.getId(), record);
+            return true;
         }
 
 

@@ -120,6 +120,7 @@ public class Phase1Tester {
         try {
             sm.insertRecord(1, new Object[]{500, "Duplicate key", 37.73, false});
             System.err.println("Inserted a record with duplicate key");
+            sm.insertRecord(1, new Object[]{500, "Duplicate key", 37.73, false});
             System.exit(1);
         } catch (StorageManagerException e) {}
 

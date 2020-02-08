@@ -126,8 +126,6 @@ public class PageBuffer {
      * This manages searching over pages to find the correct page using a binary search
      */
     public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException{
-
-        ArrayList<RecordPage> candidates = new ArrayList<>();
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
             return null;
@@ -142,11 +140,10 @@ public class PageBuffer {
             RecordPage page = getRecordPage(table.getId(), pageId);
 
             if (page.getEntriesCount() == 0) {
-                candidates.add(page);
+                return page;
             } else {
                 // Check if x is present at mid
                 int[] bounds = page.bounds(table, record);
-//                System.out.println("Bounds for page " + pageId + ": (" + bounds[0] + "," + bounds[1] + ")");
                 // if we are contained within the bounds of the page, or the first/last entries of the page are our
                 // entry, then this is most certainly our page
 
@@ -154,7 +151,7 @@ public class PageBuffer {
                         || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
                         || (bounds[1] == 1 && pageIds.last() == pageId) // there is no page bigger than me, but im larger than the first element: this is my page
                         || (bounds[0] == -1 && pageIds.first() == pageId)) // there is no page smaller than me, but im smaller than the first element: this is my page
-                    candidates.add(page);
+                    return page;
                 else if ((bounds[0] == bounds[1]) && bounds[0] == 1) {
                     smallestAvaliblePage = page;
                 }
@@ -165,17 +162,8 @@ public class PageBuffer {
 
         }
 
-        if(candidates.size() == 0 && smallestAvaliblePage != null)
+        if(smallestAvaliblePage != null)
             return smallestAvaliblePage;
-        for (RecordPage page: candidates) {
-            if (page.findRecord(table, record) != -1)
-                return page;
-        }
-        if (candidates.size() >= 1) {
-            RecordPage lowest_candidate = candidates.get(0);
-            candidates.remove(0);
-            return lowest_candidate;
-        }
         return null;
 
     }
