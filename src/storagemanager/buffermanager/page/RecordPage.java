@@ -8,6 +8,7 @@ import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RecordPage extends Page<Object[]> {
 
@@ -28,7 +29,6 @@ public class RecordPage extends Page<Object[]> {
     RecordPage(Table table){
         super(table, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
-//        System.out.println("created new page with maxRecords: " + table.getMaxRecords() + " and record size: " + table.getRecordSize());
         this.records = new Object[table.getMaxRecords()][];
     }
 
@@ -202,12 +202,15 @@ public class RecordPage extends Page<Object[]> {
     /***
      * getRecord uses the findRecord method to find the index then returns the object[]
      */
-    public Object[] getRecord(Table table, Object[] record){
+    public Object[] getRecord(Table table, Object[] record) throws StorageManagerException {
         int index = findRecord(table, record);
+        if (index < 0) throw new StorageManagerException(StorageManager.RECORD_NOT_FOUND);
         return records[index];
     }
 
-
+    public Object[][] getRecords() {
+        return Arrays.copyOf(this.records, entries);
+    }
 
     /**
      * Get's the bounds of a page

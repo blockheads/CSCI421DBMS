@@ -28,9 +28,13 @@ public abstract class DataManager {
         new File(DataManager.dbmsPath).mkdirs();
     }
 
-    public static boolean deleteDb (String dbmsPath) {
+    public static void deleteDb (String dbmsPath) throws StorageManagerException {
         resolveDBPath(dbmsPath);
-        return new File(dbmsPath).delete();
+        try {
+            new File(dbmsPath).delete();
+        } catch (SecurityException e) {
+            throw new StorageManagerException(StorageManager.CANNOT_MAKE_NEW_DB);
+        }
     }
 
     private static void resolveDBPath(String dbmsPath) {

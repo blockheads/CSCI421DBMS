@@ -3,6 +3,7 @@ package storagemanager.buffermanager;
 import storagemanager.StorageManager;
 import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.page.Page;
 import storagemanager.buffermanager.page.PageTypes;
 import storagemanager.buffermanager.page.RecordPage;
 import storagemanager.buffermanager.pageManager.PageBuffer;
@@ -76,6 +77,24 @@ public class BufferManager {
     public void removeRecord(int tableId, Object[] keyValue) throws StorageManagerException {
         Table table = getTable(tableId);
         pageBuffer.removeRecord(table, keyValue);
+    }
+
+    public Object[][] getAllRecords(int tableID) throws StorageManagerException {
+        int entities = 0;
+        for (Integer pageID: getTable(tableID).getPages()) {
+            RecordPage recordPage = pageBuffer.getRecordPage(tableID, pageID);
+            entities += recordPage.getEntriesCount();
+        }
+        Object[][] records = new Object[entities][];
+        int current = 0;
+        for (Integer pageID: getTable(tableID).getPages()) {
+            RecordPage recordPage = pageBuffer.getRecordPage(tableID, pageID);
+            Object[][] pageRecords = recordPage.getRecords();
+            for (Object[] record: pageRecords) {
+                records[current++] = record;
+            }
+        }
+        return records;
     }
 
     public void clearTable(int table) throws StorageManagerException {

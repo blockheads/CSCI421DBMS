@@ -20,6 +20,7 @@ public class StorageManager extends AStorageManager {
     public static final String INSERT_RECORD_INVALID_DATA = "a record contains invalid data and cannot be inserted.";
     public static final String UPDATE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be updated.";
     public static final String UPDATE_RECORD_NOT_FOUND = "a record cannot be found and cannot be updated.";
+    public static final String RECORD_NOT_FOUND = "the record cannot be found.";
     public static final String REMOVE_RECORD_NOT_FOUND = "a record cannot be found and cannot be removed.";
     public static final String REMOVE_RECORD_INVALID_DATA = "a record contains invalid data and cannot be  removed.";
     public static final String CANNOT_SAVE_DATA = "Data failed to be saved to disk.";
@@ -51,7 +52,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public Object[][] getRecords(int table) throws StorageManagerException {
-        return new Object[0][];
+        return bufferManager.getAllRecords(table);
     }
 
     @Override
@@ -143,8 +144,6 @@ public class StorageManager extends AStorageManager {
 
     @Override
     protected void newDatabase(String dbLoc, int pageBufferSize, int pageSize) throws StorageManagerException {
-        if(!DataManager.deleteDb(dbLoc)) {
-            throw new StorageManagerException(CANNOT_MAKE_NEW_DB);
-        }
+        DataManager.deleteDb(dbLoc);
     }
 }
