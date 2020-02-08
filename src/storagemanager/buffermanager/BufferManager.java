@@ -60,7 +60,7 @@ public class BufferManager {
      */
     public Object[] getRecord(int table, Object[] key) throws StorageManagerException {
 
-        Table target_table = tableMap.get(table);
+        Table target_table = getTable(table);
         Object[] keyRecord = target_table.keyToRecord(key);
         //call getPages in dataManager
         //call searchPages in pageBuffer to get the record page
@@ -71,7 +71,6 @@ public class BufferManager {
 
     public void updateRecord(int tableId, Object[] record) throws StorageManagerException{
         Table table = getTable(tableId);
-
         pageBuffer.updateRecord(table, record);
     }
 

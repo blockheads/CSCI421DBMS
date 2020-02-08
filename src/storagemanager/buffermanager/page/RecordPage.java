@@ -202,9 +202,9 @@ public class RecordPage extends Page<Object[]> {
     /***
      * getRecord uses the findRecord method to find the index then returns the object[]
      */
-    public Object[] getRecord(Table table, Object[] record) throws StorageManagerException {
+    public Object[] getRecord(Table table, Object[] record)  {
         int index = findRecord(table, record);
-        if (index < 0) throw new StorageManagerException(StorageManager.RECORD_NOT_FOUND);
+        if (index < 0) return null;
         return records[index];
     }
 
