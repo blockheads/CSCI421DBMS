@@ -20,7 +20,7 @@ public class Phase1Tester {
         int pageSize = 4096;
         AStorageManager sm = null;
 
-        System.out.println("Creating storage manager");
+//        System.out.println("Creating storage manager");
         try {
             // Create a new database at the provided location
             sm = new StorageManager(dbLoc, pageBufferSize, pageSize, false);

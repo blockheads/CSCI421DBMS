@@ -108,6 +108,15 @@ public class Table implements Serializable {
         return keyIndices;
     }
 
+    public Object[] recordToKey(Object[] record) {
+        Object[] recordKey = new Object[keyIndices.length];
+        int pos = 0;
+        for (Integer keyIndex: this.keyIndices) {
+            recordKey[pos++] = record[keyIndex];
+        }
+        return  recordKey;
+    }
+
     /**
      * Takes in a record and returns only the part's of the object[] which contain
      * key indices
@@ -136,7 +145,7 @@ public class Table implements Serializable {
     public boolean validRecord(Object[] record) {
         for (int i = 0; i < record.length; i++) {
             Object attribute = record[i];
-            if (!datatypes.get(i).matches(attribute))
+            if (attribute != null && !datatypes.get(i).matches(attribute))
                 return false;
         }
         return true;

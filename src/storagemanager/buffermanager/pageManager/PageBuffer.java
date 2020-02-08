@@ -127,6 +127,7 @@ public class PageBuffer {
      */
     public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException{
 
+        ArrayList<RecordPage> candidates = new ArrayList<>();
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
             return null;
@@ -141,7 +142,7 @@ public class PageBuffer {
             RecordPage page = getRecordPage(table.getId(), pageId);
 
             if (page.getEntriesCount() == 0) {
-                return page;
+                candidates.add(page);
             } else {
                 // Check if x is present at mid
                 int[] bounds = page.bounds(table, record);
@@ -153,7 +154,7 @@ public class PageBuffer {
                         || (bounds[0] == 0 || bounds[1] == 0) // equal to the first or last element
                         || (bounds[1] == 1 && pageIds.last() == pageId) // there is no page bigger than me, but im larger than the first element: this is my page
                         || (bounds[0] == -1 && pageIds.first() == pageId)) // there is no page smaller than me, but im smaller than the first element: this is my page
-                    return page;
+                    candidates.add(page);
                 else if ((bounds[0] == bounds[1]) && bounds[0] == 1) {
                     smallestAvaliblePage = page;
                 }
@@ -164,8 +165,12 @@ public class PageBuffer {
 
         }
 
-        if(smallestAvaliblePage != null)
+        if(candidates.size() == 0 && smallestAvaliblePage != null)
             return smallestAvaliblePage;
+        for (RecordPage page: candidates) {
+            if (page.findRecord(table, record) != -1) return page;
+        }
+        if (candidates.size() >= 1) return candidates.get(0);
         return null;
 
     }

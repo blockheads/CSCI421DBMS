@@ -89,7 +89,7 @@ public class StorageManager extends AStorageManager {
             if(!deleteDir(new File(dir_to_delete))) throw new StorageManagerException(String.format(TABLE_DNE_FORMAT, table));
         }
         catch (IOException e){
-            System.out.println("Current dir not found");
+//            System.out.println("Current dir not found");
         }
 
     }
