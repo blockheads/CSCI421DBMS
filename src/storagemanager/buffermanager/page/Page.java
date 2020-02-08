@@ -118,6 +118,13 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
      */
     public abstract void save();
 
+    public void delete() {
+        if (this instanceof RecordPage)
+            table.removePage((RecordPage) this);
+        DataManager.deletePage(this);
+        pageBuffer.removeFromPool(this, pageAgeTracker);
+    }
+
     @Override
     public int compareTo(Page page) {
         return pageID - page.pageID;

@@ -38,6 +38,7 @@ public class StorageManager extends AStorageManager {
      */
     public StorageManager(String dbLoc, int pageBufferSize, int pageSize, boolean restart) throws StorageManagerException {
         super(dbLoc, pageBufferSize, pageSize, restart);
+        DataManager.setPageSize(pageSize);
         bufferManager = new BufferManager(dbLoc, pageBufferSize, pageSize);
     }
 
