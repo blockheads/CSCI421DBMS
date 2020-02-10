@@ -26,11 +26,11 @@ public class AgeTracker<E> implements Comparable<AgeTracker<E>>, Comparator<AgeT
     }
 
     public void resetAge(int basis) {
-        this.age %= basis;
+        this.age /= basis;
     }
 
     public boolean ageIncrement() {
-        age++;
+        this.age = pool.getHighestAge() + 1;
         ageIncrement.push(this);
         return age == Integer.MAX_VALUE;
     }

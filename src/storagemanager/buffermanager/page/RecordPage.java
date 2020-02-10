@@ -22,10 +22,6 @@ public class RecordPage extends Page<Object[]> {
 
     private Object[][] records;
 
-    public int getEntriesCount() {
-        return entries;
-    }
-
     RecordPage(Table table, int pageID){
         super(table, pageID, PageTypes.RECORD_PAGE);
         // initially just a empty array with no entries?
@@ -69,7 +65,6 @@ public class RecordPage extends Page<Object[]> {
         // we split if we are full.
         if(!hasSpace()){
             splitPage();
-            pageBuffer.purge();
             bufferManager.insertRecord(table.getId(), record);
             return true;
         }
@@ -85,8 +80,6 @@ public class RecordPage extends Page<Object[]> {
             if(records[m] == null) {
                 break;
             }
-
-//            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
 
             int res = compareRecord(table,record,m);
 
@@ -119,16 +112,11 @@ public class RecordPage extends Page<Object[]> {
         for(int i=aboveIndex; i>=0; i--){
             int currentIndex = m+i;
             int newIndex = m+i+1;
-//            System.out.println("Moving record " + currentIndex + " to index " + newIndex);
             records[newIndex] = records[currentIndex];
         }
 
         records[m] = record;
         entries++;
-//        System.out.println("Entries: " + entries);
-        // just for nice testing output
-        int remaining = records.length-entries;
-//        System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
         return true;
     }
 

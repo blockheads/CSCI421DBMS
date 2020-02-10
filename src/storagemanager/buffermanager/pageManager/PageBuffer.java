@@ -53,7 +53,10 @@ public class PageBuffer {
      */
     public RecordPage getRecordPage(int tableId, int pageId) throws  StorageManagerException{
         Page page = isPageLoaded(tableId, PageTypes.RECORD_PAGE, pageId);
-        if (page != null) return (RecordPage) page;
+        if (page != null) {
+            page.increaseAge();
+            return (RecordPage) page;
+        }
 
         try {
             return (RecordPage) Page.loadPageFromDisk(bufferManager.getTable(tableId), PageTypes.RECORD_PAGE, pageId, bufferManager, this);
@@ -124,17 +127,11 @@ public class PageBuffer {
         pages.clear();
     }
 
-    /**
-     * This manages searching over pages to find the correct page using a binary search
-     */
     public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException{
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
             return null;
         }
-
-        // this is the iterative approach to searching for a page
-        RecordPage smallestAvaliblePage = null;
 
         // this code no longer is usefull as our pages are not guaranteed in order
         for(int pageId: pageIds){
