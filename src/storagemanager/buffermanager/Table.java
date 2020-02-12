@@ -4,14 +4,12 @@ import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.datatypes.ValidDataTypes;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.diskUtils.DataManager;
-import storagemanager.buffermanager.page.Page;
 import storagemanager.buffermanager.page.RecordPage;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 
 public class Table implements Serializable {
@@ -28,9 +26,6 @@ public class Table implements Serializable {
 
     // int that tells us the current highest page
     private transient TreeSet<Integer> highestPage;
-
-    // This let's us know if the pageMap corresponding to this table has been loaded into memory.
-    private boolean loadedPageMap;
 
     // this is the max amount of records which can be stored inside of a table
     private int maxRecords;
@@ -121,31 +116,20 @@ public class Table implements Serializable {
         return  recordKey;
     }
 
-    public Object[] keyToRecord(Object[] key) {
+    public Object[] getRecordFromKey(Object[] recordOrKey) {
+        if (recordOrKey.length < dataTypeCount()) {
+            recordOrKey = keyToRecord(recordOrKey);
+        }
+        return recordOrKey;
+    }
+
+    private Object[] keyToRecord(Object[] key) {
         Object[] keyRecord = new Object[datatypes.size()];
         int pos = 0;
         for (Integer integer: keyIndices) {
             keyRecord[integer] = key[pos++];
         }
         return  keyRecord;
-    }
-
-
-    /**
-     * Takes in a record and returns only the part's of the object[] which contain
-     * key indices
-     * @param record
-     * @return
-     */
-    public Object[] getKeys(Object[] record){
-        Integer[] keyIndeces = getKeyIndices();
-        Object[] keys = new Object[keyIndeces.length];
-        int j=0;
-        for( int i: keyIndeces){
-            keys[j] = record[i];
-            j++;
-        }
-        return keys;
     }
 
     public Integer[] getByteKeyIndices() {
@@ -194,14 +178,6 @@ public class Table implements Serializable {
             Orecord[i] = datatype.toObject(record, datatype.getIndex());
         }
         return Orecord;
-    }
-
-    public boolean isLoadedPageMap() {
-        return loadedPageMap;
-    }
-
-    public void setLoadedPageMap(boolean loadedPageMap) {
-        this.loadedPageMap = loadedPageMap;
     }
 
     @Override
