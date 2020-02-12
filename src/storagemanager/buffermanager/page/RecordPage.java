@@ -132,7 +132,7 @@ public class RecordPage extends Page<Object[]> {
     /**
      *
      */
-    public Page splitPage() {
+    public Page<Object[]> splitPage() throws StorageManagerException {
         RecordPage other = (RecordPage) Page.createPage(table, pageID + 1, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
         // split at n/2
@@ -155,7 +155,10 @@ public class RecordPage extends Page<Object[]> {
         other.entries = splitPoint;
         this.entries = j + ((table.getMaxRecords() % 2 == 0)?0:1);
 
-        return null;
+        // Creating a new page may have pushed this one out. This page needs to be resaved
+        if (pageBuffer.isPageLoaded(table.getId(), PageTypes.RECORD_PAGE, pageID) == null)
+            this.save();
+        return other;
     }
 
     @Override

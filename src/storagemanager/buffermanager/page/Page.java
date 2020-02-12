@@ -151,7 +151,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public abstract boolean insertRecord(E record) throws StorageManagerException, IOException;
     public abstract boolean deleteRecord(E record) throws StorageManagerException;
     public abstract boolean recordExists(E record);
-    public abstract Page<E> splitPage();
+    public abstract Page<E> splitPage() throws StorageManagerException;
     public abstract boolean hasSpace();
 
     /**
