@@ -61,11 +61,7 @@ public class StorageManager extends AStorageManager {
 
     @Override
     public void insertRecord(int table, Object[] record) throws StorageManagerException {
-        try {
-            bufferManager.insertRecord(table,record);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        bufferManager.insertRecord(table,record);
     }
 
     @Override

@@ -95,7 +95,7 @@ public class PageBuffer {
         page.deleteRecord(keyValue);
     }
 
-    public void insertRecord(Table table, Object[] record) throws  StorageManagerException, IOException {
+    public void insertRecord(Table table, Object[] record) throws  StorageManagerException {
 
         // in this case no pages have been created or loaded into memory.
         if (table.getHighestPage() == -1) {

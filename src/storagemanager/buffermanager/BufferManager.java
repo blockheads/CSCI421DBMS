@@ -40,7 +40,7 @@ public class BufferManager {
      * if id doesnt then ->
      * inserts a record through insertion sort.
      */
-    public void insertRecord(int tableId, Object[] record) throws StorageManagerException, IOException {
+    public void insertRecord(int tableId, Object[] record) throws StorageManagerException {
         Table table = getTable(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry

@@ -23,8 +23,7 @@ public class RecordPage extends Page<Object[]> {
     private Object[][] records;
 
     RecordPage(Table table, int pageID){
-        super(table, pageID, PageTypes.RECORD_PAGE);
-        // initially just a empty array with no entries?
+        super(table, pageID, PageTypes.RECORD_PAGE, 2);
         this.records = new Object[table.getMaxRecords()][];
     }
 
@@ -41,7 +40,7 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
-    public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
+    public boolean insertRecord(Object[] record) throws StorageManagerException {
         // we split if we are full.
         if(!hasSpace()){
             splitPage();
@@ -118,9 +117,19 @@ public class RecordPage extends Page<Object[]> {
         }
         entries--;
 
-        if (entries <= 0) this.delete();
+        if (entries < minRecords && !(table.getPages().last() == pageID) && !(table.getPages().first() == pageID)) {
+            mergePage();
+        }
 
         return true;
+    }
+
+    @Override
+    public void mergePage() throws StorageManagerException {
+        delete();
+        for (Object[] record: getRecords()) {
+            bufferManager.insertRecord(table.getId(), record);
+        }
     }
 
     @Override
@@ -209,6 +218,7 @@ public class RecordPage extends Page<Object[]> {
         return records[index];
     }
 
+    @Override
     public Object[][] getRecords() {
         return Arrays.copyOf(this.records, entries);
     }
