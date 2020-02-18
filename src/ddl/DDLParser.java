@@ -98,6 +98,25 @@ public class DDLParser implements IDDLParser {
 
     }
 
+    /**
+     * Parses a create table statement, constructs the following data
+     *
+     * String[] primaryKeyData = null;
+     *  null by default, this contains a list of the attributeNames that define the primary key
+     *
+     * ArrayList<ForeignKeyData> foreignKeysData = new ArrayList<>();
+     *  This arraylist contains all the ForeignKeyData objects ( see class ) storing their information
+     *
+     * ArrayList<String[]> uniqueKeysData = new ArrayList<>();
+     *  This stores each definition of unique on an attribute, with the attributeNames stored inside a String[]
+     *
+     * ArrayList<Attribute> attributes = new ArrayList<>();
+     *  This stores all the attributes (see class), holding their type, name, and constraints
+     *
+     * @param args
+     * @throws DDLParserException
+     * @throws StorageManagerException
+     */
     private void parseCreateTableStatement(String args) throws DDLParserException, StorageManagerException {
         // strip any leading whitespace before the name
         args = args.stripLeading();
@@ -123,7 +142,7 @@ public class DDLParser implements IDDLParser {
         String innerStatements = args.substring(ibeg,iend);
 
         // we can only have one primary key
-        ArrayList<String[]> primaryKeyData = new ArrayList<>();
+        String[] primaryKeyData = null;
         // we can have multiple foreign keys or unique keys
         ArrayList<ForeignKeyData> foreignKeysData = new ArrayList<>();
         ArrayList<String[]> uniqueKeysData = new ArrayList<>();
@@ -145,7 +164,7 @@ public class DDLParser implements IDDLParser {
                 }
 
                 String primaryKeys = parseParentheses(innerStatement);
-                primaryKeyData.add(primaryKeys.split("\\s+"));
+                primaryKeyData = primaryKeys.split("\\s+");
 
                 primaryKeyCount++;
 
@@ -222,7 +241,7 @@ public class DDLParser implements IDDLParser {
                         }
 
                         // in this case our primary key data is this attribute
-                        primaryKeyData.add(new String[]{attributeName});
+                        primaryKeyData = new String[]{attributeName};
 
                         primaryKeyCount++;
 
