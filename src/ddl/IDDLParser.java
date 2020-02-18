@@ -1,5 +1,7 @@
 package ddl;
 
+import storagemanager.StorageManagerException;
+
 /**
  * Interface representing a DDL parser
  */
@@ -11,5 +13,5 @@ public interface IDDLParser {
      * @param statement the DDL statement to parse
      * @throws DDLParserException any error in parsing
      */
-    void parseDDLstatement(String statement) throws DDLParserException;
+    void parseDDLstatement(String statement) throws DDLParserException, StorageManagerException;
 }
