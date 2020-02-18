@@ -1,5 +1,7 @@
 package ddl;
 
+import ddl.catalog.Attribute;
+import ddl.catalog.Constraint;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.datatypes.ValidDataTypes;
@@ -26,6 +28,8 @@ public class DDLParser implements IDDLParser {
     private final String UNIQUE_STR = "unique";
     private final String FOREIGN_KEY_STR = "foreignkey";
     private final String REFERENCES_STR = "references";
+
+
 
     // parsing errors
     private final static String INVALID_STATEMENT = "A invalid statement has been entered not supported by the database.";
@@ -213,7 +217,7 @@ public class DDLParser implements IDDLParser {
                 String attributeName = attributeData[0];
 
                 // and then it's DataType must be resolved.
-                Datatype type = ValidDataTypes.resolveType(attributeData[1]);
+                ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1]);
 
                 // construct our new attribute
                 Attribute attribute = new Attribute(attributeName,type);
@@ -221,42 +225,29 @@ public class DDLParser implements IDDLParser {
                 // iterating over constraints
                 for(int i=2; i < attributeData.length; i++){
 
-                    String constraint = attributeData[i];
-                    if(constraint.equals("notnull")){
+                    String constraintName = attributeData[i];
 
-                        if(attribute.isNotNull()){
-                            throw new DDLParserException(CREATE_TABLE_CONSTRAINT_DEF);
-                        }
-                        attribute.setNotNull(true);
+                    try{
+                        Constraint constraint = Constraint.valueOf(constraintName);
 
-                    }
-                    else if(constraint.equals("primarykey")){
-
-                        if(attribute.isPrimaryKey()){
+                        // check if the constraint is already defined
+                        if(attribute.hasConstraint(constraint)){
                             throw new DDLParserException(CREATE_TABLE_CONSTRAINT_DEF);
                         }
 
-                        if(primaryKeyCount > 0){
-                            throw new DDLParserException(CREATE_TABLE_MULT_PKS);
+                        if(constraint.equals(Constraint.PRIMARY_KEY)){
+
+                            if(primaryKeyCount > 0){
+                                throw new DDLParserException(CREATE_TABLE_MULT_PKS);
+                            }
+
+                            // in this case our primary key data is this attribute
+                            primaryKeyData = new String[]{attributeName};
+
+                            primaryKeyCount++;
                         }
 
-                        // in this case our primary key data is this attribute
-                        primaryKeyData = new String[]{attributeName};
-
-                        primaryKeyCount++;
-
-                        attribute.setPrimaryKey(true);
-
-                    }
-                    else if(constraint.equals("unique")){
-
-                        if(attribute.isUnique()){
-                            throw new DDLParserException(CREATE_TABLE_CONSTRAINT_DEF);
-                        }
-                        attribute.setUnique(true);
-
-                    }
-                    else{
+                    }catch (IllegalArgumentException e){
                         throw new DDLParserException(CREATE_TABLE_INVALID_ATTRIBUTE_CON);
                     }
 
