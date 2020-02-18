@@ -22,39 +22,14 @@ public class RecordPage extends Page<Object[]> {
 
     private Object[][] records;
 
-    public int getEntriesCount() {
-        return entries;
-    }
-
     RecordPage(Table table, int pageID){
-        super(table, pageID, PageTypes.RECORD_PAGE);
-        // initially just a empty array with no entries?
+        super(table, pageID, PageTypes.RECORD_PAGE, 2);
         this.records = new Object[table.getMaxRecords()][];
-    }
-
-
-    public void removeRecord(Object[] keyValue) throws StorageManagerException{
-
-        int index = findRecord(getTable(), keyValue);
-
-        if(index < 0)
-            throw new StorageManagerException(StorageManager.REMOVE_RECORD_NOT_FOUND);
-
-        // otherwise we remove it
-        records[index] = null;
-        for (int i = index; i < entries; i++) {
-            if (i + 1 == table.getMaxRecords()) {
-                records[i] = null;
-                break;
-            }
-            records[i] = records[i+1];
-        }
-        entries--;
     }
 
     public void updateRecord(Object[] record) throws StorageManagerException {
 
-        int index = findRecord(getTable(), record);
+        int index = findRecord(record);
 
         if(index < 0)
             throw new StorageManagerException(StorageManager.UPDATE_RECORD_NOT_FOUND);
@@ -65,11 +40,10 @@ public class RecordPage extends Page<Object[]> {
     }
 
     @Override
-    public boolean insertRecord(Object[] record) throws StorageManagerException, IOException {
+    public boolean insertRecord(Object[] record) throws StorageManagerException {
         // we split if we are full.
         if(!hasSpace()){
             splitPage();
-            pageBuffer.purge();
             bufferManager.insertRecord(table.getId(), record);
             return true;
         }
@@ -86,9 +60,7 @@ public class RecordPage extends Page<Object[]> {
                 break;
             }
 
-//            System.out.println("comparing " + record[0] + " to " + records[m][0] + " at index " + m);
-
-            int res = compareRecord(table,record,m);
+            int res = compareRecord(record, m);
 
             // in this case the record already exists in the page
             if(res == 0)
@@ -106,7 +78,7 @@ public class RecordPage extends Page<Object[]> {
         // if we are greater than the record we are inserting over, and it is not null we are inbetewen two values
         // and we are greater than the record we are inserting over, so we want to insert +1 more than where we are inserting
         if(records[m] != null) {
-            int res = compareRecord(table,record,m);
+            int res = compareRecord(record, m);
             if(res == 1)
                 m += 1;
         }
@@ -119,22 +91,45 @@ public class RecordPage extends Page<Object[]> {
         for(int i=aboveIndex; i>=0; i--){
             int currentIndex = m+i;
             int newIndex = m+i+1;
-//            System.out.println("Moving record " + currentIndex + " to index " + newIndex);
             records[newIndex] = records[currentIndex];
         }
 
         records[m] = record;
         entries++;
-//        System.out.println("Entries: " + entries);
-        // just for nice testing output
-        int remaining = records.length-entries;
-//        System.out.println("Inserted " + record[0] + " into page " + pageID + " there are " + remaining + " records left");
         return true;
     }
 
     @Override
-    public boolean deleteRecord(Object[] record) throws StorageManagerException {
+    public boolean deleteRecord(Object[] key) throws StorageManagerException {
+        int index = findRecord(key);
+
+        if(index < 0)
+            throw new StorageManagerException(StorageManager.REMOVE_RECORD_NOT_FOUND);
+
+        // otherwise we remove it
+        records[index] = null;
+        for (int i = index; i < entries; i++) {
+            if (i + 1 == table.getMaxRecords()) {
+                records[i] = null;
+                break;
+            }
+            records[i] = records[i+1];
+        }
+        entries--;
+
+        if (entries < minRecords && !(table.getPages().last() == pageID) && !(table.getPages().first() == pageID)) {
+            mergePage();
+        }
+
         return true;
+    }
+
+    @Override
+    public void mergePage() throws StorageManagerException {
+        delete();
+        for (Object[] record: getRecords()) {
+            bufferManager.insertRecord(table.getId(), record);
+        }
     }
 
     @Override
@@ -146,7 +141,7 @@ public class RecordPage extends Page<Object[]> {
     /**
      *
      */
-    public Page splitPage() {
+    public Page<Object[]> splitPage() throws StorageManagerException {
         RecordPage other = (RecordPage) Page.createPage(table, pageID + 1, PageTypes.RECORD_PAGE, bufferManager, pageBuffer);
 
         // split at n/2
@@ -169,7 +164,10 @@ public class RecordPage extends Page<Object[]> {
         other.entries = splitPoint;
         this.entries = j + ((table.getMaxRecords() % 2 == 0)?0:1);
 
-        return null;
+        // Creating a new page may have pushed this one out. This page needs to be resaved
+        if (pageBuffer.isPageLoaded(table.getId(), PageTypes.RECORD_PAGE, pageID) == null)
+            this.save();
+        return other;
     }
 
     @Override
@@ -185,7 +183,9 @@ public class RecordPage extends Page<Object[]> {
     /**
      * find's a record within a page
      */
-    public int findRecord(Table table, Object[] record){
+    public int findRecord(Object[] recordOrKey) {
+        Object[] record = table.getRecordFromKey(recordOrKey);
+
         // iterative binary search
         int l = 0, r = entries - 1;
         while (l <= r) {
@@ -193,7 +193,7 @@ public class RecordPage extends Page<Object[]> {
 
             // retrieve record at m
             // Check if record is present at mid
-            int res = compareRecord(table,record,m);
+            int res = compareRecord(record, m);
             if(res == 0)
                 return m;
 
@@ -212,12 +212,13 @@ public class RecordPage extends Page<Object[]> {
     /***
      * getRecord uses the findRecord method to find the index then returns the object[]
      */
-    public Object[] getRecord(Table table, Object[] record)  {
-        int index = findRecord(table, record);
+    public Object[] getRecord(Object[] record)  {
+        int index = findRecord(record);
         if (index < 0) return null;
         return records[index];
     }
 
+    @Override
     public Object[][] getRecords() {
         return Arrays.copyOf(this.records, entries);
     }
@@ -225,21 +226,9 @@ public class RecordPage extends Page<Object[]> {
     /**
      * Get's the bounds of a page
      */
-    public int[] bounds(Table table, Object[] record) {
-        return new int[]{compareRecord(table, record, 0), compareRecord(table, record, entries-1)};
-    }
-
-    private String recordToString(Object[] record) {
-        StringBuilder builder = new StringBuilder();
-        ArrayList<Datatype> datatypes = table.getDatatypes();
-        builder.append("{");
-        for (int i = 0; i < datatypes.size(); i++) {
-            Datatype datatype = datatypes.get(i);
-            builder.append(datatype.resolveToString(record[i]));
-            if (i + 1 < datatypes.size()) builder.append(", ");
-        }
-        builder.append("}");
-        return builder.toString();
+    public int[] bounds(Object[] recordOrKey) {
+        Object[] record = table.getRecordFromKey(recordOrKey);
+        return new int[]{compareRecord(record, 0), compareRecord(record, entries-1)};
     }
 
     /**
@@ -248,7 +237,9 @@ public class RecordPage extends Page<Object[]> {
      * -1: the record is less than the other record
      * 0: the record is equal to the other record
      */
-    private int compareRecord(Table table, Object[] record, int index) {
+    private int compareRecord(Object[] recordOrKey, int index) {
+
+        Object[] record = table.getRecordFromKey(recordOrKey);
 
         for(int i=0; i < table.getKeyIndices().length; i++){
 
@@ -271,12 +262,32 @@ public class RecordPage extends Page<Object[]> {
 
     }
 
+
+
     /**
      * Sets a pages records to a passed in value at given index
      * @param records
      */
     public void setRecord(Object[] records, int index) {
         this.records[index] = records;
+    }
+
+    /**
+     * Convert a records values into a string
+     * @param record the record being converted
+     * @return a comma separated string representing the record
+     */
+    private String recordToString(Object[] record) {
+        StringBuilder builder = new StringBuilder();
+        ArrayList<Datatype> datatypes = table.getDatatypes();
+        builder.append("{");
+        for (int i = 0; i < datatypes.size(); i++) {
+            Datatype datatype = datatypes.get(i);
+            builder.append(datatype.resolveToString(record[i]));
+            if (i + 1 < datatypes.size()) builder.append(", ");
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
     @Override

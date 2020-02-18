@@ -18,6 +18,8 @@ public abstract class Datatype<E> implements Serializable {
     }
 
     public E resolveData(Object obj) {
+        if (obj == null)
+            return null;
         try {
             return (E) type.objectClass.cast(obj);
         } catch (ClassCastException e) {

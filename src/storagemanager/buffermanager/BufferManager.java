@@ -40,7 +40,7 @@ public class BufferManager {
      * if id doesnt then ->
      * inserts a record through insertion sort.
      */
-    public void insertRecord(int tableId, Object[] record) throws StorageManagerException, IOException {
+    public void insertRecord(int tableId, Object[] record) throws StorageManagerException {
         Table table = getTable(tableId);
 
         // in this case just create page and insert in empty page, it's our first entry
@@ -61,11 +61,11 @@ public class BufferManager {
     public Object[] getRecord(int table, Object[] key) throws StorageManagerException {
 
         Table target_table = getTable(table);
-        Object[] keyRecord = target_table.keyToRecord(key);
+        Object[] keyRecord = target_table.getRecordFromKey(key);
         //call getPages in dataManager
         //call searchPages in pageBuffer to get the record page
-        RecordPage  record = pageBuffer.searchPages(target_table, target_table.getPages(), keyRecord);
-        return record.getRecord(target_table, keyRecord);
+        RecordPage  record = pageBuffer.searchPages(target_table, keyRecord);
+        return record.getRecord(keyRecord);
     }
 
 
@@ -76,7 +76,7 @@ public class BufferManager {
 
     public void removeRecord(int tableId, Object[] keyValue) throws StorageManagerException {
         Table table = getTable(tableId);
-        pageBuffer.removeRecord(table, table.keyToRecord(keyValue));
+        pageBuffer.removeRecord(table, keyValue);
     }
 
     public Object[][] getAllRecords(int tableID) throws StorageManagerException {

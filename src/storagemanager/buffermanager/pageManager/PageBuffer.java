@@ -53,7 +53,10 @@ public class PageBuffer {
      */
     public RecordPage getRecordPage(int tableId, int pageId) throws  StorageManagerException{
         Page page = isPageLoaded(tableId, PageTypes.RECORD_PAGE, pageId);
-        if (page != null) return (RecordPage) page;
+        if (page != null) {
+            page.increaseAge();
+            return (RecordPage) page;
+        }
 
         try {
             return (RecordPage) Page.loadPageFromDisk(bufferManager.getTable(tableId), PageTypes.RECORD_PAGE, pageId, bufferManager, this);
@@ -83,36 +86,23 @@ public class PageBuffer {
         if(!table.validRecord(record)) {
             throw new StorageManagerException(StorageManager.UPDATE_RECORD_INVALID_DATA);
         }
-        RecordPage page = searchPages(table, table.getPages(), record);
+        RecordPage page = searchPages(table, record);
         page.updateRecord(record);
     }
 
     public void removeRecord(Table table, Object[] keyValue) throws StorageManagerException{
-        if(!table.validRecord(keyValue)) {
-            throw new StorageManagerException(StorageManager.REMOVE_RECORD_INVALID_DATA);
-        }
-        RecordPage page = searchPages(table, table.getPages(), keyValue);
-        page.removeRecord(keyValue);
+        RecordPage page = searchPages(table, keyValue);
+        page.deleteRecord(keyValue);
     }
 
-    public void insertRecord(Table table, Object[] record) throws  StorageManagerException, IOException{
+    public void insertRecord(Table table, Object[] record) throws  StorageManagerException {
 
         // in this case no pages have been created or loaded into memory.
-        if(table.getHighestPage() == -1){
+        if (table.getHighestPage() == -1) {
             Page.createPage(table, PageTypes.RECORD_PAGE, bufferManager, this);
         }
 
-        insertRecord(table, table.getPages(), record);
-    }
-
-    /**
-     * Inserts a record into a page at appropriate spot
-     */
-    private void insertRecord(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException, IOException {
-        if(!table.validRecord(record)) {
-            throw new StorageManagerException(StorageManager.INSERT_RECORD_INVALID_DATA);
-        }
-        RecordPage page = searchPages(table, pageIds, record);
+        RecordPage page = searchPages(table, record);
         page.insertRecord(record);
     }
 
@@ -124,17 +114,12 @@ public class PageBuffer {
         pages.clear();
     }
 
-    /**
-     * This manages searching over pages to find the correct page using a binary search
-     */
-    public RecordPage searchPages(Table table, TreeSet<Integer> pageIds, Object[] record) throws StorageManagerException{
+    public RecordPage searchPages(Table table, Object[] record) throws StorageManagerException{
+        TreeSet<Integer> pageIds = table.getPages();
         if(pageIds.isEmpty()){
             // in this case there is no page to even find.
             return null;
         }
-
-        // this is the iterative approach to searching for a page
-        RecordPage smallestAvaliblePage = null;
 
         // this code no longer is usefull as our pages are not guaranteed in order
         for(int pageId: pageIds){
@@ -145,7 +130,7 @@ public class PageBuffer {
                 return page;
             } else {
                 // Check if x is present at mid
-                int[] bounds = page.bounds(table, record);
+                int[] bounds = page.bounds(record);
                 // if we are contained within the bounds of the page, or the first/last entries of the page are our
                 // entry, then this is most certainly our page
 

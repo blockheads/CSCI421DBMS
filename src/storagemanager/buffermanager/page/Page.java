@@ -26,10 +26,17 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
 
     int entries = 0;
 
-    Page(Table table, int pageID, PageTypes pageType) {
+    /**
+     * The minimum amount of records a page is allowed to have before it is deleted and its records rebalanced
+     * This property only comes into effect if this is not the first or last page in the table
+     */
+    final int minRecords;
+
+    Page(Table table, int pageID, PageTypes pageType, int minRecords) {
         this.pageID = pageID;
         this.table = table;
         this.pageType = pageType;
+        this.minRecords = minRecords;
     }
 
     public static Page loadPageFromDisk(Table table, PageTypes pageType, int pageID,
@@ -75,9 +82,7 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
             DataManager.incrementPage(table.getId(), pageType, pageIDS);
             Page loadedPage = pageBuffer.isPageLoaded(table.getId(), PageTypes.RECORD_PAGE, pageIDS);
             if (loadedPage != null) {
-//                pageBuffer.removeFromPool(loadedPage, loadedPage.pageAgeTracker);
                 loadedPage.pageID ++;
-//                loadedPage.setPageAgeTracker(pageBuffer.addPageToPool(loadedPage));
             }
         }
 
@@ -153,8 +158,10 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
     public abstract boolean insertRecord(E record) throws StorageManagerException, IOException;
     public abstract boolean deleteRecord(E record) throws StorageManagerException;
     public abstract boolean recordExists(E record);
-    public abstract Page<E> splitPage();
+    public abstract Page<E> splitPage() throws StorageManagerException;
     public abstract boolean hasSpace();
+    public abstract E[] getRecords();
+    public abstract void mergePage() throws StorageManagerException, IOException;
 
     /**
      * Writes out a page from memory into a hard coded location on disk

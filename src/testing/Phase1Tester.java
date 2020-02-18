@@ -16,7 +16,7 @@ public class Phase1Tester {
 
         // Modify based on your system and testing params
         String dbLoc = "db/";
-        int pageBufferSize = 20;
+        int pageBufferSize = 100;
         int pageSize = 4096;
         AStorageManager sm = null;
 
