@@ -1,5 +1,6 @@
 package storagemanager.buffermanager.diskUtils;
 
+import ddl.catalog.Catalog;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.page.Page;
@@ -23,6 +24,7 @@ public abstract class DataManager {
     private static String dbmsPath = "";
     private static int pageSize = 4096;
     public static final String tableObjName = "tabledata";
+    public static final String catalogObjName = "catalog";
 
     public static void setDbmsPath(String dbmsPath) {
         resolveDBPath(dbmsPath);
@@ -62,6 +64,14 @@ public abstract class DataManager {
 
     public static int getPageSize() {
         return pageSize;
+    }
+
+    public static Catalog getCatalog() throws IOException {
+        return (Catalog) ObjectSaver.load(dbmsPath + catalogObjName);
+    }
+
+    public static void saveCatalog(Catalog catalog) throws IOException {
+        ObjectSaver.save(catalog, dbmsPath + catalogObjName, false);
     }
 
     public static Table getTable(int table) throws IOException {

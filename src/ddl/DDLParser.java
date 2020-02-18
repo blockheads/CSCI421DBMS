@@ -12,6 +12,12 @@ import java.util.ArrayList;
 
 public class DDLParser implements IDDLParser {
 
+    public static final String CANNOT_LOAD_CATALOG = "Could not load catalog.";
+    public static final String CANNOT_SAVE_CATALOG = "Could not load catalog.";
+
+    private final String createTableStatement = "create table";
+    private final String alterTableStatement = "alter table";
+    private final String dropTableStatement = "drop table";
     // parsing constants
     private final String CREATE_TABLE_STATMENT = "create table";
     private final String ALTER_TABLE_STATEMENT = "alter table";
