@@ -10,12 +10,22 @@ public class DDLParser implements IDDLParser {
     private final String alterTableStatement = "alter table";
     private final String dropTableStatement = "drop table";
 
+    public static DDLParser ddlParser = null;
+
+    private DDLParser() {}
+
     /**
      * This will create an instance of this parser and return it.
      * @return an instance of a IDDLParser
      */
-    public static IDDLParser createParser(){
-        return null;
+    public static IDDLParser createParser() {
+        if (ddlParser != null) {
+            System.err.println("You cannot create more than one parser.");
+            return null;
+        }
+
+        ddlParser = new DDLParser();
+        return ddlParser;
     }
 
     @Override

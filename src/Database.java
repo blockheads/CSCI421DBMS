@@ -1,8 +1,15 @@
+import java.util.Objects;
+
 /**
  * Class to create and access a database.
  */
 
 public class Database implements IDatabase{
+
+    public static Database database = null;
+
+
+    private Database() {}
 
     /**
      * Static function that will create/restart and return a database
@@ -12,7 +19,13 @@ public class Database implements IDatabase{
      * @return an instance of an IDatabase.
      */
     public static IDatabase getConnection(String dbLoc, int pageBufferSize, int pageSize ){
-        return null;
+        if (database != null) {
+            System.err.println("You cannot create more than one connection");
+            return null;
+        }
+
+        database = new Database();
+        return database;
     }
 
     @Override
