@@ -3,7 +3,6 @@ package ddl;
 import ddl.catalog.Attribute;
 import ddl.catalog.Constraint;
 import storagemanager.StorageManagerException;
-import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.datatypes.ValidDataTypes;
 
 import java.util.ArrayList;
@@ -235,7 +234,7 @@ public class DDLParser implements IDDLParser {
                             throw new DDLParserException(CREATE_TABLE_CONSTRAINT_DEF);
                         }
 
-                        if(constraint.equals(Constraint.PRIMARY_KEY)){
+                        if(constraint.equals(Constraint.PRIMARYKEY)){
 
                             if(primaryKeyCount > 0){
                                 throw new DDLParserException(CREATE_TABLE_MULT_PKS);
