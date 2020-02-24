@@ -1,7 +1,9 @@
 package ddl;
 
+import java.io.Serializable;
+
 // class for storing parsed foreign key data
-public class ForeignKeyData {
+public class ForeignKeyData implements Serializable {
 
     public String getReferenceTable() {
         return referenceTable;

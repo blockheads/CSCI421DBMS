@@ -29,6 +29,10 @@ public abstract class Datatype<E> implements Serializable {
         return null;
     }
 
+    public boolean isType(Object obj) {
+        return type.getObjectClass().isInstance(obj);
+    }
+
     public void setIndex(int index) {
         this.index = index;
     }

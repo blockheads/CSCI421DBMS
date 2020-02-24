@@ -43,6 +43,13 @@ public class CharData extends Datatype<String>{
     }
 
     @Override
+    public boolean isType(Object obj) {
+        if (obj instanceof String)
+            return ((String) obj).length() <= maxChars;
+        return false;
+    }
+
+    @Override
     public byte[] toByteArray(String attribute) {
         ByteBuffer b = ByteBuffer.allocate(getSize());
         char[] chars = attribute.toCharArray();
