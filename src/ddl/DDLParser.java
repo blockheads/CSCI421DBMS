@@ -28,8 +28,10 @@ public class DDLParser implements IDDLParser {
     private final String UNIQUE_STR = "unique";
     private final String FOREIGN_KEY_STR = "foreignkey";
     private final String REFERENCES_STR = "references";
-
-
+    // more keywords
+    private final String ADD_STR = "add";
+    private final String DROP_STR = "drop";
+    private final String DEFAULT_STR = "default";
 
     // parsing errors
     private final static String INVALID_STATEMENT = "A invalid statement has been entered not supported by the database.";
@@ -46,6 +48,15 @@ public class DDLParser implements IDDLParser {
             "a invalid attribute constraint.";
     private final static String CREATE_TABLE_CONSTRAINT_DEF = "A create table statement is attempting to define " +
             "a constraint which has already been defined.";
+
+    private final static String DROP_TABLE_EMPTY_NAME = "A drop table statement does not specify a table name.";
+
+    private final static String ALTER_TABLE_NO_ADD_DROP = "A alter table statement does not specify either to " +
+            "add or drop from a table.";
+
+    private final static String ALTER_TABLE_DROP_NO_ATR = "A alter table statement does not specify a attribute to drop.";
+    private final static String ALTER_TABLE_INVALID_ATTRIBUTE_LEN = "A alter table statement is attempting to alter " +
+            "a attribute without a invalid amount of arguments.";
 
     public static DDLParser ddlParser = null;
 
@@ -94,7 +105,7 @@ public class DDLParser implements IDDLParser {
         }
         else if(statement.startsWith(DROP_TABLE_STATEMENT)){
             String args = statement.substring(DROP_TABLE_STATEMENT.length());
-            parseDropTableStatement(args);
+            parseDropTableStatement(args, iend);
         }
         else {
             throw new DDLParserException(INVALID_STATEMENT);
@@ -260,13 +271,86 @@ public class DDLParser implements IDDLParser {
 
         }
 
-    }
-
-    private void parseAlterTableStatement(String args){
+        // call CreateTable(primaryKeyData, foreignKeyData, uniqueKeysData, attributes);
 
     }
 
-    private void parseDropTableStatement(String args){
+    private void parseAlterTableStatement(String args) throws DDLParserException {
+
+        int addIdx = args.indexOf(ADD_STR);
+        int dropIdx = args.indexOf(DROP_STR);
+
+        // adding
+        if (addIdx != -1){
+            String tableName = args.substring(0, ADD_STR.length()).trim();
+
+            String addStatement = args.substring(ADD_STR.length()).trim();
+
+            Attribute attribute;
+
+            String[] attributeData = addStatement.split("\\s+");
+
+            if(attributeData.length < 2){
+                throw new DDLParserException(ALTER_TABLE_INVALID_ATTRIBUTE_LEN);
+            }
+            else if(attributeData.length > 2)
+                throw new DDLParserException(ALTER_TABLE_INVALID_ATTRIBUTE_LEN);
+
+            // otherwise we assign it's name as the first index
+            String attributeName = attributeData[0];
+
+            // and then it's DataType must be resolved.
+            ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1]);
+
+            int defaultIdx = args.indexOf(DEFAULT_STR);
+
+            // not sure how we want to handle default value yet...
+
+            // attribute definition with no default
+            if(defaultIdx == -1)
+            {
+
+            }
+            // attribute defintion with a default
+            else
+            {
+
+            }
+
+        }
+        // dropping
+        else if (dropIdx != -1){
+            String tableName = args.substring(0, DROP_STR.length()).trim();
+
+            // figure out element we are dropping
+            String droppedAtr = args.substring(DROP_STR.length()).trim();
+
+            if(droppedAtr.isEmpty())
+                throw new DDLParserException(ALTER_TABLE_DROP_NO_ATR);
+
+            // call alterTableDrop(tableName, droppedAtr);
+
+        }
+        // erroring
+        else{
+            throw new DDLParserException(ALTER_TABLE_NO_ADD_DROP);
+        }
+
+    }
+
+    private void parseDropTableStatement(String args, int end) throws DDLParserException {
+
+        // remove semicolon
+        args = args.substring(0,end);
+
+        if(args.length() == 0){
+            throw new DDLParserException(DROP_TABLE_EMPTY_NAME);
+        }
+
+        // trim whitespace, and theres our table name WOW!
+        String tableName = args.trim();
+
+        // call drop(tableName);
 
     }
 
