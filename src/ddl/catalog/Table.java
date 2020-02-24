@@ -24,7 +24,7 @@ public class Table implements Serializable {
         for (Attribute attribute: attributes) {
             // use this loop to find 1 attribute of the table with a primary key constraint.
             // If there is more than one then error
-            if (attribute.hasConstraint(Constraint.PRIMARY_KEY)) {
+            if (attribute.hasConstraint(Constraint.PRIMARYKEY)) {
                 if (primaryKey == null) {
                     primaryKey = new HashSet<>() {{add(attribute);}};
                 } else {
