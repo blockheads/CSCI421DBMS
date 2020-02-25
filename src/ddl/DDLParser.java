@@ -38,8 +38,8 @@ public class DDLParser implements IDDLParser {
             "\n%s";
     private final static String STATEMENT_MISSING_SEMICOLON = "A statement is missing a semicolon. \n%s";
 
-    private final static String INVALID_DATATYPE = "A statement is attempting to specify a Datatype not supported by the" +
-            "database +%s";
+    private final static String INVALID_DATATYPE = "A statement is attempting to specify a Datatype not supported by the " +
+            "database %s";
 
     private final static String CREATE_TABLE_MISSING_PAREN = "A create table statement is missing a parenthesis. \n%s";
     private final static String CREATE_TABLE_MISSING_REFERENCES = "A create table statement is missing references keyword" +
@@ -162,7 +162,7 @@ public class DDLParser implements IDDLParser {
         if (iend == -1)
             throw new DDLParserException(String.format(CREATE_TABLE_MISSING_PAREN, statement));
 
-        String innerStatements = args.substring(ibeg,iend);
+        String innerStatements = args.substring(ibeg + 1,iend);
 
         // we can only have one primary key
         String[] primaryKeyData = null;
@@ -177,13 +177,21 @@ public class DDLParser implements IDDLParser {
         // then we split our inner statements by ,
         for(String innerStatement: innerStatements.split(",")){
 
+            // check we have a valid amount of parenthesis
+            int leftParenCount = innerStatement.length() - innerStatement.replaceAll("[(]","").length();
+            int rightParenCount = innerStatement.length() - innerStatement.replaceAll("[)]","").length();
+
+            if(leftParenCount != rightParenCount){
+                throw new DDLParserException(String.format( CREATE_TABLE_MISSING_PAREN, innerStatement));
+            }
+
             innerStatement = innerStatement.stripLeading();
 
             if(innerStatement.startsWith(PRIMARY_KEY_STR)){
 
                 // tsk, tsk tsk...
                 if(primaryKeyCount > 0){
-                    throw new DDLParserException(String.format(CREATE_TABLE_MULT_PKS, statement));
+                    throw new DDLParserException(String.format(CREATE_TABLE_MULT_PKS, innerStatement));
                 }
 
                 String primaryKeys = parseParentheses(statement, innerStatement);
@@ -194,10 +202,10 @@ public class DDLParser implements IDDLParser {
             }
             else if(innerStatement.startsWith(FOREIGN_KEY_STR)){
 
-                int refIndx = args.indexOf(REFERENCES_STR);
+                int refIndx = innerStatement.indexOf(REFERENCES_STR);
 
                 if (refIndx == -1)
-                    throw new DDLParserException( String.format(CREATE_TABLE_MISSING_REFERENCES, statement));
+                    throw new DDLParserException( String.format(CREATE_TABLE_MISSING_REFERENCES, innerStatement));
 
                 // similar to .split()
                 String foreignKeyStr = innerStatement.substring(0,refIndx);
@@ -212,8 +220,8 @@ public class DDLParser implements IDDLParser {
                 String[] foreignKeyRefArr = references.split("\\s+");
 
                 // and retrieve the table we are referencing
-                int pIndx = references.indexOf("(");
-                String referenceName = references.substring(0,pIndx).trim();
+                int pIndx = refStr.indexOf("(");
+                String referenceName = refStr.substring(0,pIndx).trim();
 
                 foreignKeysData.add(new ForeignKeyData(referenceName, foreignKeyArr, foreignKeyRefArr));
 
@@ -229,7 +237,7 @@ public class DDLParser implements IDDLParser {
                 String[] attributeData = innerStatement.split("\\s+");
 
                 if(attributeData.length < 2){
-                    throw new DDLParserException(String.format(CREATE_TABLE_INVALID_ATTRIBUTE_LEN, statement));
+                    throw new DDLParserException(String.format(CREATE_TABLE_INVALID_ATTRIBUTE_LEN, innerStatement));
                 }
 
                 // otherwise we assign it's name as the first index
@@ -249,7 +257,7 @@ public class DDLParser implements IDDLParser {
                         String constraintName = attributeData[i];
 
                         try{
-                            Constraint constraint = Constraint.valueOf(constraintName);
+                            Constraint constraint = Constraint.valueOf(constraintName.toUpperCase());
 
                             // check if the constraint is already defined
                             if(attribute.hasConstraint(constraint)){
@@ -259,7 +267,7 @@ public class DDLParser implements IDDLParser {
                             if(constraint.equals(Constraint.PRIMARYKEY)){
 
                                 if(primaryKeyCount > 0){
-                                    throw new DDLParserException(String.format(CREATE_TABLE_MULT_PKS, statement));
+                                    throw new DDLParserException(String.format(CREATE_TABLE_MULT_PKS, innerStatement));
                                 }
 
                                 // in this case our primary key data is this attribute
@@ -378,9 +386,6 @@ public class DDLParser implements IDDLParser {
 
     private void parseDropTableStatement(String statement, String args, int end) throws DDLParserException {
 
-        // remove semicolon
-        args = args.substring(0,end);
-
         if(args.length() == 0){
             throw new DDLParserException(String.format(DROP_TABLE_EMPTY_NAME, statement));
         }
@@ -411,7 +416,7 @@ public class DDLParser implements IDDLParser {
             throw new DDLParserException(String.format(CREATE_TABLE_MISSING_PAREN, statement));
 
         // rreturn the substring, trimming starting and ending whitespace
-        return args.substring(ibeg,iend).trim();
+        return args.substring(ibeg+1,iend).trim();
     }
 
 }
