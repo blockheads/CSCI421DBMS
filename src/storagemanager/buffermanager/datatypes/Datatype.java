@@ -63,4 +63,6 @@ public abstract class Datatype<E> implements Serializable {
     public String toString() {
         return type.toString();
     }
+
+    public abstract boolean validData(String data);
 }

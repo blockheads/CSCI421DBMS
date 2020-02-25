@@ -99,4 +99,9 @@ public class CharData extends Datatype<String>{
     public String toString() {
         return type + " " + maxChars;
     }
+
+    @Override
+    public boolean validData(String data) {
+        return data.length() <= maxChars;
+    }
 }

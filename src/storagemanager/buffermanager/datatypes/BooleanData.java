@@ -18,4 +18,10 @@ public class BooleanData extends StaticData<Boolean> {
     public Boolean toObject(byte[] attributes, int start) {
         return attributes[start] == 1;
     }
+
+
+    public boolean validData(String data){
+        data = data.toLowerCase().trim();
+        return data.equals("true") || data.equals("false");
+    }
 }

@@ -19,4 +19,15 @@ public class IntegerData extends StaticData<Integer> {
         ByteBuffer b = ByteBuffer.wrap(attributes, start, nextIndex());
         return b.getInt();
     }
+
+    @Override
+    public boolean validData(String data) {
+        try {
+            Integer.parseInt(data);
+        } catch(NumberFormatException | NullPointerException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
 }

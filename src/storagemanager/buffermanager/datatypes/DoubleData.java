@@ -20,4 +20,15 @@ public class DoubleData extends StaticData<Double> {
         ByteBuffer b = ByteBuffer.wrap(attributes, start, nextIndex());
         return b.getDouble();
     }
+
+    @Override
+    public boolean validData(String data) {
+        try {
+            Double.parseDouble(data);
+        } catch(NumberFormatException | NullPointerException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
 }
