@@ -3,6 +3,7 @@ package ddl;
 import ddl.catalog.Attribute;
 import ddl.catalog.Constraint;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.datatypes.DataTypeException;
 import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.datatypes.ValidDataTypes;
 
@@ -352,7 +353,11 @@ public class DDLParser implements IDDLParser {
                     // and then it's DataType must be resolved.
                     Datatype defaultData = ValidDataTypes.resolveType(attributeData[1]);
 
-                    if (!defaultData.validData(defaultVal)) {
+                    try {
+                        Object defaultValue = defaultData.parseData(defaultVal);
+                        // function call goes here
+
+                    } catch (DataTypeException e) {
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_DEFAULT, attributeData[3]));
                     }
 

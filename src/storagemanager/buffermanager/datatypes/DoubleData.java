@@ -22,13 +22,12 @@ public class DoubleData extends StaticData<Double> {
     }
 
     @Override
-    public boolean validData(String data) {
+    public Object parseData(String data) throws DataTypeException {
         try {
-            Double.parseDouble(data);
+            return Double.parseDouble(data);
         } catch(NumberFormatException | NullPointerException e) {
-            return false;
+            throw new DataTypeException("Invalid Double value. " + data);
         }
-        // only got here if we didn't return false
-        return true;
+
     }
 }

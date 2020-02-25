@@ -20,8 +20,14 @@ public class BooleanData extends StaticData<Boolean> {
     }
 
 
-    public boolean validData(String data){
+    public Object parseData(String data) throws DataTypeException {
         data = data.toLowerCase().trim();
-        return data.equals("true") || data.equals("false");
+        if(data.equals("true"))
+            return Boolean.TRUE;
+        else if(data.equals("false"))
+            return Boolean.FALSE;
+
+        throw new DataTypeException("Invalid boolean value. " + data);
     }
+
 }

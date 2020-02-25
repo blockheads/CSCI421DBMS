@@ -21,13 +21,12 @@ public class IntegerData extends StaticData<Integer> {
     }
 
     @Override
-    public boolean validData(String data) {
+    public Object parseData(String data) throws DataTypeException {
         try {
-            Integer.parseInt(data);
+            return Integer.parseInt(data);
         } catch(NumberFormatException | NullPointerException e) {
-            return false;
+            throw new DataTypeException("Invalid Integer value. " + data);
         }
-        // only got here if we didn't return false
-        return true;
+
     }
 }

@@ -64,5 +64,7 @@ public abstract class Datatype<E> implements Serializable {
         return type.toString();
     }
 
-    public abstract boolean validData(String data);
+    public abstract Object parseData(String data) throws DataTypeException;
+
+
 }
