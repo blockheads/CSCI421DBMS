@@ -48,5 +48,13 @@ public class DDLParserTests {
             e.printStackTrace();
         }
 
+        try{
+
+            parser.parseDDLstatement("alter table test drop blergh;");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 }

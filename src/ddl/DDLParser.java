@@ -64,6 +64,8 @@ public class DDLParser implements IDDLParser {
             "a attribute without a invalid amount of arguments. \n%s";
     private final static String ALTER_TABLE_INVALID_ATTRIBUTE_DEFAULT = "A alter table statement is attempting to alter " +
             "a attribute with a invalid default value. %s";
+    private final static String ALTER_TABLE_DROP_INVALID_LEN = "A alter table statement is attempting to drop a attribute" +
+            "with a invalid name.\n%s";
 
 
     public static DDLParser ddlParser = null;
@@ -104,15 +106,15 @@ public class DDLParser implements IDDLParser {
         // we check if we begin with a valid statement
         if(statement.startsWith(CREATE_TABLE_STATMENT)){
 
-            String args = statement.substring(CREATE_TABLE_STATMENT.length(), iend);
+            String args = statement.substring(CREATE_TABLE_STATMENT.length(), iend).trim();
             parseCreateTableStatement(statement, args);
         }
         else if(statement.startsWith(ALTER_TABLE_STATEMENT)){
-            String args = statement.substring(ALTER_TABLE_STATEMENT.length(), iend);
+            String args = statement.substring(ALTER_TABLE_STATEMENT.length(), iend).trim();
             parseAlterTableStatement(statement,args);
         }
         else if(statement.startsWith(DROP_TABLE_STATEMENT)){
-            String args = statement.substring(DROP_TABLE_STATEMENT.length(), iend);
+            String args = statement.substring(DROP_TABLE_STATEMENT.length(), iend).trim();
             parseDropTableStatement(statement, args, iend);
         }
         else {
@@ -369,7 +371,10 @@ public class DDLParser implements IDDLParser {
             String tableName = args.substring(0, DROP_STR.length()).trim();
 
             // figure out element we are dropping
-            String droppedAtr = args.substring(DROP_STR.length()).trim();
+            String droppedAtr = args.substring(dropIdx+DROP_STR.length()).trim();
+
+            if( droppedAtr.split("\\s+").length > 1)
+                throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_LEN,statement));
 
             if(droppedAtr.isEmpty())
                 throw new DDLParserException(String.format(ALTER_TABLE_DROP_NO_ATR, statement));
