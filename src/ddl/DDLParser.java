@@ -2,6 +2,7 @@ package ddl;
 
 import ddl.catalog.Attribute;
 import ddl.catalog.Constraint;
+import ddl.catalog.ForeignKeyData;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
 import storagemanager.buffermanager.datatypes.Datatype;
@@ -88,7 +89,7 @@ public class DDLParser implements IDDLParser {
     }
 
     @Override
-    public void parseDDLstatement(String statement) throws DDLParserException, StorageManagerException {
+    public void parseDDLstatement(String statement) throws DDLParserException {
 
         // convert to lowercase
         statement = statement.toLowerCase();
@@ -143,7 +144,7 @@ public class DDLParser implements IDDLParser {
      * @throws DDLParserException
      * @throws StorageManagerException
      */
-    private void parseCreateTableStatement(String statement, String args) throws DDLParserException, StorageManagerException {
+    private void parseCreateTableStatement(String statement, String args) throws DDLParserException {
         // strip any leading whitespace before the name
         args = args.stripLeading();
 
@@ -301,7 +302,7 @@ public class DDLParser implements IDDLParser {
 
     }
 
-    private void parseAlterTableStatement(String statement, String args) throws DDLParserException, StorageManagerException {
+    private void parseAlterTableStatement(String statement, String args) throws DDLParserException {
 
         int addIdx = args.indexOf(ADD_STR);
         int dropIdx = args.indexOf(DROP_STR);
@@ -365,7 +366,7 @@ public class DDLParser implements IDDLParser {
                 }
 
             }
-            catch (IllegalArgumentException e){
+            catch (IllegalArgumentException | StorageManagerException e){
                 throw new DDLParserException(String.format(INVALID_DATATYPE, attributeData[1].toUpperCase()));
             }
 
