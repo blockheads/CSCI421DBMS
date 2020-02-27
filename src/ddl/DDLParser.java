@@ -1,7 +1,7 @@
 package ddl;
 
-import ddl.catalog.Attribute;
-import ddl.catalog.Constraint;
+import database.Database;
+import ddl.catalog.*;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
 import storagemanager.buffermanager.datatypes.Datatype;
@@ -88,7 +88,7 @@ public class DDLParser implements IDDLParser {
     }
 
     @Override
-    public void parseDDLstatement(String statement) throws DDLParserException {
+    public void parseDDLstatement(String statement) throws DDLParserException, StorageManagerException {
 
         // convert to lowercase
         statement = statement.toLowerCase();
@@ -143,7 +143,7 @@ public class DDLParser implements IDDLParser {
      * @throws DDLParserException
      * @throws StorageManagerException
      */
-    private void parseCreateTableStatement(String statement, String args) throws DDLParserException {
+    private void parseCreateTableStatement(String statement, String args) throws DDLParserException, StorageManagerException {
         // strip any leading whitespace before the name
         args = args.stripLeading();
 
@@ -297,7 +297,25 @@ public class DDLParser implements IDDLParser {
 
         }
 
-        // call CreateTable(primaryKeyData, foreignKeyData, uniqueKeysData, attributes);
+
+        Table table = new Table(tableName, attributes);
+
+        // setting our primary key data
+        table.setPrimaryKey(primaryKeyData);
+
+        // set our foreign keys
+        for(ForeignKeyData foreignKeyData: foreignKeysData){
+            new ForeignKey(table, foreignKeyData.getAttributes(), foreignKeyData.getReferenceTable(),
+                    foreignKeyData.getReferences());
+        }
+
+        // add our uniques
+        for(String[] unique: uniqueKeysData){
+            table.addUnique(unique);
+        }
+
+        // adding our table to the catalog
+        Database.catalog.addTable(table);
 
     }
 
@@ -309,6 +327,9 @@ public class DDLParser implements IDDLParser {
         // adding
         if (addIdx != -1){
             String tableName = args.substring(0, addIdx).trim();
+
+            // get our table
+            Table table = Database.catalog.getTable(tableName);
 
             // add statement is everything after 'add'
             String addStatement = args.substring(addIdx + ADD_STR.length()).trim();
@@ -338,6 +359,8 @@ public class DDLParser implements IDDLParser {
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_LEN, statement));
 
                     attribute = new Attribute(attributeName,type);
+
+                    table.addAttribute(attribute);
                 }
                 // attribute defintion with a default
                 else {
@@ -355,13 +378,18 @@ public class DDLParser implements IDDLParser {
 
                     try {
                         Object defaultValue = defaultData.parseData(defaultVal);
+
+                        attribute = new Attribute(attributeName,type);
+
                         // function call goes here
+                        table.addAttribute(attribute);
 
                     } catch (DataTypeException e) {
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_DEFAULT, attributeData[3]));
                     }
 
                     // need to figure out way to store default value
+
                 }
 
             }
@@ -385,6 +413,7 @@ public class DDLParser implements IDDLParser {
                 throw new DDLParserException(String.format(ALTER_TABLE_DROP_NO_ATR, statement));
 
             // call alterTableDrop(tableName, droppedAtr);
+            Database.catalog.removeAttributeFromTable(tableName, droppedAtr);
 
         }
         // erroring
@@ -402,6 +431,8 @@ public class DDLParser implements IDDLParser {
 
         // trim whitespace, and theres our table name WOW!
         String tableName = args.trim();
+
+        Database.catalog.dropTable(tableName);
 
         // call drop(tableName);
 
