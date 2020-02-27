@@ -14,6 +14,7 @@ public class ForeignKey implements Serializable {
 
     private static String INSIGNIFICANT_ATTRIBUTES = "Foreign Keys need equal amount of attributes (size=%s) to references (size=%s)";
     private static String TABLE_DNE = "The table you are referencing (%s) does not exist.";
+    private static String CIRCULAR_FOREIGN_KEY = "A Foreign key cannot reference itself.";
 
     // <rname>
     private String referenceTable;
@@ -31,6 +32,7 @@ public class ForeignKey implements Serializable {
      * @throws DDLParserException Reference table dne, or types dont match
      */
     public ForeignKey(Table table, String[] attributes, String referenceTable, String[] references) throws DDLParserException {
+        if (table.getTableName().equals(referenceTable)) throw new DDLParserException(CIRCULAR_FOREIGN_KEY);
         if (references.length != attributes.length) throw new DDLParserException(String.format(INSIGNIFICANT_ATTRIBUTES, attributes.length, references.length));
         if (Database.catalog.getTable(referenceTable) == null) throw new DDLParserException(String.format(TABLE_DNE, referenceTable));
 
