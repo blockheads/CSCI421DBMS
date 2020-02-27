@@ -57,6 +57,15 @@ public class Database implements IDatabase{
 
     @Override
     public void terminateDatabase() {
-
+        try {
+            catalog.saveCatalog();
+        } catch (DDLParserException e) {
+            e.printStackTrace();
+        }
+        try {
+            storageManager.terminateDatabase();
+        } catch (StorageManagerException e) {
+            e.printStackTrace();
+        }
     }
 }
