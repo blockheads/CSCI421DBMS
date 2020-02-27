@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 // class for storing parsed foreign key data
-public class ForeignKeyData implements Serializable {
+public class ForeignKey implements Serializable {
 
     public String getReferenceTable() {
         return referenceTable;
@@ -42,7 +42,7 @@ public class ForeignKeyData implements Serializable {
      * @param references the attributes in the reference table
      * @throws DDLParserException Reference table dne, or types dont match
      */
-    public ForeignKeyData(Table table, String[] attributes, String referenceTable, String[] references) throws DDLParserException {
+    public ForeignKey(Table table, String[] attributes, String referenceTable, String[] references) throws DDLParserException {
         if (references.length != attributes.length) throw new DDLParserException("insignificat attributes");
         if (Database.catalog.getTable(referenceTable) == null) throw new DDLParserException("table dne");
 
@@ -70,8 +70,8 @@ public class ForeignKeyData implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ForeignKeyData)
-            return ((ForeignKeyData) obj).referenceTable.equals(referenceTable) &&  references.equals(((ForeignKeyData) obj).references) && attributes.equals(((ForeignKeyData) obj).attributes);
+        if (obj instanceof ForeignKey)
+            return ((ForeignKey) obj).referenceTable.equals(referenceTable) &&  references.equals(((ForeignKey) obj).references) && attributes.equals(((ForeignKey) obj).attributes);
         return false;
     }
 }

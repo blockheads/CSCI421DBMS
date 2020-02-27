@@ -19,7 +19,7 @@ public class Table implements Serializable {
      */
     private ArrayList<Attribute> primaryKey;
     private ArrayList<Set<Attribute>> uniques = new ArrayList<>();
-    private Set<ForeignKeyData> foreignKeys = new HashSet<>();
+    private Set<ForeignKey> foreignKeys = new HashSet<>();
 
     public Table(String tableName, ArrayList<Attribute> attributes) throws DDLParserException {
         this.tableName = tableName;
@@ -186,13 +186,13 @@ public class Table implements Serializable {
         }
     }
 
-    void addForeignKey(ForeignKeyData foreignKeyData) {
-        foreignKeys.add(foreignKeyData);
+    void addForeignKey(ForeignKey foreignKey) {
+        foreignKeys.add(foreignKey);
     }
 
     public void dropForeignKeysTo(String tableName) {
-        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
-            ForeignKeyData data = iterator.next();
+        for (Iterator<ForeignKey> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKey data = iterator.next();
             if (data.isReferencingTable(tableName)) {
                 foreignKeys.remove(data);
             }
@@ -200,15 +200,15 @@ public class Table implements Serializable {
     }
 
     void dropForeignsReferencing(String attribute) {
-        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
-            ForeignKeyData keyData = iterator.next();
+        for (Iterator<ForeignKey> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKey keyData = iterator.next();
             if (keyData.containsReference(attribute)) foreignKeys.remove(keyData);
         }
     }
 
     private void dropForeignsWithAttribute(String attribute) {
-        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
-            ForeignKeyData keyData = iterator.next();
+        for (Iterator<ForeignKey> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKey keyData = iterator.next();
             if (keyData.containsAttribute(attribute)) foreignKeys.remove(keyData);
         }
     }

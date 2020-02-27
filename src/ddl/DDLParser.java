@@ -2,7 +2,6 @@ package ddl;
 
 import ddl.catalog.Attribute;
 import ddl.catalog.Constraint;
-import ddl.catalog.ForeignKeyData;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
 import storagemanager.buffermanager.datatypes.Datatype;
