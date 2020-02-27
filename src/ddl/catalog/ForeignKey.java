@@ -11,6 +11,10 @@ import java.util.Objects;
 
 // class for storing foreign key data
 public class ForeignKey implements Serializable {
+
+    private static String INSIGNIFICANT_ATTRIBUTES = "Foreign Keys need equal amount of attributes (size=%s) to references (size=%s)";
+    private static String TABLE_DNE = "The table you are referencing (%s) does not exist.";
+
     // <rname>
     private String referenceTable;
     // (<r1>... <rN>):
@@ -27,8 +31,8 @@ public class ForeignKey implements Serializable {
      * @throws DDLParserException Reference table dne, or types dont match
      */
     public ForeignKey(Table table, String[] attributes, String referenceTable, String[] references) throws DDLParserException {
-        if (references.length != attributes.length) throw new DDLParserException("insignificat attributes");
-        if (Database.catalog.getTable(referenceTable) == null) throw new DDLParserException("table dne");
+        if (references.length != attributes.length) throw new DDLParserException(String.format(INSIGNIFICANT_ATTRIBUTES, attributes.length, references.length));
+        if (Database.catalog.getTable(referenceTable) == null) throw new DDLParserException(String.format(TABLE_DNE, referenceTable));
 
         this.referenceTable = referenceTable;
         this.references = new ArrayList<String>(Arrays.asList(references));

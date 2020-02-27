@@ -8,6 +8,16 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Table implements Serializable {
+
+    private static final String DUPLICATED_ATTR_FORMAT = "Attribute %s previously defined on table %s.";
+    private static final String DUPLICATED_NAME_ATTR_FORMAT = "Attribute %s shares a name with another attribute on table %s.";
+    private static final String ATTR_DNE_FORMAT = "Attribute %s is not defined on table %s.";
+    private static final String ATTR_PRIM_KEY_FORMAT = "Attribute %s is a primary key on table %s and cannot be dropped.";
+    private static final String PRIM_KEY_EXISTS_FORMAT = "Table %s already has a defined primary key %s.";
+    private static final String ATTR_DUPE_PRIM_KEY_FORMAT = "You can not have duplicate attributes in a primary key (%s).";
+    private static final String TYPE_MISMATCH_FORMAT = "Table %s attribute %s(%s) referencing table %s attribute %s(%s) do not have equal types.";
+
+
     private int tableID;
     private final String tableName;
     private final Set<Attribute> attributes;
@@ -24,8 +34,6 @@ public class Table implements Serializable {
     public Table(String tableName, ArrayList<Attribute> attributes) throws DDLParserException {
         this.tableName = tableName;
         this.attributes = new HashSet<>(attributes);
-        if (this.attributes.size() != attributes.size())
-            throw new DDLParserException("Duplicated attribute");
 
         for (int i = 0; i < attributes.size(); i++) {
             Attribute attribute = attributes.get(i);
@@ -37,7 +45,7 @@ public class Table implements Serializable {
                         add(attribute);
                     }};
                 } else {
-                    throw new DDLParserException(""); // multiple primary keys
+                    throw new DDLParserException(String.format(PRIM_KEY_EXISTS_FORMAT, tableName, primaryKeys())); // multiple primary keys
                 }
             }
 
@@ -47,6 +55,8 @@ public class Table implements Serializable {
                 }});
             }
 
+            if (attributeMap.containsKey(attribute.getName()))
+                throw new DDLParserException(String.format(DUPLICATED_NAME_ATTR_FORMAT, attribute.getName(), tableName));
             attributeMap.put(attribute.getName(), attribute);
             attributeIndices.put(attribute, i);
         }
@@ -125,14 +135,6 @@ public class Table implements Serializable {
         return primaryKey != null;
     }
 
-    public boolean partOfPrimaryKey(String name) throws DDLParserException {
-        if (attributeMap.containsKey(name)) {
-            return primaryKey.contains(attributeMap.get(name));
-        } else {
-            throw new DDLParserException(""); // attribute does not exist
-        }
-    }
-
     /**
      * Get an attribute in the table if it exists
      * @param name the name of the attribute
@@ -150,24 +152,23 @@ public class Table implements Serializable {
     public void setPrimaryKey(String[] names) throws DDLParserException {
         if (primaryKey != null)
             throw new DDLParserException(""); // attempt to define multiple primary keys
-        primaryKey = new ArrayList<>();
+        Set<Attribute> primaryKey = new HashSet<>();
         for (String name: names) {
-            if (attributeMap.containsKey(name)) {
-                primaryKey.add(attributeMap.get(name));
+            containsAttribute(name);
+            if (primaryKey.contains(attributeMap.get(name))) {
+                throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
             } else {
-                primaryKey = null;
-                throw new DDLParserException(""); // attribute with given name does not exist
+                primaryKey.add(attributeMap.get(name));
             }
         }
+        this.primaryKey = new ArrayList<>(primaryKey);
     }
 
     public void addUnique(String[] names) throws DDLParserException {
         final Set<Attribute> attributes = new HashSet<>();
         for (String name: names) {
-            if (attributeMap.containsKey(name)) {
-                attributes.add(attributeMap.get(name));
-            } else
-                throw new DDLParserException("");
+            containsAttribute(name);
+            attributes.add(attributeMap.get(name));
         }
         uniques.add(attributes);
     }
@@ -177,11 +178,13 @@ public class Table implements Serializable {
             String attribute = attributes.get(i);
             String reference = references.get(i);
 
-            if (!table.attributeMap.containsKey(reference)) throw new DDLParserException("");
-            if (!attributeMap.containsKey(attribute)) throw new DDLParserException("");
+            table.containsAttribute(reference);
+            containsAttribute(attribute);
 
             if (!attributeMap.get(attribute).sameType(table.attributeMap.get(reference).getDataType())) {
-                throw new DDLParserException(""); // type mismatch
+                throw new DDLParserException(
+                        String.format(TYPE_MISMATCH_FORMAT, tableName, attribute, attributeMap.get(attribute).getDataType(),
+                        table.tableName, reference, table.attributeMap.get(attribute).getDataType())); // type mismatch
             }
         }
     }
@@ -214,15 +217,13 @@ public class Table implements Serializable {
     }
 
     void dropAttribute(String name) throws DDLParserException {
-        if (attributeMap.containsKey(name)) {
+        if (containsAttribute(name)) {
             if (primaryKey.contains(attributeMap.get(name))) {
-                throw new DDLParserException(""); //cant drop primary keys
+                throw new DDLParserException(String.format(ATTR_PRIM_KEY_FORMAT, name, tableName)); //cant drop primary keys
             }
             Attribute attribute = attributeMap.remove(name);
             removeUniques(attribute);
             dropForeignsWithAttribute(name);
-        } else {
-            throw new DDLParserException("");
         }
     }
 
@@ -237,8 +238,34 @@ public class Table implements Serializable {
         if (!attributeMap.containsKey(attribute.getName())) {
             attributeMap.put(attribute.getName(), attribute);
         } else {
-            throw new DDLParserException("");
+            throw new DDLParserException(String.format(DUPLICATED_ATTR_FORMAT, attribute.getName(), tableName));
         }
+    }
+
+    private boolean containsAttribute(String name) throws DDLParserException {
+        if (attributeMap.containsKey(name)) return true;
+        throw new DDLParserException(String.format(ATTR_DNE_FORMAT, name, tableName));
+    }
+
+    private String arrayToString(String[] arry) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        for (int i = 0; i < arry.length && builder.append(", ") != null; i++) {
+            builder.append(arry[i]);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
+    private String primaryKeys() {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        for (Iterator<Attribute> iterator = primaryKey.iterator(); iterator.hasNext() && builder.append(", ") != null; ) {
+            Attribute key = iterator.next();
+            builder.append(key.getName());
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
     @Override

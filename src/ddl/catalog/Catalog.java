@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Catalog implements Serializable {
+
+    private static String TABLE_DOES_NOT_EXIST = "The table (%s) does not exist.";
+
     private static Catalog catalog;
 
     private final Map<String, Table> tables;
@@ -127,7 +130,7 @@ public class Catalog implements Serializable {
                 rtable.dropForeignsReferencing(attribute);
             }
         } else {
-            throw new DDLParserException("table dne");
+            throw new DDLParserException(String.format(TABLE_DOES_NOT_EXIST, table));
         }
     }
 
