@@ -9,6 +9,7 @@ import java.util.*;
 
 public class Table implements Serializable {
     private int tableID;
+    private final String tableName;
     private final Set<Attribute> attributes;
     private final Map<Attribute, Integer> attributeIndices = new HashMap<>();
     private final Map<String, Attribute> attributeMap = new HashMap<>();
@@ -18,9 +19,10 @@ public class Table implements Serializable {
      */
     private ArrayList<Attribute> primaryKey;
     private ArrayList<Set<Attribute>> uniques = new ArrayList<>();
-    private ArrayList<ArrayList<Attribute>> foreignKeys = new ArrayList<>();
+    private Set<ForeignKeyData> foreignKeys = new HashSet<>();
 
-    public Table(ArrayList<Attribute> attributes) throws DDLParserException {
+    public Table(String tableName, ArrayList<Attribute> attributes) throws DDLParserException {
+        this.tableName = tableName;
         this.attributes = new HashSet<>(attributes);
         if (this.attributes.size() != attributes.size())
             throw new DDLParserException("Duplicated attribute");
@@ -56,6 +58,18 @@ public class Table implements Serializable {
      */
     void setTableID(int tableID) {
         this.tableID = tableID;
+    }
+
+    /**
+     * get the id of the table
+     * @return the tables underlying id, used in the storage manager
+     */
+    int getTableID() {
+        return tableID;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     /**
@@ -120,6 +134,15 @@ public class Table implements Serializable {
     }
 
     /**
+     * Get an attribute in the table if it exists
+     * @param name the name of the attribute
+     * @return the attribute or null
+     */
+    public Attribute getAttribute(String name) {
+        return attributeMap.get(name);
+    }
+
+    /**
      * Create a primary key from a constraint
      * @param names the names of the attributes in the key
      * @throws DDLParserException primary key already defined, or attribute in primary key constraint dne
@@ -147,5 +170,86 @@ public class Table implements Serializable {
                 throw new DDLParserException("");
         }
         uniques.add(attributes);
+    }
+
+    void typeMatch(List<String> attributes, Table table, List<String> references) throws DDLParserException {
+        for (int i = 0; i < attributes.size(); i++) {
+            String attribute = attributes.get(i);
+            String reference = references.get(i);
+
+            if (!table.attributeMap.containsKey(reference)) throw new DDLParserException("");
+            if (!attributeMap.containsKey(attribute)) throw new DDLParserException("");
+
+            if (!attributeMap.get(attribute).sameType(table.attributeMap.get(reference).getDataType())) {
+                throw new DDLParserException(""); // type mismatch
+            }
+        }
+    }
+
+    void addForeignKey(ForeignKeyData foreignKeyData) {
+        foreignKeys.add(foreignKeyData);
+    }
+
+    public void dropForeignKeysTo(String tableName) {
+        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKeyData data = iterator.next();
+            if (data.isReferencingTable(tableName)) {
+                foreignKeys.remove(data);
+            }
+        }
+    }
+
+    void dropForeignsReferencing(String attribute) {
+        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKeyData keyData = iterator.next();
+            if (keyData.containsReference(attribute)) foreignKeys.remove(keyData);
+        }
+    }
+
+    private void dropForeignsWithAttribute(String attribute) {
+        for (Iterator<ForeignKeyData> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
+            ForeignKeyData keyData = iterator.next();
+            if (keyData.containsAttribute(attribute)) foreignKeys.remove(keyData);
+        }
+    }
+
+    void dropAttribute(String name) throws DDLParserException {
+        if (attributeMap.containsKey(name)) {
+            if (primaryKey.contains(attributeMap.get(name))) {
+                throw new DDLParserException(""); //cant drop primary keys
+            }
+            Attribute attribute = attributeMap.remove(name);
+            removeUniques(attribute);
+            dropForeignsWithAttribute(name);
+        } else {
+            throw new DDLParserException("");
+        }
+    }
+
+    private void removeUniques(Attribute attribute) {
+        for (Iterator<Set<Attribute>> iterator = uniques.iterator(); iterator.hasNext(); ) {
+            Set<Attribute> unique = iterator.next();
+            if (unique.contains(attribute)) uniques.remove(unique);
+        }
+    }
+
+    public void addAttribute(Attribute attribute) throws DDLParserException {
+        if (!attributeMap.containsKey(attribute.getName())) {
+            attributeMap.put(attribute.getName(), attribute);
+        } else {
+            throw new DDLParserException("");
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Table)
+            return tableID == ((Table) obj).tableID;
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tableID);
     }
 }

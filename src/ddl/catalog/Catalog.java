@@ -2,6 +2,7 @@ package ddl.catalog;
 
 import ddl.DDLParser;
 import ddl.DDLParserException;
+import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.diskUtils.DataManager;
 
 import java.io.IOException;
@@ -71,17 +72,43 @@ public class Catalog implements Serializable {
     }
 
     /**
-     * Add a table to the catalog
+     * Add a table to the catalog.
      * @return true if the table did not exist
+     * @throws StorageManagerException an underlying table with the same id already exists
      */
-    public boolean addTable(String tableName, Table table) {
-        if (tables.get(tableName) != null) {
-            tables.put(tableName, table);
-            table.setTableID(idGenerator.getNewID());
-            return true;
-        } else {
-            return false;
-        }
+    public boolean addTable(Table table) throws StorageManagerException {
+        if (tables.containsKey(table.getTableName())) return false;
+        addTable(table, idGenerator.getNewID());
+        return true;
+    }
+
+    /**
+     * Replace a table in the catalog for a table with the same id
+     *
+     * // TODO: I dont think this needs to ever be used, just use a combination of get table and drop/add attribute
+     * // TODO: then get the tables records, modify, table.drop, table.create, storagemanager.insert
+     *
+     * @param table the table to replace. The tables should have the same name
+     * @return if the table was replaced
+     * @throws StorageManagerException no table to replace
+     */
+    public boolean replaceTable(Table table) throws StorageManagerException {
+        if (!tables.containsKey(table.getTableName())) return false;
+        table.dropTable();
+        addTable(table, tables.get(table.getTableName()).getTableID());
+        return true;
+    }
+
+    /**
+     * Add or replace a table in the catalog.
+     * @param table the table to place
+     * @param tableID the id the table should have
+     * @post a table is added to the catalog even if it overwrites another
+     */
+    private void addTable(Table table, int tableID) throws StorageManagerException {
+        table.setTableID(tableID);
+        table.createTable();
+        tables.put(table.getTableName(), table);
     }
 
     /**
@@ -93,6 +120,17 @@ public class Catalog implements Serializable {
         return tables.getOrDefault(tableName, null);
     }
 
+    public void removeAttributeFromTable(String table, String attribute) throws DDLParserException {
+        if (tables.containsKey(table)) {
+            tables.get(table).dropAttribute(attribute);
+            for (Table rtable: tables.values()) {
+                rtable.dropForeignsReferencing(attribute);
+            }
+        } else {
+            throw new DDLParserException("table dne");
+        }
+    }
+
     /**
      * Drop a table from the catalog
      * @param tableName the name of the table
@@ -101,6 +139,11 @@ public class Catalog implements Serializable {
     public boolean dropTable(String tableName) {
         if (tables.get(tableName) != null) {
             tables.remove(tableName);
+
+            for (String name: tables.keySet()) {
+                tables.get(name).dropForeignKeysTo(tableName);
+            }
+
             return true;
         } else {
             return false;

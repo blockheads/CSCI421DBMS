@@ -5,6 +5,7 @@ import storagemanager.buffermanager.datatypes.ValidDataTypes;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class Attribute implements Serializable {
@@ -42,15 +43,19 @@ public class Attribute implements Serializable {
         return dataType;
     }
 
+    public boolean sameType(ValidDataTypes dataType) {
+        return dataType.equals(this.dataType);
+    }
+
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return Objects.hash(name, dataType);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Attribute) {
-            return ((Attribute) obj).name.equals(name);
+            return ((Attribute) obj).name.equals(name) && ((Attribute) obj).dataType.equals(dataType);
         }
         return false;
     }
