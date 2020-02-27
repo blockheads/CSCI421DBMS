@@ -87,10 +87,6 @@ public class Catalog implements Serializable {
 
     /**
      * Replace a table in the catalog for a table with the same id
-     *
-     * // TODO: I dont think this needs to ever be used, just use a combination of get table and drop/add attribute
-     * // TODO: then get the tables records, modify, table.drop, table.create, storagemanager.insert
-     *
      * @param table the table to replace. The tables should have the same name
      * @return if the table was replaced
      * @throws StorageManagerException no table to replace

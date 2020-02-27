@@ -107,6 +107,15 @@ public class Table implements Serializable {
         Database.storageManager.addTable(tableID, generateDatatype(), generateKeyIndices());
     }
 
+    /**
+     * Add a record to the underlying table
+     * @param record the record to add
+     * @throws StorageManagerException inserting the record failed
+     */
+    public void addRecord(Object[] record) throws StorageManagerException {
+        Database.storageManager.insertRecord(tableID, record);
+    }
+
     private String[] generateDatatype() {
         String[] dataTypes = new String[attributes.size()];
         int i = 0;
