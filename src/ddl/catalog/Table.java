@@ -233,6 +233,11 @@ public class Table implements Serializable {
             Attribute attribute = attributeMap.remove(name);
             attributes.remove(attribute);
             int index = attributeIndices.remove(attribute);
+            attributeIndices.forEach((attr, integer) -> {
+                if (integer > index) {
+                    attributeIndices.put(attr, --integer);
+                }
+            });
             removeUniques(attribute);
             dropForeignsWithAttribute(name);
             return index;
