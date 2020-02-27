@@ -225,15 +225,19 @@ public class Table implements Serializable {
         }
     }
 
-    void dropAttribute(String name) throws DDLParserException {
+    int dropAttribute(String name) throws DDLParserException {
         if (containsAttribute(name)) {
             if (primaryKey.contains(attributeMap.get(name))) {
                 throw new DDLParserException(String.format(ATTR_PRIM_KEY_FORMAT, name, tableName)); //cant drop primary keys
             }
             Attribute attribute = attributeMap.remove(name);
+            attributes.remove(attribute);
+            int index = attributeIndices.remove(attribute);
             removeUniques(attribute);
             dropForeignsWithAttribute(name);
+            return index;
         }
+        return -1;
     }
 
     private void removeUniques(Attribute attribute) {
@@ -246,6 +250,8 @@ public class Table implements Serializable {
     public void addAttribute(Attribute attribute) throws DDLParserException {
         if (!attributeMap.containsKey(attribute.getName())) {
             attributeMap.put(attribute.getName(), attribute);
+            attributes.add(attribute);
+            attributeIndices.put(attribute, attributeIndices.size());
         } else {
             throw new DDLParserException(String.format(DUPLICATED_ATTR_FORMAT, attribute.getName(), tableName));
         }

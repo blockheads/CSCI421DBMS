@@ -119,12 +119,20 @@ public class Catalog implements Serializable {
         return tables.getOrDefault(tableName, null);
     }
 
-    public void removeAttributeFromTable(String table, String attribute) throws DDLParserException {
+    /**
+     * Remove an attribute from the table
+     * @param table the table name
+     * @param attribute the name of the attribute
+     * @return the index that the attribute was removed from
+     * @throws DDLParserException the attribute or table dne
+     */
+    public int removeAttributeFromTable(String table, String attribute) throws DDLParserException {
         if (tables.containsKey(table)) {
-            tables.get(table).dropAttribute(attribute);
+            int location = tables.get(table).dropAttribute(attribute);
             for (Table rtable: tables.values()) {
                 rtable.dropForeignsReferencing(attribute);
             }
+            return location;
         } else {
             throw new DDLParserException(String.format(TABLE_DOES_NOT_EXIST, table));
         }
