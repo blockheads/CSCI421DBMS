@@ -12,13 +12,13 @@ public class DDLParserTests {
         IDDLParser parser = DDLParser.createParser();
         assert parser != null;
 
-//        // create table test
-//        try{
-//            parser.parseDDLstatement("create table bazzle( baz double PRIMARYKEY);");
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//        }
+        // create table test
+        try{
+            parser.parseDDLstatement("create table bazzle( baz double PRIMARYKEY);");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         // a little more advanced
         try{

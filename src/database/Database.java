@@ -45,7 +45,7 @@ public class Database implements IDatabase{
     public void executeNonQuery(String statement) {
         try {
             parser.parseDDLstatement(statement);
-        } catch (DDLParserException e) {
+        } catch (DDLParserException | StorageManagerException e ) {
             System.err.println(e.getLocalizedMessage());
         }
     }
