@@ -10,12 +10,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Catalog implements Serializable {
-    public static Catalog catalog;
+    private static Catalog catalog;
 
     private final Map<String, Table> tables;
 
-    public Catalog() {
+    private Catalog() {
         tables = new HashMap<>();
+    }
+
+    public static Catalog newCatalog() {
+        if (catalog != null) return catalog;
+        catalog = new Catalog();
+        return catalog;
     }
 
     /**
@@ -23,12 +29,14 @@ public class Catalog implements Serializable {
      * @pre a database has previously been created. The storagemanager has already been loaded
      * @throws DDLParserException a catalog has never been created for this database
      */
-    public static void loadCatalog() throws DDLParserException {
+    public static Catalog loadCatalog() throws DDLParserException {
+        if (catalog != null) return catalog;
         try {
             catalog = DataManager.getCatalog();
         } catch (IOException e) {
             throw new DDLParserException(DDLParser.CANNOT_LOAD_CATALOG);
         }
+        return catalog;
     }
 
     /**
