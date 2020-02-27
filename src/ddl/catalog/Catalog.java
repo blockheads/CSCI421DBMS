@@ -13,9 +13,11 @@ public class Catalog implements Serializable {
     private static Catalog catalog;
 
     private final Map<String, Table> tables;
+    private final TableIDGenerator idGenerator;
 
     private Catalog() {
         tables = new HashMap<>();
+        idGenerator = new TableIDGenerator();
     }
 
     public static Catalog newCatalog() {
@@ -75,6 +77,7 @@ public class Catalog implements Serializable {
     public boolean addTable(String tableName, Table table) {
         if (tables.get(tableName) != null) {
             tables.put(tableName, table);
+            table.setTableID(idGenerator.getNewID());
             return true;
         } else {
             return false;
