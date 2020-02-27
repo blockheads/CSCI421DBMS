@@ -22,7 +22,7 @@ public class Database implements IDatabase{
         try {
             storageManager = new StorageManager(dbLoc, pageBufferSize, pageSize, false);
         } catch (StorageManagerException e) {
-            System.err.println("Storage manager could not be started");
+            System.err.println(e.getLocalizedMessage());
         }
         catalog = Catalog.createOrLoadCatalog();
         parser = DDLParser.createParser();
