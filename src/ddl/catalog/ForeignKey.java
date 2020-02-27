@@ -9,24 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-// class for storing parsed foreign key data
+// class for storing foreign key data
 public class ForeignKey implements Serializable {
-
-    public String getReferenceTable() {
-        return referenceTable;
-    }
-    public boolean isReferencingTable(String name) {
-        return referenceTable.equals(name);
-    }
-
-    public List<String> getReferences() {
-        return references;
-    }
-
-    public List<String> getAttributes() {
-        return attributes;
-    }
-
     // <rname>
     private String referenceTable;
     // (<r1>... <rN>):
@@ -53,6 +37,10 @@ public class ForeignKey implements Serializable {
         table.typeMatch(this.attributes, Database.catalog.getTable(referenceTable), this.references);
 
         table.addForeignKey(this);
+    }
+
+    public boolean isReferencingTable(String name) {
+        return referenceTable.equals(name);
     }
 
     public boolean containsAttribute(String name) {
