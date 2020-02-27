@@ -1,3 +1,11 @@
+import ddl.DDLParser;
+import ddl.DDLParserException;
+import ddl.IDDLParser;
+import ddl.catalog.Catalog;
+import storagemanager.AStorageManager;
+import storagemanager.StorageManager;
+import storagemanager.StorageManagerException;
+
 import java.util.Objects;
 
 /**
@@ -5,11 +13,20 @@ import java.util.Objects;
  */
 
 public class Database implements IDatabase{
-
     public static Database database = null;
+    public static AStorageManager storageManager;
+    public static Catalog catalog;
+    public static IDDLParser parser;
 
-
-    private Database() {}
+    private Database(String dbLoc, int pageBufferSize, int pageSize) {
+        try {
+            storageManager = new StorageManager(dbLoc, pageBufferSize, pageSize, false);
+        } catch (StorageManagerException e) {
+            System.err.println("Storage manager could not be started");
+        }
+        catalog = Catalog.createOrLoadCatalog();
+        parser = DDLParser.createParser();
+    }
 
     /**
      * Static function that will create/restart and return a database
@@ -19,18 +36,18 @@ public class Database implements IDatabase{
      * @return an instance of an IDatabase.
      */
     public static IDatabase getConnection(String dbLoc, int pageBufferSize, int pageSize ){
-        if (database != null) {
-            System.err.println("You cannot create more than one connection");
-            return null;
-        }
-
-        database = new Database();
+        if (database != null) return database;
+        database = new Database(dbLoc, pageBufferSize, pageSize);
         return database;
     }
 
     @Override
     public void executeNonQuery(String statement) {
-
+        try {
+            parser.parseDDLstatement(statement);
+        } catch (DDLParserException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     @Override

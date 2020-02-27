@@ -28,6 +28,7 @@ public class Catalog implements Serializable {
      * Load a catalog from disk. The storage manager should already be initialized.
      * @pre a database has previously been created. The storagemanager has already been loaded
      * @throws DDLParserException a catalog has never been created for this database
+     * @return the catalog for this database
      */
     public static Catalog loadCatalog() throws DDLParserException {
         if (catalog != null) return catalog;
@@ -35,6 +36,22 @@ public class Catalog implements Serializable {
             catalog = DataManager.getCatalog();
         } catch (IOException e) {
             throw new DDLParserException(DDLParser.CANNOT_LOAD_CATALOG);
+        }
+        return catalog;
+    }
+
+    /**
+     * Try to load a catalog from disk, If this cannot be done then create a new one.
+     * // Todo: I am unsure how a database is supposed to be deleted or created from scratch.
+     * // Todo: in storage manager there is a restart parameter but that is missing from creating a database.
+     * @return a catalog for the database to use
+     */
+    public static Catalog createOrLoadCatalog() {
+        if (catalog != null) return catalog;
+        try {
+            catalog = loadCatalog();
+        } catch (DDLParserException e) {
+            catalog = newCatalog();
         }
         return catalog;
     }
