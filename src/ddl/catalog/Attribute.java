@@ -38,6 +38,10 @@ public class Attribute implements Serializable {
         return constraints.contains(constraint);
     }
 
+    public ValidDataTypes getDataType() {
+        return dataType;
+    }
+
     @Override
     public int hashCode() {
         return name.hashCode();
