@@ -1,3 +1,5 @@
+package database;
+
 import ddl.DDLParser;
 import ddl.DDLParserException;
 import ddl.IDDLParser;
@@ -5,8 +7,6 @@ import ddl.catalog.Catalog;
 import storagemanager.AStorageManager;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
-
-import java.util.Objects;
 
 /**
  * Class to create and access a database.
@@ -33,7 +33,7 @@ public class Database implements IDatabase{
      * @param dbLoc the location to start/restart the database in
      * @param pageBufferSize the size of the page buffer; max number of pages allowed in the buffer at any given time
      * @param pageSize the size of a page in bytes
-     * @return an instance of an IDatabase.
+     * @return an instance of an database.IDatabase.
      */
     public static IDatabase getConnection(String dbLoc, int pageBufferSize, int pageSize ){
         if (database != null) return database;
