@@ -395,7 +395,7 @@ public class DDLParser implements IDDLParser {
                         Object[] extendedRec = new Object[record.length + 1];
                         System.arraycopy(record, 0, extendedRec, 0, record.length);
                         extendedRec[record.length] = null;
-                        table.addRecord(record);
+                        table.addRecord(extendedRec);
                     }
 
                 }
@@ -427,7 +427,7 @@ public class DDLParser implements IDDLParser {
                             Object[] extendedRec = new Object[record.length + 1];
                             System.arraycopy(record, 0, extendedRec, 0, record.length);
                             extendedRec[record.length] = defaultValue;
-                            table.addRecord(record);
+                            table.addRecord(extendedRec);
                         }
 
 
@@ -482,7 +482,7 @@ public class DDLParser implements IDDLParser {
                         j++;
                     }
                 }
-                table.addRecord(record);
+                table.addRecord(reducedRec);
             }
 
         }
