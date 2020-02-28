@@ -9,15 +9,15 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Attribute implements Serializable {
-    private final ValidDataTypes dataType;
+    private final String dataType;
     private final String name;
     private final Set<Constraint> constraints;
 
-    public Attribute(String name, ValidDataTypes dataType) {
+    public Attribute(String name, String dataType) {
         this(name, dataType, new Constraint[]{});
     }
 
-    public Attribute(String name, ValidDataTypes dataType, Constraint... constraint) {
+    public Attribute(String name, String dataType, Constraint... constraint) {
         this.name = name;
         this.dataType = dataType;
         this.constraints = new HashSet<>(){{addAll(Arrays.asList(constraint));}};
@@ -39,11 +39,11 @@ public class Attribute implements Serializable {
         return constraints.contains(constraint);
     }
 
-    public ValidDataTypes getDataType() {
+    public String getDataType() {
         return dataType;
     }
 
-    public boolean sameType(ValidDataTypes dataType) {
+    public boolean sameType(String dataType) {
         return dataType.equals(this.dataType);
     }
 

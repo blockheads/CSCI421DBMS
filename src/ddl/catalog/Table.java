@@ -121,7 +121,7 @@ public class Table implements Serializable {
         int i = 0;
         for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext(); i++) {
             Attribute attribute = iterator.next();
-            dataTypes[i] = attribute.getDataType().toString();
+            dataTypes[i] = attribute.getDataType();
         }
         return dataTypes;
     }
