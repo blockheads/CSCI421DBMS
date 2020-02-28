@@ -166,11 +166,11 @@ public class Table implements Serializable {
         Set<Attribute> primaryKey = new HashSet<>();
         for (String name: names) {
             containsAttribute(name);
-//            if (primaryKey.contains(attributeMap.get(name))) {
-//                throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
-//            } else {
-//                primaryKey.add(attributeMap.get(name));
-//            }
+            if (primaryKey.contains(attributeMap.get(name))) {
+                throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
+            } else {
+                primaryKey.add(attributeMap.get(name));
+            }
         }
         this.primaryKey = new ArrayList<>(primaryKey);
     }
@@ -248,10 +248,12 @@ public class Table implements Serializable {
     }
 
     private void removeUniques(Attribute attribute) {
-        for (Iterator<Set<Attribute>> iterator = uniques.iterator(); iterator.hasNext(); ) {
-            Set<Attribute> unique = iterator.next();
-            if (unique.contains(attribute)) uniques.remove(unique);
-        }
+//        for (Iterator<Set<Attribute>> iterator = uniques.iterator(); iterator.hasNext(); ) {
+//            Set<Attribute> unique = iterator.next();
+//            if (unique.contains(attribute)) uniques.remove(unique);
+//        }
+
+        uniques.removeIf(attr -> attr.contains(attribute));
     }
 
     public void addAttribute(Attribute attribute) throws DDLParserException {
