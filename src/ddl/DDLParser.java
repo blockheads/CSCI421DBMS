@@ -338,7 +338,7 @@ public class DDLParser implements IDDLParser {
 
     }
 
-    private void parseAlterTableStatement(String statement, String args) throws DDLParserException {
+    private void parseAlterTableStatement(String statement, String args) throws DDLParserException, StorageManagerException {
 
         int addIdx = args.indexOf(ADD_STR);
         int dropIdx = args.indexOf(DROP_STR);
@@ -379,7 +379,23 @@ public class DDLParser implements IDDLParser {
 
                     attribute = new Attribute(attributeName,type);
 
+                    //get the table from catalog
+                    //Call addAttribute, if no error continue
+                    //Call getRecords
+                    //Call Catalog replace table with the same table that you got previously
+
+
                     table.addAttribute(attribute);
+                    Object[][] tableRec = table.getRecords();
+                    Database.catalog.replaceTable(table);
+                    for(Object[] record: tableRec){
+                        //Call tables insert record with each record array in get records extended with null value
+                        Object[] extendedRec = new Object[record.length + 1];
+                        System.arraycopy(record, 0, extendedRec, 0, record.length);
+                        extendedRec[record.length] = null;
+                        table.addRecord(record);
+                    }
+
                 }
                 // attribute defintion with a default
                 else {
@@ -402,6 +418,16 @@ public class DDLParser implements IDDLParser {
 
                         // function call goes here
                         table.addAttribute(attribute);
+                        Object[][] tableRec = table.getRecords();
+                        Database.catalog.replaceTable(table);
+                        for(Object[] record: tableRec){
+                            //Call tables insert record with each record array in get records extended with new value
+                            Object[] extendedRec = new Object[record.length + 1];
+                            System.arraycopy(record, 0, extendedRec, 0, record.length);
+                            extendedRec[record.length] = defaultData;
+                            table.addRecord(record);
+                        }
+
 
                     } catch (DataTypeException e) {
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_DEFAULT, attributeData[3]));
@@ -431,8 +457,31 @@ public class DDLParser implements IDDLParser {
             if(droppedAtr.isEmpty())
                 throw new DDLParserException(String.format(ALTER_TABLE_DROP_NO_ATR, statement));
 
+            //Get the table from the catalog
+            //Call  Catalog.removeAttributeFromTable, This gives you an index of the attribute dropped, The function fails if attribute dne or is a primary key
+            //Call getRecords on table
+            //Call Catalog with replace table with the same table that that you got previously
+            //Call tables insert record with each record array from the get records but with the index gotten previously removed
+
+            Table table = Database.catalog.getTable(tableName);
+
             // call alterTableDrop(tableName, droppedAtr);
-            Database.catalog.removeAttributeFromTable(tableName, droppedAtr);
+            int idx = Database.catalog.removeAttributeFromTable(tableName, droppedAtr);
+
+            Object[][] tableRec = table.getRecords();
+            Database.catalog.replaceTable(table);
+            for(Object[] record: tableRec){
+                //Call tables insert record with each record array in get records extended with new value
+                Object[] reducedRec = new Object[record.length- 1];
+                int j = 0;
+                for(int i=0; i<record.length; i++){
+                    if(i != idx){
+                        reducedRec[j] = record[i];
+                        j++;
+                    }
+                }
+                table.addRecord(record);
+            }
 
         }
         // erroring
