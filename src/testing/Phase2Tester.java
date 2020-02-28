@@ -3,6 +3,7 @@ package testing;
 import database.Database;
 import database.IDatabase;
 import ddl.DDLParserException;
+import ddl.catalog.Table;
 import storagemanager.AStorageManager;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
@@ -331,6 +332,64 @@ public class Phase2Tester {
         } catch (StorageManagerException e) {
             System.out.println("dropped successfully");
         }
+
+
+        // some extra tests leaving these commented out, just manually debug step over to see foreign key debug
+        // info in table output.
+        /*
+        System.out.println("Test drop Table drops foreign keys...");
+
+        database.executeNonQuery(createTable1);
+        database.executeNonQuery(createTable2);
+
+        // dropping table 2
+        Table table = Database.catalog.getTable("baz");
+        database.executeNonQuery(drop1);
+        table = Database.catalog.getTable("baz");
+
+        // recreating foo
+        database.executeNonQuery(createTable1);
+
+        String createTable3 = "CREATE TABLE woo(" +
+                "id INTEGER PRIMARYKEY," +
+                "testkey INTEGER," +
+                "department varchar(60)," +
+                "unique( department )," +
+                "foreignkey( id ) references foo( testkey )" +
+                ");";
+
+        database.executeNonQuery(createTable3);
+        table = Database.catalog.getTable("woo");
+
+        String alterTable3 = "alter table woo drop testkey;";
+
+        // dropping test key should drop foreign key
+        database.executeNonQuery(alterTable3);
+
+        table = Database.catalog.getTable("woo");
+
+        String drop3 = "drop table woo;";
+
+        // just reseting woo
+        database.executeNonQuery(drop3);
+        database.executeNonQuery(createTable3);
+
+        String createTable4 = "CREATE TABLE zoopow(" +
+                "id INTEGER PRIMARYKEY," +
+                "testkey INTEGER," +
+                "department varchar(60)," +
+                "unique( department )," +
+                "foreignkey( testkey ) references woo( testkey )" +
+                ");";
+
+        database.executeNonQuery(createTable4);
+        table = Database.catalog.getTable("zoopow");
+
+        database.executeNonQuery(alterTable3);
+
+        table = Database.catalog.getTable("zoopow");
+
+         */
 
         System.out.println("Testing complete....");
     }
