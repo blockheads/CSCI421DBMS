@@ -254,7 +254,7 @@ public class DDLParser implements IDDLParser {
                     ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1].toUpperCase());
 
                     // construct our new attribute
-                    Attribute attribute = new Attribute(attributeName,type);
+                    Attribute attribute = new Attribute(attributeName,attributeData[1]);
 
                     // iterating over constraints
                     for(int i=2; i < attributeData.length; i++){
@@ -365,7 +365,6 @@ public class DDLParser implements IDDLParser {
             String attributeName = attributeData[0];
 
             try{
-                ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1].toUpperCase());
 
                 int defaultIdx = args.indexOf(DEFAULT_STR);
 
@@ -377,7 +376,7 @@ public class DDLParser implements IDDLParser {
                     if(attributeData.length > 2)
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_LEN, statement));
 
-                    attribute = new Attribute(attributeName,type);
+                    attribute = new Attribute(attributeName, attributeData[1]);
 
                     //get the table from catalog
                     //Call addAttribute, if no error continue
@@ -414,7 +413,7 @@ public class DDLParser implements IDDLParser {
                     try {
                         Object defaultValue = defaultData.parseData(defaultVal);
 
-                        attribute = new Attribute(attributeName,type);
+                        attribute = new Attribute(attributeName, attributeData[1]);
 
                         // function call goes here
                         table.addAttribute(attribute);
