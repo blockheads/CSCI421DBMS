@@ -426,7 +426,7 @@ public class DDLParser implements IDDLParser {
                             //Call tables insert record with each record array in get records extended with new value
                             Object[] extendedRec = new Object[record.length + 1];
                             System.arraycopy(record, 0, extendedRec, 0, record.length);
-                            extendedRec[record.length] = defaultData;
+                            extendedRec[record.length] = defaultValue;
                             table.addRecord(record);
                         }
 
