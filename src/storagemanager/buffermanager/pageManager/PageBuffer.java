@@ -153,6 +153,14 @@ public class PageBuffer {
         }
     }
 
+    public void forgetTablePool(Table table) {
+        if (pages.get(table.getId()) == null) return;
+        for (Page page: pages.get(table.getId()).get(PageTypes.RECORD_PAGE)) {
+            page.forget();
+        }
+        pages.get(table.getId()).get(PageTypes.RECORD_PAGE).clear();
+    }
+
     public void destroyPage(Page page) { // delete a page from the system
         removePage(page);
         page.delete();
@@ -166,6 +174,10 @@ public class PageBuffer {
             e.printStackTrace();
         }
         removePage(page);
+    }
+
+    public void removeTracker(AgeTracker<Page> pageAgeTracker) {
+        pagePool.remove(pageAgeTracker);
     }
 
     public void removeFromPool(Page page, AgeTracker<Page> pageAgeTracker) {

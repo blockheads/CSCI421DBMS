@@ -141,19 +141,13 @@ public class Catalog implements Serializable {
     /**
      * Drop a table from the catalog
      * @param tableName the name of the table
-     * @return true if the table was deleted
+     * @throws StorageManagerException the underlying table cannot be dropped
+     * @throws NullPointerException the table dne
      */
-    public boolean dropTable(String tableName) {
-        if (tables.get(tableName) != null) {
-            tables.remove(tableName);
-
-            for (String name: tables.keySet()) {
-                tables.get(name).dropForeignKeysTo(tableName);
-            }
-
-            return true;
-        } else {
-            return false;
+    public void dropTable(String tableName) throws StorageManagerException, NullPointerException{
+        tables.remove(tableName).dropTable();
+        for (String name: tables.keySet()) {
+            tables.get(name).dropForeignKeysTo(tableName);
         }
     }
 }

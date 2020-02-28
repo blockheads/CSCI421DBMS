@@ -105,6 +105,11 @@ public class BufferManager {
         getTable(table).resetPages();
     }
 
+    public void removeTable(int table) throws StorageManagerException {
+        pageBuffer.forgetTablePool(getTable(table));
+        tableMap.remove(table);
+    }
+
     /**
      * Updates a table after it has been modified in the table map
      */

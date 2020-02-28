@@ -56,7 +56,7 @@ public class DDLParser implements IDDLParser {
             "a constraint which has already been defined. %s";
     private final static String CREATE_TABLE_ALREADY_EXISTS = "A table with the name %s already exists.";
     private final static String DROP_TABLE_EMPTY_NAME = "A drop table statement does not specify a table name. \n%s";
-
+    private final static String DROP_TABLE_DNE = "The table %s does not exist and cannot be dropped.";
     private final static String ALTER_TABLE_NO_ADD_DROP = "A alter table statement does not specify either to " +
             "add or drop from a table.\n%s";
 
@@ -502,7 +502,13 @@ public class DDLParser implements IDDLParser {
         // trim whitespace, and theres our table name WOW!
         String tableName = args.trim();
 
-        Database.catalog.dropTable(tableName);
+        try {
+            Database.catalog.dropTable(tableName);
+        } catch (StorageManagerException e) {
+            throw new DDLParserException(e.getLocalizedMessage());
+        } catch (NullPointerException e) {
+            throw new DDLParserException(String.format(DROP_TABLE_DNE, tableName));
+        }
 
         // call drop(tableName);
 

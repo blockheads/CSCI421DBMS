@@ -79,11 +79,10 @@ public class StorageManager extends AStorageManager {
 
         //check to see if directory exists
         //delete directory
-
+        bufferManager.removeTable(table);
         if (!DataManager.dropTable(table)) {
             throw new StorageManagerException(String.format(TABLE_DNE_FORMAT, table));
         }
-
     }
     //helper method to get rid of directory holding pages for DropTable
     private static boolean deleteDir(File file) {

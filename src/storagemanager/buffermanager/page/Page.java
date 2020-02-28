@@ -175,6 +175,10 @@ public abstract class Page<E> implements Serializable, Comparable<Page> {
         pageBuffer.removeFromPool(this, pageAgeTracker);
     }
 
+    public void forget() {
+        pageBuffer.removeTracker(pageAgeTracker);
+    }
+
     @Override
     public int compareTo(Page page) {
         return pageID - page.pageID;
