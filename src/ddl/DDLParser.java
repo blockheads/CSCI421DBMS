@@ -251,7 +251,14 @@ public class DDLParser implements IDDLParser {
                 // and then it's DataType must be resolved.
                 try{
 
-                    ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1].toUpperCase());
+                    // try and check value
+                    if(attributeData[1].startsWith(ValidDataTypes.VARCHAR.toString().toLowerCase())){
+
+                    }
+                    else{
+                        ValidDataTypes.valueOf(attributeData[1].toUpperCase());
+                    }
+
 
                     // construct our new attribute
                     Attribute attribute = new Attribute(attributeName,attributeData[1]);
@@ -319,7 +326,7 @@ public class DDLParser implements IDDLParser {
 
         Table table = new Table(tableName, attributes);
 
-        // setting our primary key data
+        // settitng our primary key data
         table.setPrimaryKey(primaryKeyData);
 
         // set our foreign keys

@@ -159,6 +159,8 @@ public class Table implements Serializable {
      * @throws DDLParserException primary key already defined, or attribute in primary key constraint dne
      */
     public void setPrimaryKey(String[] names) throws DDLParserException {
+        if(names == null)
+            return;
         if (primaryKey != null)
             throw new DDLParserException(""); // attempt to define multiple primary keys
         Set<Attribute> primaryKey = new HashSet<>();
