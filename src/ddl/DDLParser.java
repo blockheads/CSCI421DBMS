@@ -6,6 +6,7 @@ import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
 import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.datatypes.ValidDataTypes;
+import storagemanager.buffermanager.datatypes.VarcharData;
 
 import java.util.ArrayList;
 
@@ -249,6 +250,9 @@ public class DDLParser implements IDDLParser {
 
                 // and then it's DataType must be resolved.
                 try{
+
+                    ValidDataTypes type = ValidDataTypes.valueOf(attributeData[1].toUpperCase());
+
                     // construct our new attribute
                     Attribute attribute = new Attribute(attributeName,attributeData[1]);
 
@@ -258,7 +262,22 @@ public class DDLParser implements IDDLParser {
                         String constraintName = attributeData[i];
 
                         try{
-                            Constraint constraint = Constraint.valueOf(constraintName.toUpperCase());
+                            Constraint constraint;
+
+                            // error handling 'not null'
+                            if(constraintName.equals("not")){
+                                // check next is null
+                                i++;
+                                constraintName = attributeData[i];
+                                if(constraintName.equals("null"))
+                                    constraint = Constraint.NOTNULL;
+                                else
+                                    throw new DDLParserException(String.format( CREATE_TABLE_CONSTRAINT_DEF, constraintName));
+                            }
+                            else{
+                                constraint = Constraint.valueOf(constraintName.toUpperCase());
+                            }
+
 
                             // check if the constraint is already defined
                             if(attribute.hasConstraint(constraint)){
@@ -276,6 +295,8 @@ public class DDLParser implements IDDLParser {
 
                                 primaryKeyCount++;
                             }
+
+                            attribute.addConstraint(constraint);
 
                         }catch (IllegalArgumentException e){
                             throw new DDLParserException(String.format(CREATE_TABLE_INVALID_ATTRIBUTE_CON, constraintName));
