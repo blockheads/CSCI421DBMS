@@ -1,4 +1,4 @@
-package testers;
+package testing;
 
 import database.Database;
 import database.IDatabase;
@@ -96,12 +96,19 @@ public class Phase2Tester {
         database.executeNonQuery(createTable2);
 
         System.out.println("\tThese table creates should report failure but not stop the database...");
+        System.out.println("1");
         database.executeNonQuery(createErrorExists);
+        System.out.println("2");
         database.executeNonQuery(createErrorType);
+        System.out.println("3");
         database.executeNonQuery(createErrorPK1);
+        System.out.println("4");
         database.executeNonQuery(createErrorFK1);
+        System.out.println("5");
         database.executeNonQuery(createErrorFK2);
+        System.out.println("6");
         database.executeNonQuery(createErrorFK3);
+        System.out.println("7");
         database.executeNonQuery(createErrorU1);
 
         System.out.println("Shutting down the database...");

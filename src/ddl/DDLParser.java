@@ -54,7 +54,7 @@ public class DDLParser implements IDDLParser {
             "a invalid attribute constraint. %s";
     private final static String CREATE_TABLE_CONSTRAINT_DEF = "A create table statement is attempting to define " +
             "a constraint which has already been defined. %s";
-
+    private final static String CREATE_TABLE_ALREADY_EXISTS = "A table with the name %s already exists.";
     private final static String DROP_TABLE_EMPTY_NAME = "A drop table statement does not specify a table name. \n%s";
 
     private final static String ALTER_TABLE_NO_ADD_DROP = "A alter table statement does not specify either to " +
@@ -161,6 +161,9 @@ public class DDLParser implements IDDLParser {
 
         String tableName =  args.substring(0 , ibeg); //this will give the name
 
+        if (Database.catalog.getTable(tableName) != null)
+            throw new DDLParserException(String.format(CREATE_TABLE_ALREADY_EXISTS, tableName));
+
         int iend = args.lastIndexOf(")");
 
         if (iend == -1)
@@ -169,7 +172,7 @@ public class DDLParser implements IDDLParser {
         String innerStatements = args.substring(ibeg + 1,iend);
 
         // we can only have one primary key
-        String[] primaryKeyData = null;
+        String[] primaryKeyData = new String[0];
         // we can have multiple foreign keys or unique keys
         ArrayList<ForeignKeyData> foreignKeysData = new ArrayList<>();
         ArrayList<String[]> uniqueKeysData = new ArrayList<>();
@@ -251,16 +254,8 @@ public class DDLParser implements IDDLParser {
                 // and then it's DataType must be resolved.
                 try{
 
-                    // try and check value
-                    if(attributeData[1].startsWith(ValidDataTypes.VARCHAR.toString().toLowerCase())){
-
-                    }
-                    else{
-                        ValidDataTypes.valueOf(attributeData[1].toUpperCase());
-                    }
-
-
                     // construct our new attribute
+                    ValidDataTypes.resolveType(attributeData[1]);
                     Attribute attribute = new Attribute(attributeName,attributeData[1]);
 
                     // iterating over constraints
@@ -383,6 +378,7 @@ public class DDLParser implements IDDLParser {
                     if(attributeData.length > 2)
                         throw new DDLParserException(String.format(ALTER_TABLE_INVALID_ATTRIBUTE_LEN, statement));
 
+                    ValidDataTypes.resolveType(attributeData[1]);
                     attribute = new Attribute(attributeName, attributeData[1]);
 
                     //get the table from catalog

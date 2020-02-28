@@ -39,15 +39,15 @@ public class Table implements Serializable {
             Attribute attribute = attributes.get(i);
             // use this loop to find 1 attribute of the table with a primary key constraint.
             // If there is more than one then error
-            if (attribute.hasConstraint(Constraint.PRIMARYKEY)) {
-                if (primaryKey == null) {
-                    primaryKey = new ArrayList<>() {{
-                        add(attribute);
-                    }};
-                } else {
-                    throw new DDLParserException(String.format(PRIM_KEY_EXISTS_FORMAT, tableName, primaryKeys())); // multiple primary keys
-                }
-            }
+//            if (attribute.hasConstraint(Constraint.PRIMARYKEY)) {
+//                if (primaryKey == null) {
+//                    primaryKey = new ArrayList<>() {{
+//                        add(attribute);
+//                    }};
+//                } else {
+//                    throw new DDLParserException(String.format(PRIM_KEY_EXISTS_FORMAT, tableName, primaryKeys())); // multiple primary keys
+//                }
+//            }
 
             if (attribute.hasConstraint(Constraint.UNIQUE)) { // add singleton uniques
                 uniques.add(new HashSet<>() {{
@@ -162,15 +162,15 @@ public class Table implements Serializable {
         if(names == null)
             return;
         if (primaryKey != null)
-            throw new DDLParserException(""); // attempt to define multiple primary keys
+            throw new DDLParserException(PRIM_KEY_EXISTS_FORMAT); // attempt to define multiple primary keys
         Set<Attribute> primaryKey = new HashSet<>();
         for (String name: names) {
             containsAttribute(name);
-            if (primaryKey.contains(attributeMap.get(name))) {
-                throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
-            } else {
-                primaryKey.add(attributeMap.get(name));
-            }
+//            if (primaryKey.contains(attributeMap.get(name))) {
+//                throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
+//            } else {
+//                primaryKey.add(attributeMap.get(name));
+//            }
         }
         this.primaryKey = new ArrayList<>(primaryKey);
     }
