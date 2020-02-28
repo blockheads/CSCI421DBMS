@@ -107,6 +107,15 @@ public class Table implements Serializable {
         Database.storageManager.addTable(tableID, generateDatatype(), generateKeyIndices());
     }
 
+    /**
+     * Add a record to the underlying table
+     * @param record the record to add
+     * @throws StorageManagerException inserting the record failed
+     */
+    public void addRecord(Object[] record) throws StorageManagerException {
+        Database.storageManager.insertRecord(tableID, record);
+    }
+
     private String[] generateDatatype() {
         String[] dataTypes = new String[attributes.size()];
         int i = 0;
@@ -216,15 +225,24 @@ public class Table implements Serializable {
         }
     }
 
-    void dropAttribute(String name) throws DDLParserException {
+    int dropAttribute(String name) throws DDLParserException {
         if (containsAttribute(name)) {
             if (primaryKey.contains(attributeMap.get(name))) {
                 throw new DDLParserException(String.format(ATTR_PRIM_KEY_FORMAT, name, tableName)); //cant drop primary keys
             }
             Attribute attribute = attributeMap.remove(name);
+            attributes.remove(attribute);
+            int index = attributeIndices.remove(attribute);
+            attributeIndices.forEach((attr, integer) -> {
+                if (integer > index) {
+                    attributeIndices.put(attr, --integer);
+                }
+            });
             removeUniques(attribute);
             dropForeignsWithAttribute(name);
+            return index;
         }
+        return -1;
     }
 
     private void removeUniques(Attribute attribute) {
@@ -237,6 +255,8 @@ public class Table implements Serializable {
     public void addAttribute(Attribute attribute) throws DDLParserException {
         if (!attributeMap.containsKey(attribute.getName())) {
             attributeMap.put(attribute.getName(), attribute);
+            attributes.add(attribute);
+            attributeIndices.put(attribute, attributeIndices.size());
         } else {
             throw new DDLParserException(String.format(DUPLICATED_ATTR_FORMAT, attribute.getName(), tableName));
         }
