@@ -130,7 +130,7 @@ public class Catalog implements Serializable {
         if (tables.containsKey(table)) {
             int location = tables.get(table).dropAttribute(attribute);
             for (Table rtable: tables.values()) {
-                rtable.dropForeignsReferencing(attribute);
+                rtable.dropForeignsReferencing(table, attribute);
             }
             return location;
         } else {

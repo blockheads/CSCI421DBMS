@@ -213,10 +213,10 @@ public class Table implements Serializable {
         }
     }
 
-    void dropForeignsReferencing(String attribute) {
+    void dropForeignsReferencing(String tableName, String attribute) {
         for (Iterator<ForeignKey> iterator = foreignKeys.iterator(); iterator.hasNext(); ) {
             ForeignKey keyData = iterator.next();
-            if (keyData.containsReference(attribute)) foreignKeys.remove(keyData);
+            if (keyData.isReferencingTable(tableName) && keyData.containsReference(attribute)) foreignKeys.remove(keyData);
         }
     }
 
@@ -248,11 +248,6 @@ public class Table implements Serializable {
     }
 
     private void removeUniques(Attribute attribute) {
-//        for (Iterator<Set<Attribute>> iterator = uniques.iterator(); iterator.hasNext(); ) {
-//            Set<Attribute> unique = iterator.next();
-//            if (unique.contains(attribute)) uniques.remove(unique);
-//        }
-
         uniques.removeIf(attr -> attr.contains(attribute));
     }
 
