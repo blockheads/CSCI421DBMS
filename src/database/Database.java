@@ -63,7 +63,7 @@ public class Database implements IDatabase{
 
     @Override
     public void executeNonQuery(String statement) {
-        statement = statement.trim();
+        statement = statement.trim().toLowerCase();
         if (ddlCommands.contains(statement.substring(0, statement.indexOf(' '))))
             executeNonQueryDDL(statement);
         else if (dmlCommands.contains(statement.substring(0, statement.indexOf(' '))))

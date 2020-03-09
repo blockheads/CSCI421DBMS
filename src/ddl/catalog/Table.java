@@ -3,6 +3,7 @@ package ddl.catalog;
 import database.Database;
 import ddl.DDLParserException;
 import storagemanager.StorageManagerException;
+import storagemanager.buffermanager.datatypes.DataTypeException;
 
 import java.io.Serializable;
 import java.util.*;
@@ -114,6 +115,19 @@ public class Table implements Serializable {
      */
     public void addRecord(Object[] record) throws StorageManagerException {
         Database.storageManager.insertRecord(tableID, record);
+    }
+
+    public void addRecord(String recordString) throws StorageManagerException, DataTypeException {
+        Object[] record = new Object[attributes.size()];
+
+        String[] recordData = recordString.split(" [ ]*");
+
+        for (Attribute attribute: attributes) {
+            int index = attributeIndices.get(attribute);
+            record[index] = Database.storageManager.underlyingDatatypes(tableID).get(index).parseData(recordData[index]);
+        }
+
+        addRecord(record);
     }
 
     private String[] generateDatatype() {

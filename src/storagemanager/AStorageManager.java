@@ -1,5 +1,7 @@
 package storagemanager;
 
+import storagemanager.buffermanager.datatypes.Datatype;
+
 import java.util.ArrayList;
 
 /**
@@ -106,6 +108,14 @@ public abstract class AStorageManager {
     public abstract void addTable(int table, String[] dataTypes, Integer[] keyIndices) throws StorageManagerException;
 
     /**
+     * Get the underlying lists of datatypes from the internal table
+     * @param id the internal table id
+     * @return the underlying datatypes
+     * @throws StorageManagerException
+     */
+    public abstract ArrayList<Datatype> underlyingDatatypes(int id) throws StorageManagerException;
+
+    /**
      * Will purge any pages in the buffer to the physical hardware.
      * @throws StorageManagerException any failure to write the buffer to hardware
      */
@@ -134,4 +144,5 @@ public abstract class AStorageManager {
      * @throws StorageManagerException fails to create a database at the provided location
      */
     protected abstract void newDatabase(String dbLoc, int pageBufferSize, int pageSize) throws StorageManagerException;
+
 }

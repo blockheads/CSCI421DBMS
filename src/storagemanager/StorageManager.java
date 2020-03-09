@@ -2,6 +2,7 @@ package storagemanager;
 
 import storagemanager.buffermanager.BufferManager;
 import storagemanager.buffermanager.Table;
+import storagemanager.buffermanager.datatypes.Datatype;
 import storagemanager.buffermanager.diskUtils.DataManager;
 import storagemanager.buffermanager.pageManager.PageBuffer;
 
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class StorageManager extends AStorageManager {
 
@@ -110,6 +112,11 @@ public class StorageManager extends AStorageManager {
 
         Table table = new Table(id, dataTypes, keyIndices, bufferManager.getPageSize());
         DataManager.saveTable(table,id);
+    }
+
+    @Override
+    public ArrayList<Datatype> underlyingDatatypes(int table) throws StorageManagerException {
+        return bufferManager.getTable(table).getDatatypes();
     }
 
     @Override
