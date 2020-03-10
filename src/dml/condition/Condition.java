@@ -1,8 +1,18 @@
 package dml.condition;
 
+import ddl.catalog.Attribute;
+import ddl.catalog.Table;
+import dml.DMLParserException;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A condition is the deepest level in a statement,
+ * a condition takes in a table segment of data and limits the data returned based on a user defined equality
+ *
+ * @author Nicholas Chieppa
+ */
 public class Condition implements Resolvable {
 
     /**
@@ -19,7 +29,9 @@ public class Condition implements Resolvable {
         ATTR, BOOL, STR
     }
 
-    private final Map<String, Equality> conditions = new HashMap<>() {{
+
+    public String conditionsRegex = "(!=|>=|<=|=|>|<)";
+    private final Map<String, Equality> equalityMap = new HashMap<>() {{
         put("=", Equality.EQUAL);
         put("!=", Equality.NOTEQUAL);
         put(">", Equality.GREATER);
@@ -28,10 +40,14 @@ public class Condition implements Resolvable {
         put("<=", Equality.LESS_EQUAL);
     }};
 
+    public String booleanRegex = "(true|false)";
+
+    private final Table table;
+
     /**
      * The attribute on the left hand side of the equation
      */
-    private final String attribute;
+    private final Attribute attribute;
 
     /**
      * The equality test
@@ -52,8 +68,28 @@ public class Condition implements Resolvable {
      * Represent a single part (test between two junctions) of the statement
      * @param segment the segment of the statement to represent
      */
-    Condition (String segment) {
+    Condition (Table table, String segment) throws DMLParserException {
+        this.table = table;
 
+        String[] sides = segment.split(conditionsRegex, 2);
+        equality = equalityMap.get(segment.substring(sides[0].length(),
+                sides[0].length() + (segment.length() - (sides[0].length() + sides[1].length()))));
+
+        attribute = table.getAttribute(sides[0]);
+        if (attribute == null) throw new DMLParserException("");
+
+        if (sides[1].matches(booleanRegex)) {
+            rhsObject = Boolean.valueOf(sides[1]);
+            rhsType = RHS.BOOL;
+        } else if (sides[1].contains("\"")) {
+            rhsObject = sides[1].replaceAll("\"", "");
+            rhsType = RHS.STR;
+        } else {
+            Attribute attribute = table.getAttribute(sides[1]);
+            if (attribute == null) throw new DMLParserException("");
+            rhsObject = attribute;
+            rhsType = RHS.ATTR;
+        }
     }
 
     @Override
