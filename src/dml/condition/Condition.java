@@ -72,6 +72,7 @@ public class Condition implements Resolvable {
         String[] sides = segment.split(conditionsRegex, 2);
         equality = equalityMap.get(segment.substring(sides[0].length(),
                 sides[0].length() + (segment.length() - (sides[0].length() + sides[1].length()))));
+        if (equality == null) throw new DMLParserException("There must be a comparision in each clause: " + segment);
 
         for (int i = 0; i < sides.length; i++) sides[i] = sides[i].trim();
 
@@ -110,7 +111,7 @@ public class Condition implements Resolvable {
         }
     }
 
-    void attemptAsAttr(String rhs) throws DMLParserException {
+    private void attemptAsAttr(String rhs) throws DMLParserException {
         rhsObject = table.getAttribute(rhs);
         if (rhsObject == null) throw new DMLParserException(rhs + " is not an object of type " + rhsType + " or an attr in the table");
         if (!((Attribute) rhsObject).getDataType().equals(attribute.getDataType()))
