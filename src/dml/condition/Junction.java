@@ -2,7 +2,7 @@ package dml.condition;
 
 public class Junction implements Resolvable {
 
-    private enum Connection {
+    enum Connection {
         CONJUNCTION, DISJUNCTION
     }
 

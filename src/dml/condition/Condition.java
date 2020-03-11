@@ -26,7 +26,7 @@ public class Condition implements Resolvable {
      * The data on the right hand side of the equation
      */
     private enum RHS {
-        ATTR, BOOL, STR
+        ATTR, BOOL, INT, STR
     }
 
 
@@ -39,8 +39,6 @@ public class Condition implements Resolvable {
         put(">=", Equality.GREATER_EQUAL);
         put("<=", Equality.LESS_EQUAL);
     }};
-
-    public String booleanRegex = "(true|false)";
 
     private final Table table;
 
@@ -57,12 +55,12 @@ public class Condition implements Resolvable {
     /**
      * The type of data on the right hand side that we are checking against
      */
-    private final RHS rhsType;
+    private RHS rhsType;
 
     /**
      * The data on the right hand side that we are checking against
      */
-    private final Object rhsObject;
+    private Object rhsObject;
 
     /**
      * Represent a single part (test between two junctions) of the statement
@@ -75,22 +73,52 @@ public class Condition implements Resolvable {
         equality = equalityMap.get(segment.substring(sides[0].length(),
                 sides[0].length() + (segment.length() - (sides[0].length() + sides[1].length()))));
 
+        for (int i = 0; i < sides.length; i++) sides[i] = sides[i].trim();
+
         attribute = table.getAttribute(sides[0]);
         if (attribute == null) throw new DMLParserException("");
 
-        if (sides[1].matches(booleanRegex)) {
-            rhsObject = Boolean.valueOf(sides[1]);
-            rhsType = RHS.BOOL;
-        } else if (sides[1].contains("\"")) {
-            rhsObject = sides[1].replaceAll("\"", "");
-            rhsType = RHS.STR;
-        } else {
-            Attribute attribute = table.getAttribute(sides[1]);
-            if (attribute == null) throw new DMLParserException("");
-            rhsObject = attribute;
-            rhsType = RHS.ATTR;
+        switch (attribute.getDataType().split("[(]")[0]) {
+            case "integer":
+                rhsType = RHS.INT;
+                try {
+                    rhsObject = Integer.parseInt(sides[1]);
+                } catch (NumberFormatException e) {
+                    attemptAsAttr(sides[1]);
+                }
+                break;
+            case "varchar":
+            case "char":
+                rhsType = RHS.STR;
+                if (sides[1].contains("\"")) {
+                    rhsObject = sides[1].replaceAll("\"","");
+                }
+                else
+                    attemptAsAttr(sides[1]);
+                break;
+            case "boolean":
+                rhsType = RHS.BOOL;
+                try {
+                    rhsObject = Boolean.parseBoolean(sides[1]);
+                } catch (NumberFormatException e) {
+                    attemptAsAttr(sides[1]);
+                }
+                break;
+            default:
+                throw new DMLParserException("The attribute " + attribute.getName() + " has type "
+                        + attribute.getDataType() + " which is unrecognized by this clause.");
         }
     }
+
+    void attemptAsAttr(String rhs) throws DMLParserException {
+        rhsObject = table.getAttribute(rhs);
+        if (rhsObject == null) throw new DMLParserException(rhs + " is not an object of type " + rhsType + " or an attr in the table");
+        if (!((Attribute) rhsObject).getDataType().equals(attribute.getDataType()))
+            throw new DMLParserException("attributes: (" + attribute.getName() + ", " +
+                    ((Attribute) rhsObject).getName() + " have incompatible data types.");
+        rhsType = RHS.ATTR;
+    }
+
 
     @Override
     public Object[][] resolveAgainst(Object[][] data) {
