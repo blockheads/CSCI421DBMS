@@ -30,8 +30,8 @@ public class Condition implements Resolvable {
     }
 
 
-    public String conditionsRegex = "(!=|>=|<=|=|>|<)";
-    private final Map<String, Equality> equalityMap = new HashMap<>() {{
+    public static String conditionsRegex = "(!=|>=|<=|=|>|<)";
+    private final static Map<String, Equality> equalityMap = new HashMap<>() {{
         put("=", Equality.EQUAL);
         put("!=", Equality.NOTEQUAL);
         put(">", Equality.GREATER);
