@@ -168,6 +168,13 @@ public class Table implements Serializable {
     }
 
     /**
+     * Get the index of the attribute that you are getting
+     * @param attribute the attribute
+     * @return the index of the attribute
+     */
+    public Integer getIndex(Attribute attribute) {return attributeIndices.get(attribute); }
+
+    /**
      * Create a primary key from a constraint
      * @param names the names of the attributes in the key
      * @throws DDLParserException primary key already defined, or attribute in primary key constraint dne

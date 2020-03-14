@@ -119,11 +119,60 @@ public class Condition implements Resolvable {
         rhsType = RHS.ATTR;
     }
 
-
     @Override
     public Set<Object[]> resolveAgainst(Set<Object[]> data) {
-        return null;
+        final Set<Object[]> accepted = new HashSet<>();
+        for (Object[] record : data) {
+            if (resolves(record)) accepted.add(record);
+        }
+        return accepted;
     }
 
+    private boolean resolves(Object[] record) {
+        switch (rhsType) {
+            case ATTR:
+                return cmp(record[table.getIndex(attribute)], record[table.getIndex((Attribute) rhsObject)]);
+            case BOOL:
+                return cmp((Boolean) record[table.getIndex(attribute)], (Boolean) rhsObject);
+            case INT:
+                return cmp((Integer) record[table.getIndex(attribute)], (Integer) rhsObject);
+            case STR:
+                return cmp((String) record[table.getIndex(attribute)], (String) rhsObject);
+        }
+        return false;
+    }
+
+    private boolean cmp (Object obj1, Object obj2) {
+        switch (attribute.getDataType().split("[(]")[0]) {
+            case "integer":
+                return cmp((Integer) obj1, (Integer) obj2);
+            case "varchar":
+            case "char":
+                return cmp((String) obj1, (String) obj2);
+            case "boolean":
+                return cmp((Boolean) obj1, (Boolean) obj2);
+            default:  // should never occur, the check for this happened when the clause was created
+                throw new RuntimeException("The attribute " + attribute.getName() + " has type "
+                        + attribute.getDataType() + " which is unrecognized by this clause.");
+        }
+    }
+
+    private <E extends Comparable<E>> boolean cmp (E s1, E s2) {
+        switch (equality) {
+            case EQUAL:
+                return s1.compareTo(s2) == 0;
+            case NOTEQUAL:
+                return s1.compareTo(s2) != 0;
+            case GREATER:
+                return s1.compareTo(s2) > 0;
+            case LESS:
+                return s1.compareTo(s2) < 0;
+            case GREATER_EQUAL:
+                return s1.compareTo(s2) >= 0;
+            case LESS_EQUAL:
+                return s1.compareTo(s2) <= 0;
+        }
+        return false;
+    }
 
 }
