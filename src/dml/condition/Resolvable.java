@@ -1,5 +1,7 @@
 package dml.condition;
 
+import java.util.Set;
+
 /**
  * Something is resolvable if it is part of the where clause in a query
  *
@@ -12,6 +14,6 @@ public interface Resolvable {
      * @param data the data segment to check
      * @return the remaining data
      */
-    public Object[][] resolveAgainst(Object[][] data);
+    public Set<Object[]> resolveAgainst(Set<Object[]> data);
 
 }

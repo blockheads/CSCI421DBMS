@@ -4,8 +4,7 @@ import ddl.catalog.Attribute;
 import ddl.catalog.Table;
 import dml.DMLParserException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A condition is the deepest level in a statement,
@@ -122,8 +121,8 @@ public class Condition implements Resolvable {
 
 
     @Override
-    public Object[][] resolveAgainst(Object[][] data) {
-        return new Object[0][];
+    public Set<Object[]> resolveAgainst(Set<Object[]> data) {
+        return null;
     }
 
 
