@@ -26,15 +26,6 @@ public class Conjunction implements Resolvable {
     @Override
     public Set<Object[]> resolveAgainst(Set<Object[]> records) {
         Set<Object[]> lhsResult = LHS.resolveAgainst(records);
-        Set<Object[]> rhsResult = LHS.resolveAgainst(records);
-
-        for (Iterator<Object[]> iterator = lhsResult.iterator(); iterator.hasNext(); ) {
-            Object[] record = iterator.next();
-            if (!rhsResult.contains(record)) {
-                lhsResult.remove(record);
-            }
-        }
-
-        return lhsResult;
+        return RHS.resolveAgainst(lhsResult);
     }
 }
