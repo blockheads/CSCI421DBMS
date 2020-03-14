@@ -120,9 +120,9 @@ public class Condition implements Resolvable {
     }
 
     @Override
-    public Set<Object[]> resolveAgainst(Set<Object[]> data) {
+    public Set<Object[]> resolveAgainst(Set<Object[]> records) {
         final Set<Object[]> accepted = new HashSet<>();
-        for (Object[] record : data) {
+        for (Object[] record : records) {
             if (resolves(record)) accepted.add(record);
         }
         return accepted;

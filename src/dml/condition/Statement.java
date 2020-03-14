@@ -83,10 +83,10 @@ public class Statement implements Resolvable {
     }
 
     @Override
-    public Set<Object[]> resolveAgainst(Set<Object[]> data) {
+    public Set<Object[]> resolveAgainst(Set<Object[]> records) {
         Set<Object[]> result = new HashSet<>();
         for (Resolvable resolvable : this.resolvable) {
-            result.addAll(resolvable.resolveAgainst(data));
+            result.addAll(resolvable.resolveAgainst(records));
         }
         return result;
     }

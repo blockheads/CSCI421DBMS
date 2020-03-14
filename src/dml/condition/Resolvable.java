@@ -11,9 +11,9 @@ public interface Resolvable {
 
     /**
      * Resolve a proposition against a table segment
-     * @param data the data segment to check
-     * @return the remaining data
+     * @param records the records segment to check
+     * @return the remaining records
      */
-    public Set<Object[]> resolveAgainst(Set<Object[]> data);
+    public Set<Object[]> resolveAgainst(Set<Object[]> records);
 
 }
