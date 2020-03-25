@@ -29,6 +29,7 @@ public class Table implements Serializable {
      *  the primary key of the table if set it cannot be added to or reset
      */
     private ArrayList<Attribute> primaryKey;
+    private Set<Attribute> primaryKeyParts;
     private ArrayList<Set<Attribute>> uniques = new ArrayList<>();
     private Set<ForeignKey> foreignKeys = new HashSet<>();
 
@@ -184,16 +185,19 @@ public class Table implements Serializable {
             return;
         if (primaryKey != null)
             throw new DDLParserException(PRIM_KEY_EXISTS_FORMAT); // attempt to define multiple primary keys
-        Set<Attribute> primaryKey = new HashSet<>();
+        ArrayList<Attribute> primaryKey = new ArrayList<Attribute>();
+        Set<Attribute> primaryKeyParts = new HashSet<>();
         for (String name: names) {
             containsAttribute(name);
-            if (primaryKey.contains(attributeMap.get(name))) {
+            if (primaryKeyParts.contains(attributeMap.get(name))) {
                 throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
             } else {
                 primaryKey.add(attributeMap.get(name));
+                primaryKeyParts.add(attributeMap.get(name));
             }
         }
         this.primaryKey = new ArrayList<>(primaryKey);
+        this.primaryKeyParts = primaryKeyParts;
     }
 
     public void addUnique(String[] names) throws DDLParserException {
@@ -203,6 +207,83 @@ public class Table implements Serializable {
             attributes.add(attributeMap.get(name));
         }
         uniques.add(attributes);
+    }
+
+    /**
+     * Get the attribute values that make up a tuples primary key
+     * @param tuple the tuple to grab the primary key from
+     * @return the primary key
+     */
+    private Object[] getPrimaryKeyAttrValues(Object[] tuple) {
+        Object[] primaryKeyValues = new Object[primaryKey.size()];
+        for (int i = 0; i < primaryKey.size(); i++) {
+            primaryKeyValues[i] = tuple[attributeIndices.get(primaryKey.get(i))];
+        }
+        return primaryKeyValues;
+    }
+
+    private int compareAttrValues(Object[] obj1, Object[] obj2) {
+        for (int i = 0; i < obj1.length; i++) {
+            int c = compareAttrValues(obj1[i], obj2[i]);
+            if (c != 0) return c;
+        }
+        return 0;
+    }
+
+    private int compareAttrValues(Object obj1, Object obj2) {
+        if (obj1 instanceof Comparable)
+            return ((Comparable) obj1).compareTo(obj2);
+        return 0;
+    }
+
+    /**
+     * Check a tuple for nulls, helps to enforce the not null condition
+     * @param tuple the tuple being checked for nulls
+     * @return true if there are no nulls in notnull positions else false
+     */
+    public boolean checkNotNullConditions(Object[] tuple) {
+        if (tuple.length < attributes.size()) return false;
+        for (Attribute attribute: attributes) {
+            if (attribute.hasConstraint(Constraint.NOTNULL) || primaryKeyParts.contains(attribute)) {
+                if (tuple[attributeIndices.get(attribute)] == null) return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkUniqueConditions(Object[][] table, Object[] tuple) {
+        for (Set<Attribute> unique : uniques) {
+            List<Object[]> uniqueLists = new ArrayList<>();
+            for (Object[] tableEntry : table) { // get all the uniques from the table
+                Object[] uniqueEntry = new Object[unique.size()];
+                int i = 0;
+                for (Attribute attribute : unique) {
+                    uniqueEntry[i++] = tableEntry[attributeIndices.get(attribute)];
+                }
+                uniqueLists.add(uniqueEntry);
+            }
+
+            Object[] uniqueEntry = new Object[unique.size()];
+            int i = 0;
+            for (Attribute attribute : unique) { // generate an object list for the tuple
+                uniqueEntry[i++] = tuple[attributeIndices.get(attribute)];
+            }
+
+            int index = uniqueLists.indexOf(uniqueEntry);
+            if (index != -1) { // attributes with the same primary key dont count
+                if (compareAttrValues(getPrimaryKeyAttrValues(table[index]), getPrimaryKeyAttrValues(tuple)) != 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkForeignKeyConditions(Object[] tuple) {
+        return false;
+    }
+
+    public boolean checkForeignKeyConditions(Set<Object[]> tuple) {
+        return false;
     }
 
     void typeMatch(List<String> attributes, Table table, List<String> references) throws DDLParserException {
