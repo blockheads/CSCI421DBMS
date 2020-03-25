@@ -24,7 +24,10 @@ public class DMLParser implements IDMLParser {
                 try {
                     Object[][] tableValues = table.getRecords();
                     Object[] record = table.getRecordFromString(value.substring(1, value.length() - 1));
-                    System.out.println(table.checkUniqueConditions(tableValues, record));
+                    System.out.println("null" + table.checkNotNullConditions(record));
+                    System.out.println("unique" + table.checkUniqueConditions(tableValues, record));
+                    System.out.println();
+
                     table.addRecord(record);
                 } catch (StorageManagerException e) {
                     e.printStackTrace();

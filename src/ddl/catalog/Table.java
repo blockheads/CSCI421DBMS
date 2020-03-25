@@ -299,7 +299,7 @@ public class Table implements Serializable {
 
             for (UniquePair uniquePair : uniqueLists.getOrDefault(hash, new ArrayList<>())) {
                 if (compareAttrValues(uniquePair.tuple, uniqueEntry) == 0) // found an identical unique
-                    if (compareAttrValues(getPrimaryKeyAttrValues(table[index]), getPrimaryKeyAttrValues(tuple)) != 0) // attributes with the same primary key dont count
+                    if (compareAttrValues(getPrimaryKeyAttrValues(table[uniquePair.index]), getPrimaryKeyAttrValues(tuple)) != 0) // attributes with the same primary key dont count
                         return false;
             }
         }
