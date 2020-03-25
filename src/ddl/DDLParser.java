@@ -97,13 +97,13 @@ public class DDLParser implements IDDLParser {
         statement = statement.stripLeading();
 
 
-        //todo: each statement needs to check it ends with a semicolon
-        // now search for the end of our statement
-        int iend = statement.indexOf(";");
-
-        if(iend == -1){
-            throw new DDLParserException(String.format(STATEMENT_MISSING_SEMICOLON, statement));
-        }
+//        //todo: each statement needs to check it ends with a semicolon
+//        // now search for the end of our statement
+        int iend = statement.length();
+//
+//        if(iend == -1){
+//            throw new DDLParserException(String.format(STATEMENT_MISSING_SEMICOLON, statement));
+//        }
 
         // we check if we begin with a valid statement
         if(statement.startsWith(CREATE_TABLE_STATMENT)){

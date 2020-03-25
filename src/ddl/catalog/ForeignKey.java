@@ -2,6 +2,7 @@ package ddl.catalog;
 
 import database.Database;
 import ddl.DDLParserException;
+import storagemanager.StorageManagerException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ForeignKey implements Serializable {
     private static String CIRCULAR_FOREIGN_KEY = "A Foreign key cannot reference itself.";
 
     // <rname>
-    private String referenceTable;
+    private final String referenceTable;
     // (<r1>... <rN>):
     private List<String> references;
     // (<a1>...<aN>)
@@ -55,6 +56,12 @@ public class ForeignKey implements Serializable {
 
     public boolean containsReference(String name) {
         return attributes.contains(name);
+    }
+
+    public boolean hasMatch(Object[] tuple) throws StorageManagerException {
+        Table referenceTable = Database.catalog.getTable(this.referenceTable);
+        Object[][] referenceRecords = referenceTable.getRecords();
+        return false;
     }
 
     @Override

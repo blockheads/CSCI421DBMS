@@ -102,6 +102,7 @@ public class CharData extends Datatype<String>{
 
     @Override
     public Object parseData(String data) throws DataTypeException {
+        data = data.substring(1, data.length() -1);
         if (data.length() > maxChars)
             throw new DataTypeException("Invalid Char value. " + data);
         return data;

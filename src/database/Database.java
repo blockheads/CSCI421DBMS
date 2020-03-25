@@ -64,12 +64,16 @@ public class Database implements IDatabase{
     @Override
     public void executeNonQuery(String statement) {
         statement = statement.trim().toLowerCase();
-        if (ddlCommands.contains(statement.substring(0, statement.indexOf(' '))))
-            executeNonQueryDDL(statement);
-        else if (dmlCommands.contains(statement.substring(0, statement.indexOf(' '))))
-            executeNonQueryDDL(statement);
-        else
-            System.err.println("Statement not a command: " + statement);
+        String[] statements = statement.split(";");
+        for (String s : statements) {
+            if (s.trim().length() == 0) continue;
+            if (ddlCommands.contains(s.substring(0, s.indexOf(' '))))
+                executeNonQueryDDL(s);
+            else if (dmlCommands.contains(s.substring(0, s.indexOf(' '))))
+                executeNonQueryDML(s);
+            else
+                System.err.println("Statement not a command: " + s);
+        }
     }
 
     private void executeNonQueryDDL(String statement) {

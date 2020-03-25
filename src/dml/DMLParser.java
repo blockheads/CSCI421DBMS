@@ -19,9 +19,13 @@ public class DMLParser implements IDMLParser {
             String[] values = dml[4].split(",[ ]*");
 
             Table table =  Database.catalog.getTable(dml[2]);
+            if (table == null) throw new DMLParserException("Table DNE");
             for (String value: values) {
                 try {
-                    table.addRecord(value.substring(1, value.length() - 1));
+                    Object[][] tableValues = table.getRecords();
+                    Object[] record = table.getRecordFromString(value.substring(1, value.length() - 1));
+                    System.out.println(table.checkUniqueConditions(tableValues, record));
+                    table.addRecord(record);
                 } catch (StorageManagerException e) {
                     e.printStackTrace();
                 } catch (DataTypeException e) {
@@ -59,7 +63,7 @@ public class DMLParser implements IDMLParser {
 
     @Override
     public void parseDMLStatement(String statement) throws DMLParserException {
-        DMLCommands.valueOf(statement.substring(0, statement.indexOf(' ')).toLowerCase()).handle.parseDMLStatement(statement.toLowerCase());
+        DMLCommands.valueOf(statement.substring(0, statement.indexOf(' ')).toUpperCase()).handle.parseDMLStatement(statement.toLowerCase());
     }
     
     @Override

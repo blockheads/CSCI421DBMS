@@ -118,7 +118,7 @@ public class Table implements Serializable {
         Database.storageManager.insertRecord(tableID, record);
     }
 
-    public void addRecord(String recordString) throws StorageManagerException, DataTypeException {
+    public Object[] getRecordFromString(String recordString) throws StorageManagerException, DataTypeException {
         Object[] record = new Object[attributes.size()];
 
         String[] recordData = recordString.split(" [ ]*");
@@ -127,8 +127,11 @@ public class Table implements Serializable {
             int index = attributeIndices.get(attribute);
             record[index] = Database.storageManager.underlyingDatatypes(tableID).get(index).parseData(recordData[index]);
         }
+        return record;
+    }
 
-        addRecord(record);
+    public void addRecord(String recordString) throws StorageManagerException, DataTypeException {
+        addRecord(getRecordFromString(recordString));
     }
 
     private String[] generateDatatype() {
@@ -231,6 +234,11 @@ public class Table implements Serializable {
     }
 
     private int compareAttrValues(Object obj1, Object obj2) {
+
+        if (obj1 == null || obj2 == null) {
+            return (obj1 == obj2)?0:((obj1 == null)?-1:1);
+        }
+
         if (obj1 instanceof Comparable)
             return ((Comparable) obj1).compareTo(obj2);
         return 0;
@@ -252,37 +260,56 @@ public class Table implements Serializable {
     }
 
     public boolean checkUniqueConditions(Object[][] table, Object[] tuple) {
+
+        final class UniquePair {
+            final Object[] tuple;
+            final int index;
+            public UniquePair (Object[] tuple, int index) {
+                this.tuple = tuple;
+                this.index = index;
+            }
+        }
+
         for (Set<Attribute> unique : uniques) {
-            List<Object[]> uniqueLists = new ArrayList<>();
+            HashMap<Integer, ArrayList<UniquePair>> uniqueLists = new HashMap<>();
+            int index = 0;
             for (Object[] tableEntry : table) { // get all the uniques from the table
                 Object[] uniqueEntry = new Object[unique.size()];
                 int i = 0;
+                int hash = 0;
                 for (Attribute attribute : unique) {
-                    uniqueEntry[i++] = tableEntry[attributeIndices.get(attribute)];
+                    uniqueEntry[i] = tableEntry[attributeIndices.get(attribute)];
+                    hash = Objects.hash(hash, uniqueEntry[i++]);
                 }
-                uniqueLists.add(uniqueEntry);
+
+                ArrayList<UniquePair> hashList = uniqueLists.get(hash);
+                if (hashList == null)
+                    uniqueLists.put(hash, new ArrayList<>(){{add(new UniquePair(uniqueEntry, index));}});
+                else
+                    uniqueLists.get(hash).add(new UniquePair(uniqueEntry, index));
             }
 
             Object[] uniqueEntry = new Object[unique.size()];
             int i = 0;
+            int hash = 0;
             for (Attribute attribute : unique) { // generate an object list for the tuple
-                uniqueEntry[i++] = tuple[attributeIndices.get(attribute)];
+                uniqueEntry[i] = tuple[attributeIndices.get(attribute)];
+                hash = Objects.hash(hash, uniqueEntry[i]);
             }
 
-            int index = uniqueLists.indexOf(uniqueEntry);
-            if (index != -1) { // attributes with the same primary key dont count
-                if (compareAttrValues(getPrimaryKeyAttrValues(table[index]), getPrimaryKeyAttrValues(tuple)) != 0)
-                    return false;
+            for (UniquePair uniquePair : uniqueLists.getOrDefault(hash, new ArrayList<>())) {
+                if (compareAttrValues(uniquePair.tuple, uniqueEntry) == 0) // found an identical unique
+                    if (compareAttrValues(getPrimaryKeyAttrValues(table[index]), getPrimaryKeyAttrValues(tuple)) != 0) // attributes with the same primary key dont count
+                        return false;
             }
         }
         return true;
     }
 
     public boolean checkForeignKeyConditions(Object[] tuple) {
-        return false;
-    }
+        for (ForeignKey foreignKey : foreignKeys) {
 
-    public boolean checkForeignKeyConditions(Set<Object[]> tuple) {
+        }
         return false;
     }
 

@@ -143,6 +143,11 @@ public class Condition implements Resolvable {
     }
 
     private boolean cmp (Object obj1, Object obj2) {
+
+        if (obj1 == null || obj2 == null) {
+            return obj1 == obj2;
+        }
+
         switch (attribute.getDataType().split("[(]")[0]) {
             case "integer":
                 return cmp((Integer) obj1, (Integer) obj2);
