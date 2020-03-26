@@ -113,15 +113,15 @@ public class UpdateFilter {
                     throw new DMLParserException("The attribute " + assign.getName() + " has type "
                             + assign.getDataType() + " which is unrecognized by this clause.");
             }
-
-
         }
         return newTuple;
     }
 
     private Double doubleMath(int index, Object[] oldTuple) {
         double value1 = (inputTypes.get(index).get(0) == VALTYPES.ATTR)? (double) oldTuple[table.getIndex((Attribute) inputs.get(index).get(0))] : (double) inputs.get(index).get(0);
-        double value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (double) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (double) inputs.get(index).get(1);
+        double value2 = 0;
+        if(operations.get(index) == MATHOP.NONE)
+            value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (double) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (double) inputs.get(index).get(1);
 
         switch (operations.get(index)) {
             case ADD:
@@ -132,6 +132,8 @@ public class UpdateFilter {
                 return value1 * value2;
             case DIV:
                 return value1 / value2;
+            case NONE:
+                return value1;
         }
 
         return 0.0;
@@ -139,7 +141,9 @@ public class UpdateFilter {
 
     private Integer intMath(int index, Object[] oldTuple) {
         int value1 = (inputTypes.get(index).get(0) == VALTYPES.ATTR)? (int) oldTuple[table.getIndex((Attribute) inputs.get(index).get(0))] : (int) inputs.get(index).get(0);
-        int value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (int) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (int) inputs.get(index).get(1);
+        int value2 = 0;
+        if(operations.get(index) == MATHOP.NONE)
+            value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (int) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (int) inputs.get(index).get(1);
 
         switch (operations.get(index)) {
             case ADD:
@@ -150,6 +154,8 @@ public class UpdateFilter {
                 return value1 * value2;
             case DIV:
                 return value1 / value2;
+            case NONE:
+                return value1;
         }
 
         return 0;

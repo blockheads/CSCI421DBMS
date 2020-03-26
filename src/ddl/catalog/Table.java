@@ -42,18 +42,6 @@ public class Table implements Serializable {
 
         for (int i = 0; i < attributes.size(); i++) {
             Attribute attribute = attributes.get(i);
-            // use this loop to find 1 attribute of the table with a primary key constraint.
-            // If there is more than one then error
-//            if (attribute.hasConstraint(Constraint.PRIMARYKEY)) {
-//                if (primaryKey == null) {
-//                    primaryKey = new ArrayList<>() {{
-//                        add(attribute);
-//                    }};
-//                } else {
-//                    throw new DDLParserException(String.format(PRIM_KEY_EXISTS_FORMAT, tableName, primaryKeys())); // multiple primary keys
-//                }
-//            }
-
             if (attribute.hasConstraint(Constraint.UNIQUE)) { // add singleton uniques
                 uniques.add(new HashSet<>() {{
                     add(attribute);
@@ -124,6 +112,31 @@ public class Table implements Serializable {
     public void addRecord(Object[] record) throws StorageManagerException {
         Database.storageManager.insertRecord(tableID, record);
     }
+    public void addRecord(String recordString) throws StorageManagerException, DataTypeException {
+        addRecord(getRecordFromString(recordString));
+    }
+
+    /**
+     * Update a record in the underlying table
+     * @param record the record to update
+     * @throws StorageManagerException the record could not be updated
+     */
+    public void updateRecord(Object[] record) throws StorageManagerException {
+        Database.storageManager.updateRecord(tableID, record);
+    }
+    public void updateRecord(Set<Object[]> records) throws StorageManagerException {
+        for (Object[] tuple : records)
+            updateRecord(tuple);
+    }
+
+    /**
+     * Delete a record from the table
+     * @param record a record to delete
+     * @throws StorageManagerException the record could not be deleted
+     */
+    public void deleteRecord(Object[] record) throws StorageManagerException {
+        Database.storageManager.removeRecord(tableID, getPrimaryKeyAttrValues(record));
+    }
 
     public Object[] getRecordFromString(String recordString) throws StorageManagerException, DataTypeException {
         Object[] record = new Object[attributes.size()];
@@ -135,10 +148,6 @@ public class Table implements Serializable {
             record[index] = Database.storageManager.underlyingDatatypes(tableID).get(index).parseData(recordData[index]);
         }
         return record;
-    }
-
-    public void addRecord(String recordString) throws StorageManagerException, DataTypeException {
-        addRecord(getRecordFromString(recordString));
     }
 
     private String[] generateDatatype() {
@@ -326,6 +335,16 @@ public class Table implements Serializable {
                             return false;
                 }
             }
+        }
+        return true;
+    }
+
+    private Map<ForeignKey, ReferenceTable> referenceTableMap = new HashMap<>();
+    public boolean checkForeignKeyConditions(Object[] tuple, boolean reset) throws StorageManagerException {
+        for (ForeignKey foreignKey : foreignKeys) {
+            ReferenceTable referenceTable = (reset)?foreignKey.getReferenceTable(this):this.referenceTableMap.get(foreignKey);
+            referenceTableMap.put(foreignKey, referenceTable);
+            if (!referenceTable.match(tuple)) return false;
         }
         return true;
     }

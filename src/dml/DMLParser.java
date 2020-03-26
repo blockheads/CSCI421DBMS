@@ -23,13 +23,15 @@ public class DMLParser implements IDMLParser {
             Table table =  Database.catalog.getTable(dml[2]);
             if (table == null) throw new DMLParserException("Table DNE");
 
+            boolean generateRefTable = true;
             for (String value: values) {
                 try {
                     Object[][] tableValues = table.getRecords();
                     Object[] record = table.getRecordFromString(value.substring(1, value.length() - 1));
-                    System.out.println("null" + table.checkNotNullConditions(record));
-                    System.out.println("unique" + table.checkUniqueConditions(tableValues, Collections.singleton(record)));
-
+                    if (!table.checkNotNullConditions(record)) throw new DMLParserException("Not null not respected");
+                    if (!table.checkUniqueConditions(tableValues, Collections.singleton(record))) throw new DMLParserException("Not unique");
+                    if (!table.checkForeignKeyConditions(record, generateRefTable)) throw new DMLParserException("Missing foreign key");
+                    generateRefTable = false;
                     table.addRecord(record);
                 } catch (StorageManagerException e) {
                     e.printStackTrace();
@@ -110,9 +112,9 @@ public class DMLParser implements IDMLParser {
 
                 // dont need to check nulls because you cant update a value to a null
 
-                table.checkUniqueConditions(tableData, updatedData);
-                table.checkForeignKeyConditions(updatedData);
-                //table.updateRecords
+                if (table.checkUniqueConditions(tableData, updatedData)) throw new DMLParserException("One or more updates are not unique");
+                if (table.checkForeignKeyConditions(updatedData)) throw new DMLParserException("One or more updates no longer satisfy the foreign key conditions");
+                table.updateRecord(updatedData);
             } catch (StorageManagerException e) {
                 e.printStackTrace();
             }
