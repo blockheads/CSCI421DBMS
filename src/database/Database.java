@@ -79,7 +79,7 @@ public class Database implements IDatabase{
     private void executeNonQueryDDL(String statement) {
         try {
             ddlParser.parseDDLstatement(statement);
-        } catch (DDLParserException | StorageManagerException e ) {
+        } catch (DDLParserException e) {
             System.err.println(e.getLocalizedMessage());
         }
     }
