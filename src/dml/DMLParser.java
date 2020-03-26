@@ -33,10 +33,8 @@ public class DMLParser implements IDMLParser {
                     if (!table.checkForeignKeyConditions(record, generateRefTable)) throw new DMLParserException("Missing foreign key");
                     generateRefTable = false;
                     table.addRecord(record);
-                } catch (StorageManagerException e) {
-                    e.printStackTrace();
-                } catch (DataTypeException e) {
-                    e.printStackTrace();
+                } catch (StorageManagerException | DataTypeException e) {
+                    throw new DMLParserException(e.getLocalizedMessage());
                 }
             }
         }),
@@ -55,7 +53,7 @@ public class DMLParser implements IDMLParser {
                 }
 
             } catch (StorageManagerException e) {
-                e.printStackTrace();
+                throw new DMLParserException(e.getLocalizedMessage());
             }
 
 
@@ -83,7 +81,7 @@ public class DMLParser implements IDMLParser {
                 if (!table.checkForeignKeyConditions(updatedData)) throw new DMLParserException("One or more updates no longer satisfy the foreign key conditions");
                 table.updateRecord(updatedData);
             } catch (StorageManagerException e) {
-                e.printStackTrace();
+                throw new DMLParserException(e.getLocalizedMessage());
             }
         });
 

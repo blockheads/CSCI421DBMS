@@ -155,10 +155,8 @@ public class Table implements Serializable {
 
     private String[] generateDatatype() {
         String[] dataTypes = new String[attributes.size()];
-        int i = 0;
-        for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext(); i++) {
-            Attribute attribute = iterator.next();
-            dataTypes[i] = attribute.getDataType();
+        for (Attribute attribute : attributes) {
+            dataTypes[attributeIndices.get(attribute)] =  attribute.getDataType();
         }
         return dataTypes;
     }

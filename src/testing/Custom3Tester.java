@@ -34,5 +34,6 @@ public class Custom3Tester {
         database.executeNonQuery("update foo set name = \"hello\" where amount > 2.1;");
         database.executeNonQuery("delete from foo where id = 1;");
         database.executeNonQuery("delete from foo where id > 1;");
+        database.terminateDatabase();
     }
 }

@@ -39,7 +39,7 @@ public class ReferenceTable {
                 referenceTuple[i] = tuple[referenceTable.getIndex(attribute)];
                 hash = Objects.hash(hash, referenceTuple);
             }
-            if (references.containsKey(hash))
+            if (!references.containsKey(hash))
                 references.put(hash, new ArrayList<>(){{add(referenceTuple);}});
             else
                 references.get(hash).add(referenceTuple);
