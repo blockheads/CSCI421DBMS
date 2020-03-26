@@ -145,7 +145,10 @@ public class Table implements Serializable {
 
         for (Attribute attribute: attributes) {
             int index = attributeIndices.get(attribute);
-            record[index] = Database.storageManager.underlyingDatatypes(tableID).get(index).parseData(recordData[index]);
+            if(recordData[index].equals("null"))
+                record[index] = null;
+            else
+                record[index] = Database.storageManager.underlyingDatatypes(tableID).get(index).parseData(recordData[index]);
         }
         return record;
     }
@@ -271,8 +274,8 @@ public class Table implements Serializable {
     public boolean checkNotNullConditions(Object[] tuple) {
         if (tuple.length < attributes.size()) return false;
         for (Attribute attribute: attributes) {
-            if (attribute.hasConstraint(Constraint.NOTNULL) || primaryKeyParts.contains(attribute)) {
-                if (tuple[attributeIndices.get(attribute)] == null) return false;
+            if (tuple[attributeIndices.get(attribute)] == null && (attribute.hasConstraint(Constraint.NOTNULL) || primaryKeyParts.contains(attribute))) {
+                return false;
             }
         }
         return true;
