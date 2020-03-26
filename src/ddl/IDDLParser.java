@@ -13,5 +13,5 @@ public interface IDDLParser {
      * @param statement the DDL statement to parse
      * @throws DDLParserException any error in parsing
      */
-    void parseDDLstatement(String statement) throws DDLParserException, StorageManagerException;
+    void parseDDLstatement(String statement) throws DDLParserException;
 }

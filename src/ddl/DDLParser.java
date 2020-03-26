@@ -89,7 +89,7 @@ public class DDLParser implements IDDLParser {
     }
 
     @Override
-    public void parseDDLstatement(String statement) throws DDLParserException, StorageManagerException {
+    public void parseDDLstatement(String statement) throws DDLParserException {
 
         // convert to lowercase
         statement = statement.toLowerCase();
@@ -105,22 +105,23 @@ public class DDLParser implements IDDLParser {
 //            throw new DDLParserException(String.format(STATEMENT_MISSING_SEMICOLON, statement));
 //        }
 
-        // we check if we begin with a valid statement
-        if(statement.startsWith(CREATE_TABLE_STATMENT)){
+        try {
+            // we check if we begin with a valid statement
+            if (statement.startsWith(CREATE_TABLE_STATMENT)) {
 
-            String args = statement.substring(CREATE_TABLE_STATMENT.length(), iend).trim();
-            parseCreateTableStatement(statement, args);
-        }
-        else if(statement.startsWith(ALTER_TABLE_STATEMENT)){
-            String args = statement.substring(ALTER_TABLE_STATEMENT.length(), iend).trim();
-            parseAlterTableStatement(statement,args);
-        }
-        else if(statement.startsWith(DROP_TABLE_STATEMENT)){
-            String args = statement.substring(DROP_TABLE_STATEMENT.length(), iend).trim();
-            parseDropTableStatement(statement, args, iend);
-        }
-        else {
-            throw new DDLParserException(String.format(INVALID_STATEMENT, statement ));
+                String args = statement.substring(CREATE_TABLE_STATMENT.length(), iend).trim();
+                parseCreateTableStatement(statement, args);
+            } else if (statement.startsWith(ALTER_TABLE_STATEMENT)) {
+                String args = statement.substring(ALTER_TABLE_STATEMENT.length(), iend).trim();
+                parseAlterTableStatement(statement, args);
+            } else if (statement.startsWith(DROP_TABLE_STATEMENT)) {
+                String args = statement.substring(DROP_TABLE_STATEMENT.length(), iend).trim();
+                parseDropTableStatement(statement, args, iend);
+            } else {
+                throw new DDLParserException(String.format(INVALID_STATEMENT, statement));
+            }
+        } catch (StorageManagerException e) {
+            System.err.println(e.getLocalizedMessage());
         }
 
     }
