@@ -175,6 +175,11 @@ public class Condition implements Resolvable {
     }
 
     private <E extends Comparable<E>> boolean cmp (E s1, E s2) {
+
+        if (s1 == null || s2 == null) {
+            return s1 == s2;
+        }
+
         switch (equality) {
             case EQUAL:
                 return s1.compareTo(s2) == 0;

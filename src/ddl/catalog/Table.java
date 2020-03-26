@@ -340,7 +340,7 @@ public class Table implements Serializable {
         return true;
     }
 
-    private Map<ForeignKey, ReferenceTable> referenceTableMap = new HashMap<>();
+    private transient Map<ForeignKey, ReferenceTable> referenceTableMap = new HashMap<>();
     public boolean checkForeignKeyConditions(Object[] tuple, boolean reset) throws StorageManagerException {
         for (ForeignKey foreignKey : foreignKeys) {
             ReferenceTable referenceTable = (reset)?foreignKey.getReferenceTable(this):this.referenceTableMap.get(foreignKey);
