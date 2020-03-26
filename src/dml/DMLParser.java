@@ -1,6 +1,7 @@
 package dml;
 
 import database.Database;
+import ddl.catalog.Attribute;
 import ddl.catalog.Catalog;
 import ddl.catalog.Table;
 import storagemanager.StorageManagerException;
@@ -37,6 +38,57 @@ public class DMLParser implements IDMLParser {
             }
         }),
         DELETE(statement -> {
+            String[] dml = statement.split(" [ ]*", 5);
+
+
+            Table table =  Database.catalog.getTable(dml[2]);
+            if (table == null) throw new DMLParserException("Table DNE");
+
+
+            // then we break up and statements inside of each or statement
+
+            // grab all the records
+            try {
+
+                // iterate over the records and check the conditional is satisfied, if so delete it.
+                Object[][] records =  table.getRecords();
+
+                for(Object[] record: records){
+
+                    boolean statementTruth = true;
+
+                    // evaluate our conditionals
+                    for(String andStatement:  dml[4].split("and")){
+
+                        boolean orStatementTruth = true;
+
+                        for(String expression: andStatement.split("or")){
+
+                            if(!parseConditional(expression, record, table)){
+                                orStatementTruth = false;
+                                break;
+                            }
+
+                        }
+
+                        if(!orStatementTruth)
+                            statementTruth = false;
+                            break;
+
+                    }
+
+                    // delete record
+                    if(statementTruth)
+                        System.out.println("dropping record " + record);
+
+                }
+
+                // for each record check conditional to see if it should be deleted
+
+            } catch (StorageManagerException e) {
+                e.printStackTrace();
+            }
+
 
         }),
         UPDATE(statement -> {
@@ -49,6 +101,38 @@ public class DMLParser implements IDMLParser {
         }
     }
 
+    /**
+     * Evaluates a conditional statement to see if the record should be deleted from the table
+     * @return true if deleted, false otherwise
+     */
+    private static boolean parseConditional(String conditional, Object[] record, Table table){
+
+        String[] dml = conditional.split(" [ ]*", 5);
+
+        String attributeName = dml[0];
+        String attributeValue = dml[2];
+
+
+        switch (dml[1]){
+            case "=":
+
+                break;
+            case ">":
+                break;
+            case "<":
+                break;
+            case ">=":
+                break;
+            case "<=":
+                break;
+                // error out
+            default:
+                break;
+        }
+
+        return true;
+
+    }
 
     /**
      * This will create an instance of this parser and return it.

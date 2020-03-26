@@ -22,6 +22,9 @@ public class Table implements Serializable {
     private int tableID;
     private final String tableName;
     private final Set<Attribute> attributes;
+
+
+
     private final Map<Attribute, Integer> attributeIndices = new HashMap<>();
     private final Map<String, Attribute> attributeMap = new HashMap<>();
 
@@ -82,6 +85,10 @@ public class Table implements Serializable {
 
     public String getTableName() {
         return tableName;
+    }
+
+    public Integer getAttributeIndex(String name) {
+        return attributeIndices.get(name);
     }
 
     /**
