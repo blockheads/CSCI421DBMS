@@ -178,6 +178,10 @@ public class Table implements Serializable {
         return attributeMap.get(name);
     }
 
+    public int getAttributeCount() {
+        return attributes.size();
+    }
+
     /**
      * Get the index of the attribute that you are getting
      * @param attribute the attribute
@@ -265,7 +269,7 @@ public class Table implements Serializable {
         return true;
     }
 
-    public boolean checkUniqueConditions(Object[][] table, Object[] tuple) {
+    public boolean checkUniqueConditions(Object[][] table, Set<Object[]> tuples) {
 
         final class UniquePair {
             final Object[] tuple;
@@ -295,18 +299,32 @@ public class Table implements Serializable {
                     uniqueLists.get(hash).add(new UniquePair(uniqueEntry, index));
             }
 
-            Object[] uniqueEntry = new Object[unique.size()];
-            int i = 0;
-            int hash = 0;
-            for (Attribute attribute : unique) { // generate an object list for the tuple
-                uniqueEntry[i] = tuple[attributeIndices.get(attribute)];
-                hash = Objects.hash(hash, uniqueEntry[i]);
-            }
+            HashMap<Integer, ArrayList<Object[]>> generatedLists = new HashMap<>();
+            for (Object[] tuple : tuples) {
+                Object[] uniqueEntry = new Object[unique.size()];
+                int i = 0;
+                int hash = 0;
+                for (Attribute attribute : unique) { // generate an object list for the tuple
+                    uniqueEntry[i] = tuple[attributeIndices.get(attribute)];
+                    hash = Objects.hash(hash, uniqueEntry[i]);
+                }
 
-            for (UniquePair uniquePair : uniqueLists.getOrDefault(hash, new ArrayList<>())) {
-                if (compareAttrValues(uniquePair.tuple, uniqueEntry) == 0) // found an identical unique
-                    if (compareAttrValues(getPrimaryKeyAttrValues(table[uniquePair.index]), getPrimaryKeyAttrValues(tuple)) != 0) // attributes with the same primary key dont count
-                        return false;
+                if (generatedLists.containsKey(hash)) { // check the new values against themselves
+                    for (Object[] generatedTuple : generatedLists.get(hash)) {
+                        if (compareAttrValues(generatedTuple, uniqueEntry) == 0) return false;
+                    }
+                    generatedLists.get(hash).add(uniqueEntry);
+                } else {
+                    generatedLists.put(hash, new ArrayList<>() {{
+                        add(uniqueEntry);
+                    }});
+                }
+
+                for (UniquePair uniquePair : uniqueLists.getOrDefault(hash, new ArrayList<>())) {
+                    if (compareAttrValues(uniquePair.tuple, uniqueEntry) == 0) // found an identical unique
+                        if (compareAttrValues(getPrimaryKeyAttrValues(table[uniquePair.index]), getPrimaryKeyAttrValues(tuple)) != 0) // attributes with the same primary key dont count
+                            return false;
+                }
             }
         }
         return true;

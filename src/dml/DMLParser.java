@@ -4,9 +4,13 @@ import database.Database;
 import ddl.catalog.Attribute;
 import ddl.catalog.Catalog;
 import ddl.catalog.Table;
+import dml.condition.Statement;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DMLParser implements IDMLParser {
@@ -21,13 +25,13 @@ public class DMLParser implements IDMLParser {
 
             Table table =  Database.catalog.getTable(dml[2]);
             if (table == null) throw new DMLParserException("Table DNE");
+
             for (String value: values) {
                 try {
                     Object[][] tableValues = table.getRecords();
                     Object[] record = table.getRecordFromString(value.substring(1, value.length() - 1));
                     System.out.println("null" + table.checkNotNullConditions(record));
-                    System.out.println("unique" + table.checkUniqueConditions(tableValues, record));
-                    System.out.println();
+                    System.out.println("unique" + table.checkUniqueConditions(tableValues, Collections.singleton(record)));
 
                     table.addRecord(record);
                 } catch (StorageManagerException e) {
@@ -93,6 +97,28 @@ public class DMLParser implements IDMLParser {
         }),
         UPDATE(statement -> {
 
+            String[] dml = statement.split(" [ ]*", 4);
+            Table table = Database.catalog.getTable(dml[1]);
+
+            String[] values = dml[4].split("[ ]*where[ ]*", 2);
+            UpdateFilter updateFilter = new UpdateFilter(table, values[0].trim());
+            Statement whereExp = Statement.fromWhere(table, values[1].trim());
+            try {
+                Object[][] tableData = table.getRecords();
+                Set<Object[]> rows = whereExp.resolveAgainst(Collections.singleton(tableData));
+                Set<Object[]> updatedData = new HashSet<>();
+                for (Object[] tuple : rows) {
+                    updatedData.add(updateFilter.performUpdate(tuple));
+                }
+
+                // dont need to check nulls because you cant update a value to a null
+
+                table.checkUniqueConditions(tableData, updatedData);
+                table.checkForeignKeyConditions(updatedData);
+                //table.updateRecords
+            } catch (StorageManagerException e) {
+                e.printStackTrace();
+            }
         });
 
         final DMLHandle handle;
