@@ -25,7 +25,7 @@ public class Condition implements Resolvable {
      * The data on the right hand side of the equation
      */
     private enum RHS {
-        ATTR, BOOL, INT, STR
+        ATTR, BOOL, INT, DOUB, STR
     }
 
 
@@ -87,6 +87,14 @@ public class Condition implements Resolvable {
                     attemptAsAttr(sides[1]);
                 }
                 break;
+            case "double":
+                rhsType = RHS.DOUB;
+                try {
+                    rhsObject = Double.parseDouble(sides[1]);
+                } catch (NumberFormatException e) {
+                    attemptAsAttr(sides[1]);
+                }
+                break;
             case "varchar":
             case "char":
                 rhsType = RHS.STR;
@@ -136,6 +144,8 @@ public class Condition implements Resolvable {
                 return cmp((Boolean) record[table.getIndex(attribute)], (Boolean) rhsObject);
             case INT:
                 return cmp((Integer) record[table.getIndex(attribute)], (Integer) rhsObject);
+            case DOUB:
+                return cmp((Double) record[table.getIndex(attribute)], (Double) rhsObject);
             case STR:
                 return cmp((String) record[table.getIndex(attribute)], (String) rhsObject);
         }
@@ -151,6 +161,8 @@ public class Condition implements Resolvable {
         switch (attribute.getDataType().split("[(]")[0]) {
             case "integer":
                 return cmp((Integer) obj1, (Integer) obj2);
+            case "double":
+                return cmp((Double) obj1, (Double) obj2);
             case "varchar":
             case "char":
                 return cmp((String) obj1, (String) obj2);

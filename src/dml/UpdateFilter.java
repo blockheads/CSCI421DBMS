@@ -2,6 +2,7 @@ package dml;
 
 import ddl.catalog.Attribute;
 import ddl.catalog.Table;
+import dml.condition.Condition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Map;
 public class UpdateFilter {
 
     private enum MATHOP {
-        ADD, SUB, MUL, DIV
+        ADD, SUB, MUL, DIV, NONE
     }
 
     private final static String mathopRegex = "([+\\-*/])";
@@ -23,7 +24,7 @@ public class UpdateFilter {
     }};
 
     private enum VALTYPES {
-        ATTR, DOUBLE, INTEGER
+        ATTR, DOUBLE, INTEGER, BOOL, STRING
     }
 
     private final Table table;
@@ -48,17 +49,28 @@ public class UpdateFilter {
             inputTypes.add(new ArrayList<>());
 
             parseOperand(operands[0].trim());
-            parseOperand(operands[1].trim());
+            if (operands.length == 2) {
+                parseOperand(operands[1].trim());
+                operations.add(mathopMap.get(parts[1].substring(operands[0].length(),
+                        operands[0].length() + (parts[1].length() - (operands[0].length() + operands[1].length())))));
+            } else {
+                operations.add(MATHOP.NONE);
+            }
 
-             operations.add(mathopMap.get(parts[1].substring(operands[0].length(),
-                    operands[0].length() + (parts[1].length() - (operands[0].length() + operands[1].length())))));
+
         }
     }
 
     private void parseOperand(String operand) throws DMLParserException {
-
         try {
-            if (operand.contains(".")) {
+            if (operand.contains("\"")) {
+                inputs.get(inputs.size() - 1).add(operand.substring(1, operand.length() - 1));
+                inputTypes.get(inputs.size() - 1).add(VALTYPES.STRING);
+            } else if(operand.contains("true") || operand.contains("false")) {
+                Boolean b = Boolean.valueOf(operand);
+                inputs.get(inputs.size() - 1).add(b);
+                inputTypes.get(inputs.size() - 1).add(VALTYPES.BOOL);
+            } else if (operand.contains(".")) {
                 Double d = Double.parseDouble(operand);
 
                 inputs.get(inputs.size() - 1).add(d);
@@ -78,11 +90,31 @@ public class UpdateFilter {
         }
     }
 
-    Object[] performUpdate(Object[] oldTuple) {
+    Object[] performUpdate(Object[] oldTuple) throws DMLParserException {
         Object[] newTuple = oldTuple.clone();
         for (int i = 0; i < assigess.size(); i++) {
             Attribute assign = assigess.get(i);
-            newTuple[table.getIndex(assign)] = assign.sameType("integer") ? intMath(i, oldTuple) : doubleMath(i, oldTuple);
+
+            switch (assign.getDataType().split("[(]")[0]) {
+                case "integer":
+                    newTuple[table.getIndex(assign)] = intMath(i, oldTuple);
+                    break;
+                case "double":
+                    newTuple[table.getIndex(assign)] = doubleMath(i, oldTuple);
+                    break;
+                case "varchar":
+                case "char":
+                case "boolean":
+                    Object obj = inputs.get(i).get(0);
+                    if (inputTypes.get(i).get(0) == VALTYPES.ATTR) obj = oldTuple[table.getAttributeIndex((String) obj)];
+                    newTuple[table.getIndex(assign)] = obj;
+                    break;
+                default:
+                    throw new DMLParserException("The attribute " + assign.getName() + " has type "
+                            + assign.getDataType() + " which is unrecognized by this clause.");
+            }
+
+
         }
         return newTuple;
     }
