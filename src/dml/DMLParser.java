@@ -14,6 +14,11 @@ public class DMLParser implements IDMLParser {
 
     private static DMLParser dmlParser;
 
+    private static final String NOT_NULL = "Some of the values in the record is null where a non-null value is expected";
+    private static final String NOT_UNIQUE = "Some of the values in the record is not unique where a unique value is expected";
+    private static final String NOT_FK = "Some of the values in the record do not have corresponding foreign keys where expected";
+    private static final String TABLE_DNE = "The table you are trying to query does not exist.";
+
     private enum DMLCommands {
         INSERT(statement -> {
 
@@ -21,16 +26,16 @@ public class DMLParser implements IDMLParser {
             String[] values = dml[4].split(",[ ]*");
 
             Table table =  Database.catalog.getTable(dml[2]);
-            if (table == null) throw new DMLParserException("Table DNE");
+            if (table == null) throw new DMLParserException(TABLE_DNE);
 
             boolean generateRefTable = true;
             for (String value: values) {
                 try {
                     Object[][] tableValues = table.getRecords();
                     Object[] record = table.getRecordFromString(value.substring(1, value.length() - 1));
-                    if (!table.checkNotNullConditions(record)) throw new DMLParserException("Not null not respected");
-                    if (!table.checkUniqueConditions(tableValues, Collections.singleton(record))) throw new DMLParserException("Not unique");
-                    if (!table.checkForeignKeyConditions(record, generateRefTable)) throw new DMLParserException("Missing foreign key");
+                    if (!table.checkNotNullConditions(record)) throw new DMLParserException(NOT_NULL);
+                    if (!table.checkUniqueConditions(tableValues, Collections.singleton(record))) throw new DMLParserException(NOT_UNIQUE);
+                    if (!table.checkForeignKeyConditions(record, generateRefTable)) throw new DMLParserException(NOT_FK);
                     generateRefTable = false;
                     table.addRecord(record);
                 } catch (StorageManagerException | DataTypeException e) {
@@ -77,8 +82,8 @@ public class DMLParser implements IDMLParser {
 
                 // dont need to check nulls because you cant update a value to a null
 
-                if (!table.checkUniqueConditions(tableData, updatedData)) throw new DMLParserException("One or more updates are not unique");
-                if (!table.checkForeignKeyConditions(updatedData)) throw new DMLParserException("One or more updates no longer satisfy the foreign key conditions");
+                if (!table.checkUniqueConditions(tableData, updatedData)) throw new DMLParserException(NOT_UNIQUE);
+                if (!table.checkForeignKeyConditions(updatedData)) throw new DMLParserException(NOT_FK);
                 table.updateRecord(updatedData);
             } catch (StorageManagerException e) {
                 throw new DMLParserException(e.getLocalizedMessage());
