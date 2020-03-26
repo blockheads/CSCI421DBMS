@@ -29,5 +29,9 @@ public class Custom3Tester {
 
         database = Database.getConnection(dbLoc, pageBufferSize, pageSize);
         database.executeNonQuery("insert into foo values (1 \"foo\" 2.1 false);");
+        database.terminateDatabase();
+
+        database = Database.getConnection(dbLoc, pageBufferSize, pageSize);
+        database.executeNonQuery("delete from foo where id = 1 and married = false or amount = 2.1;");
     }
 }
