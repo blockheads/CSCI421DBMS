@@ -306,9 +306,9 @@ public class Table implements Serializable {
 
                 ArrayList<UniquePair> hashList = uniqueLists.get(hash);
                 if (hashList == null)
-                    uniqueLists.put(hash, new ArrayList<>(){{add(new UniquePair(uniqueEntry, index));}});
-                else
-                    uniqueLists.get(hash).add(new UniquePair(uniqueEntry, index));
+                    uniqueLists.put(hash, new ArrayList<>());
+                uniqueLists.get(hash).add(new UniquePair(uniqueEntry, index));
+                index++;
             }
 
             HashMap<Integer, ArrayList<Object[]>> generatedLists = new HashMap<>();

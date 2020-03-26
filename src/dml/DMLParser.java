@@ -41,7 +41,7 @@ public class DMLParser implements IDMLParser {
             }
         }),
         DELETE(statement -> {
-            String[] dml = statement.split(" [ ]*", 4);
+            String[] dml = statement.split(" [ ]*", 5);
 
 
             Table table =  Database.catalog.getTable(dml[2]);
@@ -49,7 +49,7 @@ public class DMLParser implements IDMLParser {
 
             try {
                 Object[][] tableData = table.getRecords();
-                Statement whereExp = Statement.fromWhere(table, dml[3]);
+                Statement whereExp = Statement.fromWhere(table, dml[4]);
                 for (Object[] row : whereExp.resolveAgainst(new HashSet<>(Arrays.asList(tableData)))) {
                     table.deleteRecord(row);
                 }
@@ -79,8 +79,8 @@ public class DMLParser implements IDMLParser {
 
                 // dont need to check nulls because you cant update a value to a null
 
-                if (table.checkUniqueConditions(tableData, updatedData)) throw new DMLParserException("One or more updates are not unique");
-                if (table.checkForeignKeyConditions(updatedData)) throw new DMLParserException("One or more updates no longer satisfy the foreign key conditions");
+                if (!table.checkUniqueConditions(tableData, updatedData)) throw new DMLParserException("One or more updates are not unique");
+                if (!table.checkForeignKeyConditions(updatedData)) throw new DMLParserException("One or more updates no longer satisfy the foreign key conditions");
                 table.updateRecord(updatedData);
             } catch (StorageManagerException e) {
                 e.printStackTrace();
