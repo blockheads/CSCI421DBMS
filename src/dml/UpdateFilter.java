@@ -78,36 +78,48 @@ public class UpdateFilter {
         }
     }
 
-    public Object[] performUpdate(Object[] oldTuple) {
+    Object[] performUpdate(Object[] oldTuple) {
         Object[] newTuple = oldTuple.clone();
         for (int i = 0; i < assigess.size(); i++) {
             Attribute assign = assigess.get(i);
-
-
-
-//            switch (operations.get(i)) {
-//                case ADD:
-//                    newTuple[table.getIndex(assign)] = ;
-//                    break;
-//                case SUB:
-//                    newTuple[table.getIndex(assign)];
-//                    break;
-//                case MUL:
-//                    newTuple[table.getIndex(assign)];
-//                    break;
-//                case DIV:
-//                    newTuple[table.getIndex(assign)];
-//                    break;
-//            }
+            newTuple[table.getIndex(assign)] = assign.sameType("integer") ? intMath(i, oldTuple) : doubleMath(i, oldTuple);
         }
         return newTuple;
     }
 
-    public Double doubleMath () {
+    private Double doubleMath(int index, Object[] oldTuple) {
+        double value1 = (inputTypes.get(index).get(0) == VALTYPES.ATTR)? (double) oldTuple[table.getIndex((Attribute) inputs.get(index).get(0))] : (double) inputs.get(index).get(0);
+        double value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (double) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (double) inputs.get(index).get(1);
+
+        switch (operations.get(index)) {
+            case ADD:
+                return value1 + value2;
+            case SUB:
+                return value1 - value2;
+            case MUL:
+                return value1 * value2;
+            case DIV:
+                return value1 / value2;
+        }
+
         return 0.0;
     }
 
-    public Integer intMath() {
+    private Integer intMath(int index, Object[] oldTuple) {
+        int value1 = (inputTypes.get(index).get(0) == VALTYPES.ATTR)? (int) oldTuple[table.getIndex((Attribute) inputs.get(index).get(0))] : (int) inputs.get(index).get(0);
+        int value2 = (inputTypes.get(index).get(1) == VALTYPES.ATTR)? (int) oldTuple[table.getIndex((Attribute) inputs.get(index).get(1))] : (int) inputs.get(index).get(1);
+
+        switch (operations.get(index)) {
+            case ADD:
+                return value1 + value2;
+            case SUB:
+                return value1 - value2;
+            case MUL:
+                return value1 * value2;
+            case DIV:
+                return value1 / value2;
+        }
+
         return 0;
     }
 
