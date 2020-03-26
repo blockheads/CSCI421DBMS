@@ -233,8 +233,7 @@ public class Table implements Serializable {
         return 0;
     }
 
-    private int compareAttrValues(Object obj1, Object obj2) {
-
+    public static int compareAttrValues(Object obj1, Object obj2) {
         if (obj1 == null || obj2 == null) {
             return (obj1 == obj2)?0:((obj1 == null)?-1:1);
         }
@@ -306,11 +305,13 @@ public class Table implements Serializable {
         return true;
     }
 
-    public boolean checkForeignKeyConditions(Object[] tuple) {
+    public boolean checkForeignKeyConditions(Set<Object[]> tuples) throws StorageManagerException {
         for (ForeignKey foreignKey : foreignKeys) {
-
+            ReferenceTable referenceTable = foreignKey.getReferenceTable(this);
+            for (Object[] tuple : tuples)
+                if (!referenceTable.match(tuple)) return false;
         }
-        return false;
+        return true;
     }
 
     void typeMatch(List<String> attributes, Table table, List<String> references) throws DDLParserException {

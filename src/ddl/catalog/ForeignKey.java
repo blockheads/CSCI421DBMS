@@ -58,10 +58,15 @@ public class ForeignKey implements Serializable {
         return attributes.contains(name);
     }
 
-    public boolean hasMatch(Object[] tuple) throws StorageManagerException {
+    public ReferenceTable getReferenceTable(Table source) throws StorageManagerException {
         Table referenceTable = Database.catalog.getTable(this.referenceTable);
-        Object[][] referenceRecords = referenceTable.getRecords();
-        return false;
+        List<Attribute> references = new ArrayList<>();
+        List<Attribute> attributes = new ArrayList<>();
+        for (String s : this.references)
+            references.add(referenceTable.getAttribute(s));
+        for (String s : this.attributes)
+            attributes.add(source.getAttribute(s));
+        return new ReferenceTable(referenceTable, references, source, attributes);
     }
 
     @Override

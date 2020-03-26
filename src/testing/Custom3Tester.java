@@ -25,9 +25,13 @@ public class Custom3Tester {
                 ");";
         database.executeNonQuery(createTable1);
         database.executeNonQuery("insert into foo values (1 \"foo\" 2.1 false);");
+        database.executeNonQuery("insert into foo values (2 \"foo\" 2.2 false);");
         database.terminateDatabase();
 
         database = Database.getConnection(dbLoc, pageBufferSize, pageSize);
         database.executeNonQuery("insert into foo values (1 \"foo\" 2.1 false);");
+        database.executeNonQuery("update foo set married = true where amount = 2.1;");
+        database.executeNonQuery("delete from foo where id = 1;");
+        database.executeNonQuery("delete from foo where id > 1;");
     }
 }
