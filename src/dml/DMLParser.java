@@ -52,8 +52,10 @@ public class DMLParser implements IDMLParser {
 
             try {
                 Object[][] tableData = table.getRecords();
-                Statement whereExp = Statement.fromWhere(table, dml[4]);
-                for (Object[] row : whereExp.resolveAgainst(new HashSet<>(Arrays.asList(tableData)))) {
+                Set<Object[]> rows = new HashSet<>(Arrays.asList(tableData));
+                if(dml.length == 5) // where true
+                    rows = Statement.fromWhere(table, dml[4]).resolveAgainst(rows);
+                for (Object[] row : rows) {
                     table.deleteRecord(row);
                 }
 
@@ -71,10 +73,16 @@ public class DMLParser implements IDMLParser {
 
             String[] values = dml[3].split("[ ]*where[ ]*", 2);
             UpdateFilter updateFilter = new UpdateFilter(table, values[0].trim());
-            Statement whereExp = Statement.fromWhere(table, values[1].trim());
+            Statement whereExp = null;
+            if(values.length == 2) {
+                whereExp = Statement.fromWhere(table, values[1].trim());
+            }
             try {
                 Object[][] tableData = table.getRecords();
-                Set<Object[]> rows = whereExp.resolveAgainst(new HashSet<>(Arrays.asList(tableData)));
+                Set<Object[]> rows = new HashSet<>(Arrays.asList(tableData));
+                if (whereExp != null) {
+                        rows = whereExp.resolveAgainst(rows);
+                }
                 Set<Object[]> updatedData = new HashSet<>();
                 for (Object[] tuple : rows) {
                     updatedData.add(updateFilter.performUpdate(tuple));
