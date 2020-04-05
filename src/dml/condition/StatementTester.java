@@ -52,6 +52,8 @@ class StatementTester {
 //                Map<Table, Resolvable> resolve1 = Statement.fromMutliTableWhere(tables, "a1 = 1 and b1 = 2");
                 Map<Table, Resolvable> resolve2 = Statement.fromMutliTableWhere(tables, "a1 = 1 and b1 = a1");
                 Map<Table, Resolvable> resolve3 = Statement.fromMutliTableWhere(tables, "a1 = A.s3 and b1 = 2");
+                Map<Table, Resolvable> resolve4 = Statement.fromMutliTableWhere(tables, "a1 = A.s3 and b1 = 2 or b2 = 3");
+                Map<Table, Resolvable> resolve5 = Statement.fromMutliTableWhere(tables, "a1 = A.s3 and b1 = A.s3 or b2 = 3 and b1 = A.a1 or B.s3 = 7");
                 int i = 2;
             }
             break;

@@ -85,6 +85,20 @@ public class Statement implements Resolvable {
         return new Statement(resolvables);
     }
 
+    public static Resolvable whereTrue () {
+        return new Resolvable() {
+            @Override
+            public Set<Object[]> resolveAgainst(Set<Object[]> records) {
+                return records;
+            }
+
+            @Override
+            public Set<Attribute> getUsedAttributes() {
+                return new HashSet<>();
+            }
+        };
+    }
+
     /**
      * Used for selection
      *
@@ -100,6 +114,7 @@ public class Statement implements Resolvable {
 
         String[] conjunctions = condition.split(conjunctionReg);
 
+        int c_id = 0;
         for (String conjunction: conjunctions) {
             String[] disjunctions = conjunction.trim().split(disjunctionReg);
             Set<Table> usedTables = new HashSet<>();

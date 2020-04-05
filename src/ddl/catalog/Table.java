@@ -18,7 +18,7 @@ public class Table implements Serializable {
     private static final String ATTR_DUPE_PRIM_KEY_FORMAT = "You can not have duplicate attributes in a primary key (%s).";
     private static final String TYPE_MISMATCH_FORMAT = "Table %s attribute %s(%s) referencing table %s attribute %s(%s) do not have equal types.";
 
-    private static final String INTERNAL_TABLE_SIG = "_internal_";
+    public static final String INTERNAL_TABLE_SIG = "_internal_";
 
     private int tableID;
     private final String tableName;

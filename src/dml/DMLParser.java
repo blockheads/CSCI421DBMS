@@ -1,9 +1,11 @@
 package dml;
 
 import database.Database;
+import ddl.DDLParserException;
 import ddl.catalog.Attribute;
 import ddl.catalog.Catalog;
 import ddl.catalog.Table;
+import dml.condition.Resolvable;
 import dml.condition.Statement;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
@@ -18,6 +20,8 @@ public class DMLParser implements IDMLParser {
     private static final String NOT_UNIQUE = "Some of the values in the record is not unique where a unique value is expected";
     private static final String NOT_FK = "Some of the values in the record do not have corresponding foreign keys where expected";
     private static final String TABLE_DNE = "The table you are trying to query does not exist.";
+
+    private static final String selectRegex = "[ ]*(from|where|order by)[ ]*";
 
     private enum DMLCommands {
         INSERT(statement -> {
@@ -116,7 +120,77 @@ public class DMLParser implements IDMLParser {
     }
     
     @Override
-    public Object[][] parseDMLQuery(String statement) throws DMLParserException{
+    public Object[][] parseDMLQuery(String statement) throws DMLParserException {
+        String[] parts = statement.split(selectRegex, 4);
+        Set<Table> tables = new HashSet<>();
+        Set<String> attrNeeded = new HashSet<>();
+        ArrayList<Attribute> attrOrder = new ArrayList<>();
+        ArrayList<String> orderBy;
+        Resolvable whereClause = Statement.whereTrue();
+
+        { // get tables needed
+            String[] tStrings = parts[1].split(" [ ]*");
+            for (String tname : tStrings) {
+                Table table = Database.catalog.getTable(tname);
+                if (table == null) throw new DMLParserException("Table not real");
+                tables.add(table);
+            }
+        }
+
+        if (!parts[0].contains("*")) { // specific columns selected
+            parts[0] = parts[0].substring(parts[0].indexOf('t')).trim();
+            String[] aStrings = parts[0].split(" [ ]*");
+            attrOrder = new ArrayList<>(aStrings.length);
+            for (String aname : aStrings) {
+                Attribute attr = null;
+                for (Table table : tables) {
+                    attr = table.getAttribute(aname);
+                    if (attr != null) {
+                        attrNeeded.add(aname);
+                        attrOrder.add(new Attribute(table.getTableName() + "." + attr.getName(), attr.getDataType()));
+                        break;
+                    }
+                }
+                if (attr == null) throw new DMLParserException("Attr not real");
+            }
+        } else {
+            for (Table table : tables) {
+                for (Attribute attribute : table.getAttributes()) {
+                    attrNeeded.add(attribute.getName());
+                    attrNeeded.add(table.getTableName() + "." + attribute.getName());
+                    attrOrder.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
+                }
+            }
+        }
+
+        try {
+            final Table lastTable = new Table(Table.INTERNAL_TABLE_SIG + "0", attrOrder);
+
+            if (parts.length >= 3) {
+                int start = 2;
+                if (statement.contains("where")) {
+                    whereClause = Statement.fromWhere(lastTable, parts[start]);
+                    start ++;
+                }
+                if (statement.contains("order by")) {
+                    orderBy = new ArrayList<>();
+                    String[] sOrder = parts[start].split(" [ ]*");
+                    for (String aname: sOrder) {
+                        if (attrNeeded.contains(aname)) {
+                            if (!orderBy.contains(aname)) orderBy.add(aname);
+                        } else {
+                            throw new DMLParserException("Order by needs avail attr");
+                        }
+                    }
+                }
+            }
+
+
+
+        } catch (DDLParserException e) {
+            throw new DMLParserException("Error making internal table");
+        }
+
         return null;
     }
 
