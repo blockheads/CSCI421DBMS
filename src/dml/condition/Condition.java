@@ -197,4 +197,13 @@ public class Condition implements Resolvable {
         return false;
     }
 
+    @Override
+    public Set<Attribute> getUsedAttributes() {
+        Set<Attribute> usedAttr = new HashSet<>();
+        usedAttr.add(attribute);
+        if (rhsType == RHS.ATTR) {
+            usedAttr.add((Attribute) rhsObject);
+        }
+        return usedAttr;
+    }
 }

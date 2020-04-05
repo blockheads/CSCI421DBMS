@@ -18,9 +18,11 @@ public class Table implements Serializable {
     private static final String ATTR_DUPE_PRIM_KEY_FORMAT = "You can not have duplicate attributes in a primary key (%s).";
     private static final String TYPE_MISMATCH_FORMAT = "Table %s attribute %s(%s) referencing table %s attribute %s(%s) do not have equal types.";
 
+    private static final String INTERNAL_TABLE_SIG = "_internal_";
 
     private int tableID;
     private final String tableName;
+    private final Set<String> tableSubnames;
     private final Set<Attribute> attributes;
 
 
@@ -38,6 +40,7 @@ public class Table implements Serializable {
 
     public Table(String tableName, ArrayList<Attribute> attributes) throws DDLParserException {
         this.tableName = tableName;
+        this.tableSubnames = new HashSet<>();
         this.attributes = new HashSet<>(attributes);
 
         for (int i = 0; i < attributes.size(); i++) {
@@ -53,6 +56,26 @@ public class Table implements Serializable {
             attributeMap.put(attribute.getName(), attribute);
             attributeIndices.put(attribute, i);
         }
+    }
+
+    public Table(int internalID, Map<Table, Set<Attribute>> neededAttr) throws DDLParserException {
+        this(INTERNAL_TABLE_SIG + internalID, new ArrayList<>() {{
+            this.add(new Attribute(INTERNAL_TABLE_SIG + "id", "integer"));
+            for (Table table: neededAttr.keySet()) {
+                if (table.tableName.contains(INTERNAL_TABLE_SIG))
+                    this.addAll(neededAttr.get(table));
+                else {
+                    for (Attribute attribute : neededAttr.get(table)) {
+                        this.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
+                    }
+                }
+            }
+        }});
+        for (Table table: neededAttr.keySet()) {
+            tableSubnames.add(table.getTableName());
+            tableSubnames.addAll(table.getTableSubnames());
+        }
+        setPrimaryKey(new String[] {internalID + "id"});
     }
 
     /**
@@ -75,6 +98,18 @@ public class Table implements Serializable {
         return tableName;
     }
 
+    public boolean isPartTable(String name) {
+        return tableName.equals(name) || hasSubName(name);
+    }
+
+    public boolean hasSubName(String name) {
+        return tableSubnames.contains(name);
+    }
+
+    public Set<String> getTableSubnames() {
+        return new HashSet<>(tableSubnames);
+    }
+
     public Integer getAttributeIndex(String name) {
         return attributeIndices.get(name);
     }
@@ -86,6 +121,20 @@ public class Table implements Serializable {
      */
     public Object[][] getRecords() throws StorageManagerException {
         return Database.storageManager.getRecords(tableID);
+    }
+
+    public Object[][] getRecords(String[] project) throws StorageManagerException {
+        Object[][] fullRecords = getRecords();
+        Object[][] projectedRecords = new Object[fullRecords.length][];
+        for (int i = 0; i < fullRecords.length; i++) {
+            Object[] fullRecord = fullRecords[i];
+            Object[] record = new Object[project.length];
+            for (int j = 0; j < project.length; j++) {
+                record[j] = fullRecord[attributeIndices.get(getAttribute(project[j]))];
+            }
+            projectedRecords[i] = record;
+        }
+        return projectedRecords;
     }
 
     /**
@@ -185,7 +234,19 @@ public class Table implements Serializable {
      * @return the attribute or null
      */
     public Attribute getAttribute(String name) {
+        if (name.contains(".")) {
+            String[] nameSplit = name.split(".", 2);
+            if (nameSplit[0].equals(tableName))
+                return attributeMap.get(nameSplit[0]);
+            else if (tableSubnames.contains(nameSplit[0]))
+                return attributeMap.get(name);
+            return null;
+        }
         return attributeMap.get(name);
+    }
+
+    public boolean containsAttribute(String name) {
+        return (getAttribute(name) != null);
     }
 
     public int getAttributeCount() {
@@ -212,7 +273,7 @@ public class Table implements Serializable {
         ArrayList<Attribute> primaryKey = new ArrayList<Attribute>();
         Set<Attribute> primaryKeyParts = new HashSet<>();
         for (String name: names) {
-            containsAttribute(name);
+            containsAttributeError(name);
             if (primaryKeyParts.contains(attributeMap.get(name))) {
                 throw new DDLParserException(String.format(ATTR_DUPE_PRIM_KEY_FORMAT, name));
             } else {
@@ -227,7 +288,7 @@ public class Table implements Serializable {
     public void addUnique(String[] names) throws DDLParserException {
         final Set<Attribute> attributes = new HashSet<>();
         for (String name: names) {
-            containsAttribute(name);
+            containsAttributeError(name);
             attributes.add(attributeMap.get(name));
         }
         uniques.add(attributes);
@@ -364,8 +425,8 @@ public class Table implements Serializable {
             String attribute = attributes.get(i);
             String reference = references.get(i);
 
-            table.containsAttribute(reference);
-            containsAttribute(attribute);
+            table.containsAttributeError(reference);
+            containsAttributeError(attribute);
 
             if (!attributeMap.get(attribute).sameType(table.attributeMap.get(reference).getDataType())) {
                 throw new DDLParserException(
@@ -403,7 +464,7 @@ public class Table implements Serializable {
     }
 
     int dropAttribute(String name) throws DDLParserException {
-        if (containsAttribute(name)) {
+        if (containsAttributeError(name)) {
             if (primaryKey.contains(attributeMap.get(name))) {
                 throw new DDLParserException(String.format(ATTR_PRIM_KEY_FORMAT, name, tableName)); //cant drop primary keys
             }
@@ -436,7 +497,7 @@ public class Table implements Serializable {
         }
     }
 
-    private boolean containsAttribute(String name) throws DDLParserException {
+    private boolean containsAttributeError(String name) throws DDLParserException {
         if (attributeMap.containsKey(name)) return true;
         throw new DDLParserException(String.format(ATTR_DNE_FORMAT, name, tableName));
     }

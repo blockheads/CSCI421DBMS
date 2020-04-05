@@ -1,5 +1,8 @@
 package dml.condition;
 
+import ddl.catalog.Attribute;
+
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -27,5 +30,12 @@ public class Conjunction implements Resolvable {
     public Set<Object[]> resolveAgainst(Set<Object[]> records) {
         Set<Object[]> lhsResult = LHS.resolveAgainst(records);
         return RHS.resolveAgainst(lhsResult);
+    }
+
+    @Override
+    public Set<Attribute> getUsedAttributes() {
+        Set<Attribute> usedAttr = LHS.getUsedAttributes();
+        usedAttr.addAll(RHS.getUsedAttributes());
+        return usedAttr;
     }
 }

@@ -1,11 +1,10 @@
 package dml.condition;
 
+import ddl.catalog.Attribute;
 import ddl.catalog.Table;
 import dml.DMLParserException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A statement is a complete clause
@@ -18,7 +17,10 @@ public class Statement implements Resolvable {
         CONJUNCTION, DISJUNCTION
     }
 
+    private final static String disjunctionReg = "(or)\\b";
+    private final static String conjunctionReg = "(and)\\b";
     private final static String junctionReg = "(and|or)\\b";
+    public static String conditionsRegex = "(!=|>=|<=|=|>|<)";
 
     /**
      * The list of resolvable clauses
@@ -82,6 +84,44 @@ public class Statement implements Resolvable {
         return new Statement(resolvables);
     }
 
+    /**
+     * Used for selection
+     *
+     * Break a where statement into parts where only one table is required for evaluation,
+     * Tables are broken up by and statements, a fromWhere should be run again after the internal table is built
+     * to generate the final set
+     * @return a collection of statements by table
+     */
+    public static Map<Table, Pair<Statement, Set<Attribute>>> fromMutliTableWhere(Set<Table> tables, String condition) {
+        Map<Table, ArrayList<Resolvable>> usesable = new HashMap<>();
+
+        String[] conjunctions = condition.split(conjunctionReg);
+
+        for (String conjunction: conjunctions) {
+            String[] disjunctions = conjunction.split(disjunctionReg);
+            Set<Table> usedTables = new HashSet<>();
+            for (String disjunction : disjunctions) {
+                usedTables.addAll(whichTables(tables, condition));
+            }
+
+        }
+
+        Map<Table, Pair<Statement, Set<Attribute>>> statements = new HashMap<>();
+        for (Table table: usesable.keySet()) {
+            Statement statement =  new Statement(usesable.get(table));
+            statements.put(table, new Pair<>(statement, statement.getUsedAttributes()));
+        }
+        return statements;
+    }
+
+    private static boolean isAttr(String rhs) {
+        return false;
+    }
+
+    private static Set<Table> whichTables(Set<Table> tables, String condition) {
+        return null;
+    }
+
     @Override
     public Set<Object[]> resolveAgainst(Set<Object[]> records) {
         Set<Object[]> result = new HashSet<>();
@@ -89,5 +129,14 @@ public class Statement implements Resolvable {
             result.addAll(resolvable.resolveAgainst(records));
         }
         return result;
+    }
+
+    @Override
+    public Set<Attribute> getUsedAttributes() {
+        Set<Attribute> usedAttr = new HashSet<>();
+        for (Resolvable resolvable : this.resolvable) {
+            usedAttr.addAll(resolvable.getUsedAttributes());
+        }
+        return usedAttr;
     }
 }

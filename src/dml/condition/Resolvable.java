@@ -1,5 +1,7 @@
 package dml.condition;
 
+import ddl.catalog.Attribute;
+
 import java.util.Set;
 
 /**
@@ -15,5 +17,7 @@ public interface Resolvable {
      * @return the remaining records
      */
     public Set<Object[]> resolveAgainst(Set<Object[]> records);
+
+    public Set<Attribute> getUsedAttributes();
 
 }
