@@ -1,5 +1,6 @@
 package dml.condition;
 
+import ddl.DDLParserException;
 import ddl.catalog.Attribute;
 import ddl.catalog.Table;
 import dml.DMLParserException;
@@ -20,7 +21,7 @@ public class Statement implements Resolvable {
     private final static String disjunctionReg = "(or)\\b";
     private final static String conjunctionReg = "(and)\\b";
     private final static String junctionReg = "(and|or)\\b";
-    public static String conditionsRegex = "(!=|>=|<=|=|>|<)";
+    private final static String conditionsRegex = "[ ]*(!=|>=|<=|=|>|<)[ ]*";
 
     /**
      * The list of resolvable clauses
@@ -92,34 +93,61 @@ public class Statement implements Resolvable {
      * to generate the final set
      * @return a collection of statements by table
      */
-    public static Map<Table, Pair<Statement, Set<Attribute>>> fromMutliTableWhere(Set<Table> tables, String condition) {
-        Map<Table, ArrayList<Resolvable>> usesable = new HashMap<>();
+    public static Map<Table, Resolvable> fromMutliTableWhere(Set<Table> tables, String condition) throws DDLParserException, DMLParserException {
+        Map<Set<Table>, Table> createdTables = new HashMap<>();
+        Map<Table, Resolvable> preStatements = new HashMap<>();
+        int internal_id = 0;
 
         String[] conjunctions = condition.split(conjunctionReg);
 
         for (String conjunction: conjunctions) {
-            String[] disjunctions = conjunction.split(disjunctionReg);
+            String[] disjunctions = conjunction.trim().split(disjunctionReg);
             Set<Table> usedTables = new HashSet<>();
-            for (String disjunction : disjunctions) {
-                usedTables.addAll(whichTables(tables, condition));
+
+            for (String disjunction : disjunctions) { // get all the tables needed to preform this operation
+                usedTables.addAll(whichTables(tables, disjunction.trim()));
+            }
+
+            Table nTable = null; // find a table that matches all the tables needed in the operation
+            if (usedTables.size() == 1) {
+                nTable = usedTables.iterator().next(); // sets are terrible
+            } else {
+                if (createdTables.containsKey(usedTables)) {
+                    nTable = createdTables.get(usedTables);
+                } else {
+                    nTable = new Table(internal_id++, usedTables);
+                    createdTables.put(usedTables, nTable);
+                }
+            }
+
+            Statement s = Statement.fromWhere(nTable, conjunction);
+            if (preStatements.containsKey(nTable)) {
+                preStatements.put(nTable, new Conjunction(preStatements.get(nTable), s));
+            } else {
+                preStatements.put(nTable, s);
             }
 
         }
 
-        Map<Table, Pair<Statement, Set<Attribute>>> statements = new HashMap<>();
-        for (Table table: usesable.keySet()) {
-            Statement statement =  new Statement(usesable.get(table));
-            statements.put(table, new Pair<>(statement, statement.getUsedAttributes()));
-        }
-        return statements;
+        return preStatements;
     }
 
     private static boolean isAttr(String rhs) {
-        return false;
+        if (rhs.contains("\"")) { // detect strings
+            return false;
+        } else if (rhs.equals("null")) return false;
+        else return rhs.matches("(.)*[a-zA-Z]+(.)*"); // must be an attr if the side has a letter, otherwise its a number
     }
 
     private static Set<Table> whichTables(Set<Table> tables, String condition) {
-        return null;
+        Set<Table> usedTables = new HashSet<>();
+        String[] sides = condition.split(conditionsRegex, 2);
+        boolean checkRHS = isAttr(sides[1]);
+        for (Table table : tables) {
+            if (table.containsAttribute(sides[0])) usedTables.add(table);
+            if (checkRHS && table.containsAttribute(sides[1])) usedTables.add(table);
+        }
+        return usedTables;
     }
 
     @Override

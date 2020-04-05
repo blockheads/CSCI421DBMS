@@ -58,24 +58,29 @@ public class Table implements Serializable {
         }
     }
 
-    public Table(int internalID, Map<Table, Set<Attribute>> neededAttr) throws DDLParserException {
+    public Table(int internalID, Set<Table> joinedTables) throws DDLParserException {
         this(INTERNAL_TABLE_SIG + internalID, new ArrayList<>() {{
             this.add(new Attribute(INTERNAL_TABLE_SIG + "id", "integer"));
-            for (Table table: neededAttr.keySet()) {
+            for (Table table: joinedTables) {
                 if (table.tableName.contains(INTERNAL_TABLE_SIG))
-                    this.addAll(neededAttr.get(table));
-                else {
-                    for (Attribute attribute : neededAttr.get(table)) {
+                {
+                    for (Attribute attribute : table.getAttributes()) {
+                        if (attribute.getName().contains(INTERNAL_TABLE_SIG))
+                            continue;
+                        this.add(new Attribute(attribute.getName(), attribute.getDataType()));
+                    }
+                } else {
+                    for (Attribute attribute : table.getAttributes()) {
                         this.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
                     }
                 }
             }
         }});
-        for (Table table: neededAttr.keySet()) {
+        for (Table table: joinedTables) {
             tableSubnames.add(table.getTableName());
             tableSubnames.addAll(table.getTableSubnames());
         }
-        setPrimaryKey(new String[] {internalID + "id"});
+        setPrimaryKey(new String[] {INTERNAL_TABLE_SIG + "id"});
     }
 
     /**
@@ -110,8 +115,16 @@ public class Table implements Serializable {
         return new HashSet<>(tableSubnames);
     }
 
+    public int getSubtableCount() {
+        return tableSubnames.size();
+    }
+
     public Integer getAttributeIndex(String name) {
-        return attributeIndices.get(name);
+        return attributeIndices.get(getAttribute(name));
+    }
+
+    public Set<Attribute> getAttributes() {
+        return attributes;
     }
 
     /**
@@ -235,12 +248,16 @@ public class Table implements Serializable {
      */
     public Attribute getAttribute(String name) {
         if (name.contains(".")) {
-            String[] nameSplit = name.split(".", 2);
+            String[] nameSplit = name.split("\\.", 2);
             if (nameSplit[0].equals(tableName))
-                return attributeMap.get(nameSplit[0]);
+                return attributeMap.get(nameSplit[1]);
             else if (tableSubnames.contains(nameSplit[0]))
                 return attributeMap.get(name);
             return null;
+        }
+        for (String subName : tableSubnames){
+            Attribute got = attributeMap.get(subName + "." + name);
+            if (got != null) return got;
         }
         return attributeMap.get(name);
     }
@@ -532,6 +549,6 @@ public class Table implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(tableID);
+        return tableName.hashCode();
     }
 }
