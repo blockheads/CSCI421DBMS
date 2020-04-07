@@ -130,7 +130,7 @@ public class Statement implements Resolvable {
                 if (createdTables.containsKey(usedTables)) {
                     nTable = createdTables.get(usedTables);
                 } else {
-                    nTable = new Table(internal_id++, usedTables);
+                    nTable = new Table(usedTables);
                     createdTables.put(usedTables, nTable);
                 }
             }

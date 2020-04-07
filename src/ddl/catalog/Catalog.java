@@ -31,6 +31,14 @@ public class Catalog implements Serializable {
     }
 
     /**
+     * Exposes a unique table id
+     * @return a new table id
+     */
+    public int generateTableID() {
+        return idGenerator.getNewID();
+    }
+
+    /**
      * Load a catalog from disk. The storage manager should already be initialized.
      * @pre a database has previously been created. The storagemanager has already been loaded
      * @throws DDLParserException a catalog has never been created for this database

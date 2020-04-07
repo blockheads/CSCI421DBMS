@@ -125,7 +125,7 @@ public class DMLParser implements IDMLParser {
         Set<Table> tables = new HashSet<>();
         Set<String> attrNeeded = new HashSet<>();
         ArrayList<Attribute> attrOrder = new ArrayList<>();
-        ArrayList<String> orderBy;
+        ArrayList<String> orderBy = null;
         Resolvable whereClause = Statement.whereTrue();
 
         { // get tables needed
@@ -137,7 +137,15 @@ public class DMLParser implements IDMLParser {
             }
         }
 
-        if (!parts[0].contains("*")) { // specific columns selected
+        if (parts[0].contains("*")) { // select all attributes
+            for (Table table : tables) {
+                for (Attribute attribute : table.getAttributes()) {
+                    attrNeeded.add(attribute.getName());
+                    attrNeeded.add(table.getTableName() + "." + attribute.getName());
+                    attrOrder.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
+                }
+            }
+        } else { // specific columns selected
             parts[0] = parts[0].substring(parts[0].indexOf('t')).trim();
             String[] aStrings = parts[0].split(" [ ]*");
             attrOrder = new ArrayList<>(aStrings.length);
@@ -153,18 +161,10 @@ public class DMLParser implements IDMLParser {
                 }
                 if (attr == null) throw new DMLParserException("Attr not real");
             }
-        } else {
-            for (Table table : tables) {
-                for (Attribute attribute : table.getAttributes()) {
-                    attrNeeded.add(attribute.getName());
-                    attrNeeded.add(table.getTableName() + "." + attribute.getName());
-                    attrOrder.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
-                }
-            }
         }
 
         try {
-            final Table lastTable = new Table(Table.INTERNAL_TABLE_SIG + "0", attrOrder);
+            final Table lastTable = new Table(Table.generateInternalIdentifier(), attrOrder);
 
             if (parts.length >= 3) {
                 int start = 2;
@@ -182,15 +182,35 @@ public class DMLParser implements IDMLParser {
                             throw new DMLParserException("Order by needs avail attr");
                         }
                     }
+
+                } else {
+
                 }
             }
 
+            Iterator<Table> tableIterator = tables.iterator();
+            Table it = tableIterator.next();
+            if (tables.size() >= 2) {
+                for (int i = 1; i < tables.size() - 1; i++) {
+                    Table generated = it.join(tableIterator.next());
+                    if (it.getSubtableCount() > 0) it.dropTable();
+                    it = generated;
+                }
+                it.join(lastTable, tableIterator.next());
+                if (it.getSubtableCount() > 0) it.dropTable();
 
+                Set<Object[]> records = whereClause.resolveAgainst(new HashSet<>(Arrays.asList(lastTable.getRecords())));
+                Object[][] recordArr = new Object[records.size()][];
+                records.toArray(recordArr);
 
-        } catch (DDLParserException e) {
+                lastTable.dropTable();
+                return recordArr;
+            } else {
+
+            }
+        } catch (DDLParserException | StorageManagerException e) {
             throw new DMLParserException("Error making internal table");
         }
-
         return null;
     }
 

@@ -19,6 +19,7 @@ public class Table implements Serializable {
     private static final String TYPE_MISMATCH_FORMAT = "Table %s attribute %s(%s) referencing table %s attribute %s(%s) do not have equal types.";
 
     public static final String INTERNAL_TABLE_SIG = "_internal_";
+    private static final TableIDGenerator idGenerator = new TableIDGenerator();
 
     private int tableID;
     private final String tableName;
@@ -58,9 +59,8 @@ public class Table implements Serializable {
         }
     }
 
-    public Table(int internalID, Set<Table> joinedTables) throws DDLParserException {
-        this(INTERNAL_TABLE_SIG + internalID, new ArrayList<>() {{
-            this.add(new Attribute(INTERNAL_TABLE_SIG + "id", "integer"));
+    public Table(Set<Table> joinedTables) throws DDLParserException {
+        this(generateInternalIdentifier(), new ArrayList<>() {{
             for (Table table: joinedTables) {
                 if (table.tableName.contains(INTERNAL_TABLE_SIG))
                 {
@@ -80,7 +80,78 @@ public class Table implements Serializable {
             tableSubnames.add(table.getTableName());
             tableSubnames.addAll(table.getTableSubnames());
         }
-        setPrimaryKey(new String[] {INTERNAL_TABLE_SIG + "id"});
+        String[] attrNames = new String[this.attributes.size()];
+        for (Attribute attribute : attributeIndices.keySet()) {
+            attrNames[attributeIndices.get(attribute)] = attribute.getName();
+        }
+        setPrimaryKey(attrNames);
+    }
+
+    /**
+     * Join two tables together by creating an internal table,
+     * Remember to drop this table when done.
+     * @param other the table to join this
+     * @return a new table, the joined table has a primary key on every attribute
+     */
+    public Table join(Table other) throws DDLParserException, StorageManagerException {
+        Set<Table> tables = new HashSet<>();
+        tables.add(this); tables.add(other);
+        return join(new Table(tables), other);
+    }
+
+    /**
+     * Join two tables together by instantiating an internal table,
+     * Remember to drop this table when done.
+     * @param descriptor a table that describes the resultant, this table should have a primary key defined.
+     *                   This table should not be in the catalog or have an underlying table defined
+     * @param other the table to join this
+     * @return descriptor object with an id defined and records from both tables in the storage manager
+     */
+    public Table join(Table descriptor, Table other) throws StorageManagerException {
+        descriptor.setTableID(Database.catalog.generateTableID());
+        descriptor.createTable();
+
+        Object[][] thisData = this.getRecords();
+        Object[][] otherData = other.getRecords();
+
+        for (Object[] thisRecord : thisData) {
+            for (Object[] otherRecord : otherData) {
+                Object[] newRecord = new Object[descriptor.attributes.size()];
+                for (Attribute attribute : this.attributes) {
+                    if (descriptor.containsAttribute(tableName, attribute.getName())) {
+                        newRecord[descriptor.getIndex(descriptor.getAttribute(tableName, attribute.getName()))] = thisRecord[attributeIndices.get(attribute)];
+                    }
+                }
+                for (Attribute attribute : other.attributes) {
+                    if (descriptor.containsAttribute(other.tableName, attribute.getName())) {
+                        newRecord[descriptor.getIndex(descriptor.getAttribute(other.tableName, attribute.getName()))] = otherRecord[other.attributeIndices.get(attribute)];
+                    }
+                }
+                try {
+                    descriptor.addRecord(newRecord);
+                } catch (StorageManagerException e) {}
+            }
+        }
+        return descriptor;
+    }
+
+    public Table project(Table descriptor) throws StorageManagerException {
+        descriptor.setTableID(Database.catalog.generateTableID());
+        descriptor.createTable();
+
+        Object[][] records = this.getRecords();
+        for (Object[] record : records) {
+            Object[] newRecord = new Object[descriptor.attributes.size()];
+            for (Attribute attribute : this.attributes) {
+                newRecord[descriptor.getIndex(descriptor.getAttribute(this.tableName, attribute.getName()))] = record[attributeIndices.get(attribute)];
+            }
+            descriptor.addRecord(newRecord);
+        }
+        return descriptor;
+    }
+
+    public static String generateInternalIdentifier() {
+        return Table.INTERNAL_TABLE_SIG + idGenerator.getNewID();
     }
 
     /**
@@ -136,25 +207,11 @@ public class Table implements Serializable {
         return Database.storageManager.getRecords(tableID);
     }
 
-    public Object[][] getRecords(String[] project) throws StorageManagerException {
-        Object[][] fullRecords = getRecords();
-        Object[][] projectedRecords = new Object[fullRecords.length][];
-        for (int i = 0; i < fullRecords.length; i++) {
-            Object[] fullRecord = fullRecords[i];
-            Object[] record = new Object[project.length];
-            for (int j = 0; j < project.length; j++) {
-                record[j] = fullRecord[attributeIndices.get(getAttribute(project[j]))];
-            }
-            projectedRecords[i] = record;
-        }
-        return projectedRecords;
-    }
-
     /**
      * Delete underlying table from db
      * @throws StorageManagerException the table does not exist
      */
-    void dropTable() throws StorageManagerException {
+    public void dropTable() throws StorageManagerException {
         Database.storageManager.dropTable(tableID);
     }
 
@@ -262,8 +319,16 @@ public class Table implements Serializable {
         return attributeMap.get(name);
     }
 
+    public Attribute getAttribute(String tableSubname, String attributeName) {
+        return getAttribute(tableSubname + "." + attributeName);
+    }
+
     public boolean containsAttribute(String name) {
         return (getAttribute(name) != null);
+    }
+
+    public boolean containsAttribute(String tableSubname, String attributeName) {
+        return (getAttribute(tableSubname + "." + attributeName) != null);
     }
 
     public int getAttributeCount() {
