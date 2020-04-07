@@ -135,11 +135,10 @@ public class Table implements Serializable {
         return descriptor;
     }
 
-    public Table project(Table descriptor) throws StorageManagerException {
+    public Table project(Table descriptor, Set<Object[]> records) throws StorageManagerException {
         descriptor.setTableID(Database.catalog.generateTableID());
         descriptor.createTable();
 
-        Object[][] records = this.getRecords();
         for (Object[] record : records) {
             Object[] newRecord = new Object[descriptor.attributes.size()];
             for (Attribute attribute : this.attributes) {

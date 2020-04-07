@@ -189,6 +189,7 @@ public class DMLParser implements IDMLParser {
             }
 
             Iterator<Table> tableIterator = tables.iterator();
+            Set<Object[]> records;
             Table it = tableIterator.next();
             if (tables.size() >= 2) {
                 for (int i = 1; i < tables.size() - 1; i++) {
@@ -196,22 +197,26 @@ public class DMLParser implements IDMLParser {
                     if (it.getSubtableCount() > 0) it.dropTable();
                     it = generated;
                 }
-                it.join(lastTable, tableIterator.next());
+                Table generated = it.join(tableIterator.next());
                 if (it.getSubtableCount() > 0) it.dropTable();
 
-                Set<Object[]> records = whereClause.resolveAgainst(new HashSet<>(Arrays.asList(lastTable.getRecords())));
-                Object[][] recordArr = new Object[records.size()][];
-                records.toArray(recordArr);
+                records = whereClause.resolveAgainst(new HashSet<>(Arrays.asList(generated.getRecords())));
 
-                lastTable.dropTable();
-                return recordArr;
+                generated.project(lastTable, records);
+                generated.dropTable();
+
             } else {
-
+                records = whereClause.resolveAgainst(new HashSet<>(Arrays.asList(it.getRecords())));
+                it.project(lastTable, records);
             }
+
+            Object[][] finalRecords = lastTable.getRecords();
+            lastTable.dropTable();
+            return finalRecords;
+
         } catch (DDLParserException | StorageManagerException e) {
             throw new DMLParserException("Error making internal table");
         }
-        return null;
     }
 
 }
