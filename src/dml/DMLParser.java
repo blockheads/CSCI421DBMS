@@ -165,6 +165,8 @@ public class DMLParser implements IDMLParser {
 
         try {
             final Table lastTable = new Table(Table.generateInternalIdentifier(), attrOrder);
+            for (Table table : tables)
+                lastTable.addSubname(table.getTableName());
 
             if (parts.length >= 3) {
                 int start = 2;
@@ -173,19 +175,37 @@ public class DMLParser implements IDMLParser {
                     start ++;
                 }
                 if (statement.contains("order by")) {
+                    Set<String> used = new HashSet<>();
                     orderBy = new ArrayList<>();
                     String[] sOrder = parts[start].split(" [ ]*");
                     for (String aname: sOrder) {
                         if (attrNeeded.contains(aname)) {
-                            if (!orderBy.contains(aname)) orderBy.add(aname);
+                            if (!used.contains(aname)) {
+                                orderBy.add(aname);
+                                used.add(aname);
+                            }
                         } else {
                             throw new DMLParserException("Order by needs avail attr");
                         }
                     }
-
-                } else {
-
+                    for (Attribute attribute : attrOrder) {
+                        if (!used.contains(attribute.getName())) {
+                            orderBy.add(attribute.getName());
+                        }
+                    }
+                    String[] attr = new String[attrOrder.size()];
+                    attr = orderBy.toArray(attr);
+                    lastTable.setPrimaryKey(attr);
                 }
+            }
+
+            if (!statement.contains("order by"))  {
+                String[] attr = new String[attrOrder.size()];
+                for (int i = 0; i < attrOrder.size(); i++) {
+                    Attribute attribute = attrOrder.get(i);
+                    attr[i] = attribute.getName();
+                }
+                lastTable.setPrimaryKey(attr);
             }
 
             Iterator<Table> tableIterator = tables.iterator();

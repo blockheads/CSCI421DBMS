@@ -173,6 +173,10 @@ public class Table implements Serializable {
         return tableName;
     }
 
+    public void addSubname(String subname) {
+        tableSubnames.add(subname);
+    }
+
     public boolean isPartTable(String name) {
         return tableName.equals(name) || hasSubName(name);
     }
@@ -193,7 +197,11 @@ public class Table implements Serializable {
         return attributeIndices.get(getAttribute(name));
     }
 
-    public Set<Attribute> getAttributes() {
+    public List<Attribute> getAttributes() {
+        List<Attribute> attributes = new ArrayList<>(attributeIndices.keySet().size());
+        for (Attribute attribute : attributeIndices.keySet()) {
+            attributes.add(attributeIndices.get(attribute), attribute);
+        }
         return attributes;
     }
 
