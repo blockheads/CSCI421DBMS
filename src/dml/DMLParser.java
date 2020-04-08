@@ -127,13 +127,14 @@ public class DMLParser implements IDMLParser {
     public Object[][] parseDMLQuery(String statement) throws DMLParserException {
         String[] parts = statement.split(selectRegex, 4);
         Set<Table> tables = new HashSet<>();
+        Map<String, String> attrDotTable = new HashMap<>();
         Set<String> attrNeeded = new HashSet<>();
         ArrayList<Attribute> attrOrder = new ArrayList<>();
         ArrayList<String> orderBy = null;
         Resolvable whereClause = Statement.whereTrue();
 
         { // get tables needed
-            String[] tStrings = parts[1].split(" [ ]*");
+            String[] tStrings = parts[1].split("[ ]*,[ ]*");
             for (String tname : tStrings) {
                 Table table = Database.catalog.getTable(tname);
                 if (table == null) throw new DMLParserException("Table not real");
@@ -144,22 +145,28 @@ public class DMLParser implements IDMLParser {
         if (parts[0].contains("*")) { // select all attributes
             for (Table table : tables) {
                 for (Attribute attribute : table.getAttributes()) {
+                    Attribute faxAttr = new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType());
+                    attrDotTable.put(attribute.getName(), faxAttr.getName());
+                    attrDotTable.put(faxAttr.getName(), faxAttr.getName());
+                    attrNeeded.add(faxAttr.getName());
                     attrNeeded.add(attribute.getName());
-                    attrNeeded.add(table.getTableName() + "." + attribute.getName());
-                    attrOrder.add(new Attribute(table.getTableName() + "." + attribute.getName(), attribute.getDataType()));
+                    attrOrder.add(faxAttr);
                 }
             }
         } else { // specific columns selected
-            parts[0] = parts[0].substring(parts[0].indexOf('t')).trim();
-            String[] aStrings = parts[0].split(" [ ]*");
+            parts[0] = parts[0].substring(parts[0].indexOf('t') + 1).trim();
+            String[] aStrings = parts[0].split("[ ]*,[ ]*");
             attrOrder = new ArrayList<>(aStrings.length);
             for (String aname : aStrings) {
                 Attribute attr = null;
                 for (Table table : tables) {
                     attr = table.getAttribute(aname);
                     if (attr != null) {
+                        Attribute faxAttr = new Attribute(table.getTableName() + "." + attr.getName(), attr.getDataType());
+                        attrDotTable.put(attr.getName(), faxAttr.getName());
+                        attrDotTable.put(faxAttr.getName(), faxAttr.getName());
                         attrNeeded.add(aname);
-                        attrOrder.add(new Attribute(table.getTableName() + "." + attr.getName(), attr.getDataType()));
+                        attrOrder.add(faxAttr);
                         break;
                     }
                 }
@@ -183,10 +190,10 @@ public class DMLParser implements IDMLParser {
                     orderBy = new ArrayList<>();
                     String[] sOrder = parts[start].split(" [ ]*");
                     for (String aname: sOrder) {
-                        if (attrNeeded.contains(aname)) {
-                            if (!used.contains(aname)) {
-                                orderBy.add(aname);
-                                used.add(aname);
+                        if (attrNeeded.contains(attrDotTable.get(aname))) {
+                            if (!used.contains(attrDotTable.get(aname))) {
+                                orderBy.add(attrDotTable.get(aname));
+                                used.add(attrDotTable.get(aname));
                             }
                         } else {
                             throw new DMLParserException("Order by needs avail attr");
@@ -194,7 +201,7 @@ public class DMLParser implements IDMLParser {
                     }
                     for (Attribute attribute : attrOrder) {
                         if (!used.contains(attribute.getName())) {
-                            orderBy.add(attribute.getName());
+                            orderBy.add(attrDotTable.get(attribute.getName()));
                         }
                     }
                     String[] attr = new String[attrOrder.size()];

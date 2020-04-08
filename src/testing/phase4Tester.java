@@ -15,7 +15,7 @@ public class phase4Tester {
         // You may need to modify some values to test on your system
         String dbLoc = "db/";
 
-        int pageBufferSize = 20;
+        int pageBufferSize = 1000;
         int pageSize = 4096;
 
         IDatabase database = Database.getConnection(dbLoc, pageBufferSize, pageSize);

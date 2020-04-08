@@ -141,8 +141,8 @@ public class Table implements Serializable {
 
         for (Object[] record : records) {
             Object[] newRecord = new Object[descriptor.attributes.size()];
-            for (Attribute attribute : this.attributes) {
-                newRecord[descriptor.getIndex(descriptor.getAttribute(this.tableName, attribute.getName()))] = record[attributeIndices.get(attribute)];
+            for (Attribute attribute : descriptor.attributes) {
+                newRecord[descriptor.getIndex(descriptor.getAttribute(attribute.getName()))] = record[getAttributeIndex(attribute.getName())];
             }
             descriptor.addRecord(newRecord);
         }
