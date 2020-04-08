@@ -59,7 +59,7 @@ public class Table implements Serializable {
         }
     }
 
-    public Table(Set<Table> joinedTables) throws DDLParserException {
+    public Table(List<Table> joinedTables) throws DDLParserException {
         this(generateInternalIdentifier(), new ArrayList<>() {{
             for (Table table: joinedTables) {
                 if (table.tableName.contains(INTERNAL_TABLE_SIG))
@@ -94,8 +94,8 @@ public class Table implements Serializable {
      * @return a new table, the joined table has a primary key on every attribute
      */
     public Table join(Table other) throws DDLParserException, StorageManagerException {
-        Set<Table> tables = new HashSet<>();
-        tables.add(this); tables.add(other);
+        List<Table> tables = new ArrayList<>(2);
+        tables.add(0,this); tables.add(1,other);
         return join(new Table(tables), other);
     }
 

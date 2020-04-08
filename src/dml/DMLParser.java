@@ -134,7 +134,7 @@ public class DMLParser implements IDMLParser {
     @Override
     public Object[][] parseDMLQuery(String statement) throws DMLParserException {
         String[] parts = statement.split(selectRegex, 4);
-        Set<Table> tables = new HashSet<>();
+        ArrayList<Table> tables = new ArrayList<>();
         Map<String, String> attrDotTable = new HashMap<>();
         Set<String> attrNeeded = new HashSet<>();
         ArrayList<Attribute> attrOrder = new ArrayList<>();
