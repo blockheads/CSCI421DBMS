@@ -97,7 +97,7 @@ public class Database implements IDatabase{
 
     @Override
     public Object[][] executeQuery(String query) {
-        String qString = query.split(";")[0].trim().toLowerCase().replaceAll("\n", " ");
+        String qString = StringParser.toLowerCaseNonString(query.split(";")[0]).replaceAll("\n", " ").trim();
         try {
             return dmlParser.parseDMLQuery(qString);
         } catch (DMLParserException e) {
