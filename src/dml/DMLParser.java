@@ -9,6 +9,7 @@ import dml.condition.Resolvable;
 import dml.condition.Statement;
 import storagemanager.StorageManagerException;
 import storagemanager.buffermanager.datatypes.DataTypeException;
+import storagemanager.util.StringParser;
 
 import java.util.*;
 
@@ -116,8 +117,11 @@ public class DMLParser implements IDMLParser {
 
     @Override
     public void parseDMLStatement(String statement) throws DMLParserException {
-        DMLCommands.valueOf(statement.substring(0, statement.indexOf(' ')).toUpperCase()).handle.parseDMLStatement(statement.toLowerCase());
+        DMLCommands.valueOf(statement.substring(0, statement.indexOf(' ')).toUpperCase()).handle.parseDMLStatement(StringParser.toLowerCaseNonString(statement));
+
     }
+
+
     
     @Override
     public Object[][] parseDMLQuery(String statement) throws DMLParserException {

@@ -10,6 +10,7 @@ import dml.IDMLParser;
 import storagemanager.AStorageManager;
 import storagemanager.StorageManager;
 import storagemanager.StorageManagerException;
+import storagemanager.util.StringParser;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +64,7 @@ public class Database implements IDatabase{
 
     @Override
     public void executeNonQuery(String statement) {
-        statement = statement.trim().toLowerCase();
+        statement = StringParser.toLowerCaseNonString(statement.trim());
         String[] statements = statement.split(";");
         for (String s : statements) {
             if (s.trim().length() == 0) continue;
@@ -75,6 +76,8 @@ public class Database implements IDatabase{
                 System.err.println("Statement not a command: " + s);
         }
     }
+
+
 
     private void executeNonQueryDDL(String statement) {
         try {
